@@ -490,6 +490,12 @@ details.prec[open] .mprec{color:var(--ink);border-color:var(--sub)}
 .exm{font-size:.8em;color:var(--sub);margin-top:8px}
 .exold{font-size:.82em;color:var(--c-fut);margin-top:4px}
 .btn2{font:inherit;font-size:.9em;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--accent);cursor:pointer;width:100%;margin-top:6px}
+#todayUse{font-size:.85em;color:var(--sub);margin-bottom:4px}
+.ustab{width:100%;border-collapse:collapse;font-size:.92em}
+.ustab td{padding:3px 4px}
+.ustab td:first-child{width:3.5em;color:var(--sub)}
+.usb span{display:block;height:10px;border-radius:5px;background:var(--accent);min-width:2px}
+.usn{width:4em;text-align:right;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -537,6 +543,8 @@ const emptyHits = () => Object.fromEntries(REL.map(l => [l, []]));
 const $ = s => document.querySelector(s);
 const main = $("#main");
 const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let todayN = 0;   // 오늘 사용자 수 (countToday 가 채움)
+const todayText = () => "👥 오늘 " + todayN.toLocaleString() + "명이 이용했어요";
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 // ---------- 색인 ----------
@@ -1004,7 +1012,7 @@ function intro() {
   const rows = main6.map(l => "<tr><td>" + esc(L[l].name) + "</td><td>시행 " + fmt(L[l].enforce) + "</td><td>조문 " + L[l].arts.length + "개</td></tr>").join("") +
     ["고시", "지침", "예규", "훈령"].map(c => { const n = ORDER.filter(l => catOf(l) === c).length; return n ? "<tr><td>고용노동부 " + c + " " + n + "개</td><td colspan=\"2\">" +
       esc(ORDER.filter(l => catOf(l) === c).slice(0, 4).map(l => SHORT[l]).join(", ")) + (n > 4 ? " 등" : "") + "</td></tr>" : ""; }).join("");
-  main.innerHTML = '<div class="intro"><h2>검색어를 입력하세요</h2>' +
+  main.innerHTML = '<div class="intro"><div id="todayUse"' + (todayN > 0 ? ">" + todayText() : " hidden>") + "</div><h2>검색어를 입력하세요</h2>" +
     "<div>산업안전보건법 · 중대재해처벌법과 그 시행령 · 시행규칙 · 안전보건규칙, 고용노동부 산업안전 고시 · 작업지침 · 예규 · 훈령을 한 번에 찾습니다. 검색어와 <b>가장 직접 관련된 조문</b>부터 보여주고, 아래에 <b>법 조문별로</b> 시행령 · 시행규칙 연결을 묶어 보여줍니다.</div>" +
     '<div class="note" style="margin-top:6px">PSM · MSDS · 관감 · 산안비 · 특검 같은 약어로도 찾아요. 조문의 ☆로 즐겨찾기, ✎로 메모.</div>' +
     (recentAll().length ? '<div class="rech"><b>최근 검색</b><button type="button" id="recentClear">지우기</button></div><div class="samples recent">' +
@@ -1725,6 +1733,49 @@ function backupText() {
   try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (MYKEYS(k)) o[k] = localStorage.getItem(k); } } catch (e) {}
   return JSON.stringify({app: "산안법검색기", saved: new Date().toISOString().slice(0, 10), data: o});
 }
+// ---------- 하루 사용자 수: 기기마다 하루(한국 시간 0시 기준) 한 번만 센다 ----------
+// 무료 카운터(abacus.jasoncameron.dev)에 날짜별 숫자 하나만 올린다. 기기 정보·검색어 같은 건 보내지 않음.
+const CNT = "https://abacus.jasoncameron.dev", CNS = "sanan-search-kachia84";
+const kstDay = (off = 0) => {
+  const d = new Date(Date.now() + 9 * 3600e3 - off * 864e5);   // 한국 시간(UTC+9) 날짜
+  return d.toISOString().slice(0, 10).replace(/-/g, "");
+};
+function showToday(n) {   // 첫 화면 '검색어를 입력하세요' 위 "오늘 N명이 이용했어요"
+  if (!(n > 0)) return;
+  todayN = n;
+  const el = $("#todayUse");
+  if (el) { el.textContent = todayText(); el.hidden = false; }
+}
+function countToday() {
+  if (!navigator.onLine) return;
+  const today = kstDay(), url = act => fetch(CNT + "/" + act + "/" + CNS + "/d" + today, {cache: "no-store"}).then(r => r.ok ? r.json() : null);
+  let seen = null, canSave = true;
+  try { seen = localStorage.getItem("sapcnt_day"); } catch (e) { canSave = false; }
+  // 만드는 중 시험(localhost)이나 기억을 못 하는 브라우저는 세지 않고 숫자만 본다 (중복 방지)
+  const dev = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  const hit = !dev && canSave && seen !== today;
+  url(hit ? "hit" : "get").then(j => {
+    if (!j) return;
+    if (hit) try { localStorage.setItem("sapcnt_day", today); } catch (e) {}
+    showToday(j.value);
+  }).catch(() => {});
+}
+setTimeout(countToday, 1500);
+function loadUsage() {
+  const box = $("#useStat .usev"); if (!box) return;
+  const days = Array.from({length: 7}, (_, i) => kstDay(i));
+  Promise.all(days.map(d => fetch(CNT + "/get/" + CNS + "/d" + d, {cache: "no-store"}).then(r => r.ok ? r.json() : {value: 0}).then(j => Math.max(0, j.value || 0)).catch(() => null)))
+    .then(vs => {
+      if (vs.every(v => v === null)) { box.textContent = "인터넷에 연결돼 있을 때 볼 수 있어요."; return; }
+      const max = Math.max(1, ...vs.map(v => v || 0));
+      box.innerHTML = '<table class="ustab">' + days.map((d, i) => "<tr><td>" + (i === 0 ? "오늘" : i === 1 ? "어제" : +d.slice(4, 6) + "." + +d.slice(6)) +
+        '</td><td class="usb"><span style="width:' + Math.round((vs[i] || 0) / max * 100) + '%"></span></td><td class="usn">' + (vs[i] == null ? "–" : vs[i] + "명") + "</td></tr>").join("") + "</table>";
+    });
+}
+function usageHtml() {
+  return '<section id="useStat"><h3>사용자 수 <span class="note">하루 기준 · 같은 기기는 하루 한 번</span></h3><div class="usev note">불러오는 중…</div>' +
+    '<div class="note" style="margin-top:4px">한국 시간 0시에 새로 세요. 인터넷으로 연 경우만 세고, Claude 링크·GitHub 주소·파일은 각각 따로 세요.</div></section>';
+}
 function updatesHtml() {
   const U = (window.LAWDATA && LAWDATA.updates) || [];
   if (!U.length) return "";
@@ -1745,7 +1796,7 @@ function showSettings() {
       '<div class="row" style="margin-top:6px"><button type="button" class="pri" data-act="export">백업 글 복사</button><button type="button" data-act="import">백업 글 붙여넣어 복원</button></div>' +
       '<textarea id="bkText" rows="4" placeholder="백업 글이 여기에 나와요. 카톡 나에게 보내기나 메모장에 붙여 두세요." hidden></textarea>' +
       '<div class="row"><button type="button" class="pri" data-act="apply" hidden>이 내용으로 복원</button></div><div class="note" id="bkMsg"></div></section>' +
-    updatesHtml() +
+    usageHtml() + updatesHtml() +
     '<section><h3>법령 기준일</h3><table>' + rows + '</table><div class="note" style="margin-top:4px">고시 · 지침 · 예규 · 훈령 ' +
       ORDER.filter(l => !["법률", "대통령령", "부령"].includes(catOf(l))).length + "개 포함. 법제처 국가법령정보센터 자료예요.</div></section>" +
     '<section><div class="warn"><b>참고용이에요.</b> 벌칙·과태료 연결, "추정" 표시가 붙은 연결, 과태료 계산기는 법령 문구를 자동으로 읽어 만든 거예요. ' +
@@ -1754,6 +1805,7 @@ function showSettings() {
   $("#ptitle").textContent = "설정";
   $("#pbody").innerHTML = html;
   openPop();
+  loadUsage();
 }
 $("#pop").addEventListener("click", e => {
   const b = e.target.closest(".sets button"); if (!b) return;
