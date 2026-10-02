@@ -531,6 +531,7 @@ section.oel{margin:4px 0 14px}
 .oelm[open]{display:block}
 .oelm .oelb{margin:3px 4px 0 0}
 .oelb{font:inherit;font-size:.92em;padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:var(--bg);color:var(--ink);cursor:pointer}
+body[data-view="tool"] #full{display:none}   /* 도구·질의회시·즐겨찾기 화면 아래에는 법령 전문을 붙이지 않음 (머리글 '전문 ↓'은 첫 화면으로 돌아가서 보여줌) */
 </style>
 </head>
 <body>
@@ -1043,6 +1044,7 @@ function renderMore() {
     box.insertAdjacentHTML("beforeend", '<button id="morebtn" class="morebtn">결과 더 보기 (' + (current.length - shown) + "개 남음)</button>");
 }
 function intro() {
+  document.body.dataset.view = "search";
   const main6 = ORDER.filter(l => ["법률", "대통령령", "부령"].includes(catOf(l)));
   const rows = main6.map(l => "<tr><td>" + esc(L[l].name) + "</td><td>시행 " + fmt(L[l].enforce) + "</td><td>조문 " + L[l].arts.length + "개</td></tr>").join("") +
     ["고시", "지침", "예규", "훈령"].map(c => { const n = ORDER.filter(l => catOf(l) === c).length; return n ? "<tr><td>고용노동부 " + c + " " + n + "개</td><td colspan=\"2\">" +
@@ -1138,6 +1140,7 @@ function moreTop(btn) {
   if (left > 0) btn.textContent = SHORT[l] + " " + left + "개 더 보기"; else btn.remove();
 }
 function run(q) {
+  document.body.dataset.view = "search";
   window.scrollTo(0, 0);
   if (!q.trim()) { intro(); return; }
   current = search(q); fillGroupSelf(current); shown = 0;
@@ -1469,6 +1472,7 @@ function applyRefBtn(r) {
 }
 function apState() { try { return JSON.parse(localStorage.getItem("sap_apply")) || {}; } catch (e) { return {}; } }
 function showApply() {
+  document.body.dataset.view = "tool";
   window.scrollTo(0, 0);
   tokens = []; tokRe = null;
   const st = apState(), ind = INDMAP[st.ind];
@@ -1524,6 +1528,7 @@ $("#applyBtn").addEventListener("click", () => { $("#q").value = ""; showApply()
 
 // ---------- 즐겨찾기 목록 ----------
 function showFavs() {
+  document.body.dataset.view = "tool";
   window.scrollTo(0, 0);
   tokens = []; tokRe = null;
   const m = favAll(), keys = Object.keys(m);
@@ -1628,6 +1633,7 @@ function costCalc(kind, x, health) {
 }
 function costState() { try { return JSON.parse(localStorage.getItem("sap_cost")) || {}; } catch (e) { return {}; } }
 function showCost() {
+  document.body.dataset.view = "tool";
   window.scrollTo(0, 0);
   tokens = []; tokRe = null;
   const st = costState(), kinds = (TOOLS.cost || []).map(c => c[0]);
@@ -1695,6 +1701,7 @@ function eduRows(job, emp, half) {
 }
 function eduState() { try { return JSON.parse(localStorage.getItem("sap_edu")) || {}; } catch (e) { return {}; } }
 function showEdu() {
+  document.body.dataset.view = "tool";
   window.scrollTo(0, 0);
   tokens = []; tokRe = null;
   const st = eduState(), job = st.job || "etc", emp = st.emp || "normal";
@@ -1817,6 +1824,7 @@ function expcSearchHtml(q) {
 }
 let exShown = 0, exList = [], exQ = "";
 function showExpc(q) {
+  document.body.dataset.view = "tool";
   window.scrollTo(0, 0);
   tokens = []; tokRe = null;
   exQ = q || ""; exList = exQ ? expcFind(exQ) : EXPC.slice(); exShown = 0;
@@ -1847,7 +1855,7 @@ $("#tabbar").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   const k = b.dataset.go;
   if (k === "search") { leaveStudy(); setTab(k); window.scrollTo(0, 0); if (!$("#q").value.trim()) intro(); $("#q").focus(); }
-  else if (k === "full") { leaveStudy(); setTab(k); $("#full").scrollIntoView({block: "start"}); }
+  else if (k === "full") { leaveStudy(); setTab(k); if (document.body.dataset.view === "tool") { $("#q").value = ""; intro(); } $("#full").scrollIntoView({block: "start"}); }
   else if (k === "study") { if ($("#study").hidden) $("#studyBtn").click(); setTab(k); }
   else if (k === "fav") { leaveStudy(); setTab(k); $("#q").value = ""; showFavs(); }
   else if (k === "apply") { leaveStudy(); setTab(k); $("#q").value = ""; showApply(); }
@@ -1855,6 +1863,9 @@ $("#tabbar").addEventListener("click", e => {
   else if (k === "more") { showSettings(); }
 });
 setTab("search");
+document.addEventListener("click", e => {   // 도구 화면에서 머리글 '전문 ↓' → 첫 화면으로 바꾼 뒤 법령 전문으로
+  if (e.target.closest && e.target.closest('a[href="#full"]') && document.body.dataset.view === "tool") { $("#q").value = ""; intro(); setTab("full"); }
+}, true);
 document.addEventListener("click", e => { if (e.target.closest && e.target.closest("#stClose")) setTab("search"); }, true);
 
 // ---------- 자동 점검: 주소 끝에 #selftest 를 붙여 열면 주요 기능을 한 번에 확인 (고칠 때마다 확인용) ----------
