@@ -511,6 +511,7 @@ details.prec[open] .mprec{color:var(--ink);border-color:var(--sub)}
 .ctab th,.ctab td{border:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
 .ctab th{background:var(--panel);font-weight:700}
 .cnote{margin:8px 0}
+.chan{display:block;color:var(--accent);font-size:.82em;min-height:1.2em;margin-top:2px}
 .cnote>summary{cursor:pointer;color:var(--sub);padding:4px 0}
 .cnote .ctab{display:block;overflow-x:auto}
 .etab td:first-child{width:38%;color:var(--sub)}
@@ -1620,7 +1621,14 @@ document.addEventListener("click", e => {
   ({apply: showApply, cost: showCost, edu: showEdu})[b.dataset.tool]();
 });
 const won = n => Math.floor(Math.round(n * 1000) / 1000).toLocaleString() + "원";   // 소수 계산 오차(…999원) 방지 후 원 미만 버림
-const eok = n => (n / 1e8).toLocaleString(undefined, {maximumFractionDigits: 4}) + "억원";
+const eok = n => won(n);   // 계산식 표시도 원 단위
+// 1250000000 → "12억 5,000만원" (입력 확인용)
+function hanWon(n) {
+  if (!(n > 0)) return "";
+  const jo = Math.floor(n / 1e12), ek = Math.floor(n % 1e12 / 1e8), man = Math.floor(n % 1e8 / 1e4), w = Math.floor(n % 1e4);
+  return [jo ? jo.toLocaleString() + "조" : "", ek ? ek.toLocaleString() + "억" : "", man ? man.toLocaleString() + "만" : "", w ? w.toLocaleString() : ""].filter(Boolean).join(" ") + "원";
+}
+const numOf = s => parseInt(String(s || "").replace(/[^\d]/g, ""), 10) || 0;
 // 관리비 고시 제4조: 5억 미만·50억 이상 = 대상액×비율, 5억~50억 = 대상액×비율+기초액 (별표 1)
 function costCalc(kind, x, health) {
   const r = (TOOLS.cost || []).find(c => c[0] === kind);
@@ -1645,8 +1653,8 @@ function showCost() {
     '<label>공사 종류<select id="cKind">' + kinds.map(k => "<option" + (k === v("kind", kinds[0]) ? " selected" : "") + ">" + esc(k) + "</option>").join("") + "</select></label>" +
     '<label>금액 기준<select id="cMode"><option value="obj"' + (v("mode", "obj") === "obj" ? " selected" : "") + '>대상액 (직접재료비 + 간접재료비 + 직접노무비)</option>' +
       '<option value="total"' + (v("mode", "obj") === "total" ? " selected" : "") + ">총공사금액만 앎 (대상액이 명확하지 않음 → 70%)</option></select></label>" +
-    '<div class="aprow"><label>금액<span class="apin"><input id="cAmt" type="number" inputmode="decimal" min="0" step="any" value="' + esc(String(v("amt", ""))) + '" placeholder="예: 12.5">억원</span></label>' +
-    '<label>발주자 제공 재료비·완제품 가액 <span class="note">(없으면 비움)</span><span class="apin"><input id="cMat" type="number" inputmode="decimal" min="0" step="any" value="' + esc(String(v("mat", ""))) + '" placeholder="예: 2">억원</span></label></div>' +
+    '<div class="aprow"><label>금액<span class="apin"><input id="cAmt" type="text" inputmode="numeric" autocomplete="off" value="' + esc(v("amt", "") ? Number(v("amt", 0)).toLocaleString() : "") + '" placeholder="예: 1,250,000,000">원</span><small class="chan" id="cAmtH"></small></label>' +
+    '<label>발주자 제공 재료비·완제품 가액 <span class="note">(없으면 비움)</span><span class="apin"><input id="cMat" type="text" inputmode="numeric" autocomplete="off" value="' + esc(v("mat", "") ? Number(v("mat", 0)).toLocaleString() : "") + '" placeholder="예: 200,000,000">원</span><small class="chan" id="cMatH"></small></label></div>' +
     '<label class="apck"><input id="cHealth" type="checkbox"' + (v("health", false) ? " checked" : "") + '> 보건관리자 선임 대상 건설공사 (영 별표 5)</label>' +
     '</div><div id="cOut"></div>' +
     '<details class="cnote"><summary>요율표 (별표 1)</summary><table class="ctab"><tr><th>공사 종류</th><th>5억 미만</th><th>5억~50억</th><th>기초액</th><th>50억 이상</th><th>보건관리자 선임 대상</th></tr>' +
@@ -1658,10 +1666,11 @@ function showCost() {
 }
 function costRun() {
   const out = $("#cOut"); if (!out) return;
-  const kind = $("#cKind").value, mode = $("#cMode").value, amt = parseFloat($("#cAmt").value), mat = parseFloat($("#cMat").value) || 0, health = $("#cHealth").checked;
-  try { localStorage.setItem("sap_cost", JSON.stringify({kind, mode, amt: isNaN(amt) ? "" : amt, mat: mat || "", health})); } catch (e) {}
-  if (!(amt > 0)) { out.innerHTML = '<div class="intro">금액을 억원 단위로 넣으세요. 예: 12억 5천만원 → 12.5</div>'; return; }
-  const total = amt * 1e8, x = mode === "total" ? total * 0.7 : total, m = Math.min(mat * 1e8, x);
+  const kind = $("#cKind").value, mode = $("#cMode").value, amt = numOf($("#cAmt").value), mat = numOf($("#cMat").value), health = $("#cHealth").checked;
+  $("#cAmtH").textContent = hanWon(amt); $("#cMatH").textContent = hanWon(mat);
+  try { localStorage.setItem("sap_cost", JSON.stringify({kind, mode, amt: amt || "", mat: mat || "", health})); } catch (e) {}
+  if (!(amt > 0)) { out.innerHTML = '<div class="intro">금액을 원 단위로 넣으세요. 예: 1,250,000,000원 (12억 5,000만원)</div>'; return; }
+  const total = amt, x = mode === "total" ? Math.floor(total * 0.7) : total, m = Math.min(mat, x);
   let h = "";
   if (mode === "total" && total < 2e7) h += '<div class="warn">총공사금액 2천만원 미만 공사는 이 고시를 적용하지 않아요(제3조).</div>';
   const a = costCalc(kind, x, health);
@@ -1680,7 +1689,15 @@ function costRun() {
   }
   out.innerHTML = h + "</div>";
 }
-document.addEventListener("input", e => { if (e.target.closest && e.target.closest("#cf")) costRun(); });
+document.addEventListener("input", e => {
+  if (!(e.target.closest && e.target.closest("#cf"))) return;
+  const t = e.target;
+  if (t.id === "cAmt" || t.id === "cMat") {   // 숫자만 남기고 세 자리마다 쉼표 (커서는 끝으로)
+    const n = numOf(t.value);
+    t.value = n ? n.toLocaleString() : "";
+  }
+  costRun();
+});
 document.addEventListener("change", e => { if (e.target.closest && e.target.closest("#cf")) costRun(); });
 
 // 안전보건교육 시간 (시행규칙 별표 4, 2025.5.30. 개정 기준으로 옮겨 적음 — 별표가 바뀌면 경고)
@@ -1886,7 +1903,8 @@ window.SAP_SELFTEST = async function () {
   await S("비계 관리비"); ok("검색에 질의회시", !!document.querySelector("#main .exsec .exi"));
   ok("관리비 계산: 건축 10억 → 27,125,000원", Math.floor(costCalc("건축공사", 10e8).amt) === 27125000);
   ok("관리비 계산: 토목 3억 → 9,450,000원", Math.round(costCalc("토목공사", 3e8).amt) === 9450000);
-  showCost(); $("#cAmt").value = "10"; costRun(); ok("관리비 화면", /27,125,000원/.test($("#cOut").textContent) && W() <= 0, W() + "px");
+  showCost(); $("#cAmt").value = "1,000,000,000"; costRun(); ok("관리비 화면 (원 단위 입력)", /27,125,000원/.test($("#cOut").textContent) && $("#cAmtH").textContent === "10억원" && W() <= 0, W() + "px");
+  try { localStorage.removeItem("sap_cost"); } catch (e) {}
   ok("교육시간: 생산직 정기 매반기 12시간", eduRows("etc", "normal")[0][1] === "매반기 12시간 이상");
   showEdu(); ok("교육시간 화면", !!document.querySelector(".eres") && W() <= 0, W() + "px");
   await S("톨루엔"); ok("노출기준 카드: 톨루엔 50 ppm", /50 ppm/.test((document.querySelector(".oelc") || {}).textContent || ""));
