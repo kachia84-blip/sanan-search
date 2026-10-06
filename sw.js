@@ -1,6 +1,6 @@
 // 산안법 검색기: 한 번 연 뒤에는 인터넷이 없어도 열리게 (앱 파일 하나 + 아이콘만 저장)
-// 인터넷이 되면 늘 새 판을 받고(법령 갱신 반영), 안 되거나 5초 안에 응답이 없으면 저장해 둔 판을 연다.
-const C = "sanan-v1", PAGE = "./";
+// 인터넷이 되면 늘 새 판을 받고(법령 갱신 반영), 안 되거나 8초 안에 응답이 없으면 저장해 둔 판을 연다.
+const C = "sanan-v2", PAGE = "./";
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(C).then(c => c.addAll([PAGE, "manifest.json", "icon-192.png", "icon-512.png"])).catch(() => {}));
   self.skipWaiting();
@@ -21,7 +21,7 @@ self.addEventListener("fetch", e => {
   e.respondWith(new Promise(done => {
     let over = false;
     const fallback = () => saved.then(m => { if (!over && m) { over = true; done(m); } });
-    const t = setTimeout(fallback, 5000);
+    const t = setTimeout(fallback, 8000);
     net.then(res => { clearTimeout(t); if (!over) { over = true; done(res); } })
        .catch(() => { clearTimeout(t); saved.then(m => { if (!over) { over = true; done(m || Response.error()); } }); });
   }));
