@@ -2416,8 +2416,33 @@ $("#tabbar").addEventListener("click", e => {
   else if (k === "apply") { leaveStudy(); setTab(k); $("#q").value = ""; showApply(); }
   else if (k === "expc") { leaveStudy(); setTab(k); showExpc(""); }
   else if (k === "more") { showSettings(); }
+  if (k !== "more" && !backNav && tabHist[tabHist.length - 1] !== k) tabHist.push(k);
 });
 setTab("search");
+
+// ---------- 폰 뒤로 버튼(◁): 앱을 바로 닫지 않고 한 단계씩 되돌아감 ----------
+// 창(팝업) 닫기 → 공부모드 나가기 → 검색 결과 지우기 → 이전 탭 → 첫 화면에서는 "한 번 더 누르면 나가요"
+const tabHist = ["search"];
+let backNav = false, backArmed = false, backTm = null;
+function armBack() { if (backArmed) return; try { history.pushState({sapBack: 1}, ""); backArmed = true; } catch (e) {} }
+function goTab(k) { backNav = true; try { const b = $('#tabbar [data-go="' + k + '"]'); if (b) b.click(); } finally { backNav = false; } }
+window.addEventListener("popstate", () => {
+  backArmed = false;
+  if (!$("#pop").hidden) { if (popStack.length > 1) $("#pback").click(); else closePop(); }
+  else if (!$("#study").hidden) { leaveStudy(); tabHist.pop(); goTab(tabHist[tabHist.length - 1] || "search"); }
+  else if ($("#q").value.trim()) { $("#q").value = ""; intro(); setTab("search"); window.scrollTo(0, 0); if (tabHist[tabHist.length - 1] !== "search") tabHist.push("search"); }
+  else if (tabHist.length > 1) { tabHist.pop(); goTab(tabHist[tabHist.length - 1]); }
+  else if (window.scrollY > 300) window.scrollTo(0, 0);
+  else {   // 첫 화면 맨 위: 이번에는 막지 않음 → 2초 안에 한 번 더 누르면 나감
+    showToast("뒤로 버튼을 한 번 더 누르면 나가요");
+    clearTimeout(backTm); backTm = setTimeout(armBack, 2000);
+    return;
+  }
+  armBack();
+});
+// 첫 화면이 다 그려진 뒤에 한 칸 쌓아 둔다 (사용자가 화면을 한 번이라도 누르면 확실히 쌓이도록 그때도 한 번)
+setTimeout(armBack, 300);
+document.addEventListener("pointerdown", armBack, {once: true, capture: true});
 document.addEventListener("click", e => {   // 도구 화면에서 머리글 '전문 ↓' → 첫 화면으로 바꾼 뒤 법령 전문으로
   if (e.target.closest && e.target.closest('a[href="#full"]') && document.body.dataset.view === "tool") { $("#q").value = ""; intro(); setTab("full"); }
 }, true);
