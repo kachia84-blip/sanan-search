@@ -1,6 +1,6 @@
 // 산안법 검색기: 한 번 연 뒤에는 인터넷이 없어도 열리게 (앱 파일 하나 + 아이콘만 저장)
 // 인터넷이 되면 늘 새 판을 받고(법령 갱신 반영), 안 되거나 8초 안에 응답이 없으면 저장해 둔 판을 연다.
-const C = "sanan-v2", PAGE = "./";
+const C = "sanan-v3", PAGE = "./";
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(C).then(c => c.addAll([PAGE, "manifest.json", "icon-192.png", "icon-512.png"])).catch(() => {}));
   self.skipWaiting();
@@ -13,7 +13,8 @@ self.addEventListener("fetch", e => {
   if (r.method !== "GET" || u.origin !== location.origin) return;   // 판례·KOSHA·만화 그림 등 바깥 자료는 손대지 않음
   const nav = r.mode === "navigate" || /\/(index\.html)?$/.test(u.pathname);
   const key = nav ? PAGE : r;
-  const net = fetch(r).then(res => {
+  // 앱 화면은 브라우저 저장본(최대 10분)을 건너뛰고 늘 서버에 새 판이 있는지 확인 (바뀐 게 없으면 서버가 짧게 '그대로'라고만 답함)
+  const net = (nav ? fetch(u.origin + u.pathname + u.search, {cache: "no-cache", credentials: "same-origin"}) : fetch(r)).then(res => {
     if (res.ok) { const cp = res.clone(); caches.open(C).then(c => c.put(key, cp)); }
     return res;
   });
