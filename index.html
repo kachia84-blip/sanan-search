@@ -449,11 +449,12 @@ details.fl.coll>summary .rng{color:var(--sub)}
 .aprf a.apx{font-size:.95em}
 details.apno{margin:8px 0}
 details.apno>summary{cursor:pointer;color:var(--sub);padding:6px 0}
-.apv2{gap:0;padding:4px 12px}
+.apv2{gap:0;padding:4px 12px;grid-template-columns:minmax(0,1fr)}
 .apstep{display:flex;gap:10px;padding:10px 0}
 .apstep+.apstep{border-top:1px dashed var(--line)}
 .apnum{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:.8em;font-weight:800}
-.apsb{flex:1;min-width:0;display:grid;gap:6px}
+.apsb{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.apv2 select,.apv2 input{max-width:100%}
 .aph{font-weight:700;font-size:.92em}
 .apstp input{text-align:center}
 .apbn{flex:none;width:40px;height:40px;font:inherit;font-size:1.3em;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);cursor:pointer}
@@ -649,7 +650,7 @@ const $ = s => document.querySelector(s);
 const main = $("#main");
 const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let todayN = 0;   // 오늘 사용자 수 (countToday 가 채움)
-const SHOW_STATS = false;   // 사용자 수 표시 (당분간 숨김. 세기는 계속)
+const SHOW_STATS = true;    // 사용자 수 표시 (당분간 숨김. 세기는 계속)
 const todayText = () => "👥 오늘 " + todayN.toLocaleString() + "명이 이용했어요";
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -2302,6 +2303,7 @@ window.SAP_SELFTEST = async function () {
   ok("적용: 건설 900억 → 안전관리자 2명, 보건관리자 1명", /^2명/.test(st(["con", 40, 900, 0, "안전관리자"]).detail || "") && /^1명/.test(st(["con", 40, 900, 0, "보건관리자"]).detail || ""));
   const apBak = localStorage.getItem("sap_apply"); localStorage.setItem("sap_apply", JSON.stringify({ind: "s_food", n: 60}));
   showApply(); ok("적용 확인 화면 · 가로 넘침 없음", document.querySelectorAll(".aprw").length > 10 && W() <= 0, W() + "px");
+  { const over = [...document.querySelectorAll(".apv2 *")].filter(e => e.getBoundingClientRect().right > innerWidth + 1).length; ok("적용 확인 입력칸 화면 안", over === 0, over + "개 넘침"); }
   if (apBak === null) localStorage.removeItem("sap_apply"); else localStorage.setItem("sap_apply", apBak);
   // 복습 퀴즈
   const lastLaw2 = localStorage.getItem("sap_lastlaw"), progBak = localStorage.getItem("sap_study_law");
