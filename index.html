@@ -2424,7 +2424,10 @@ setTab("search");
 // 창(팝업) 닫기 → 공부모드 나가기 → 검색 결과 지우기 → 이전 탭 → 첫 화면에서는 "한 번 더 누르면 나가요"
 const tabHist = ["search"];
 let backNav = false, backArmed = false, backTm = null;
-function armBack() { if (backArmed) return; try { history.pushState({sapBack: 1}, ""); backArmed = true; } catch (e) {} }
+// 크롬은 사용자가 화면을 한 번도 누르지 않은 상태에서 쌓은 기록을 뒤로 버튼이 건너뛰게 해서(그러면 앱이 바로 꺼짐),
+// 화면을 한 번이라도 누른 뒤에만 쌓는다
+const touched = () => !navigator.userActivation || navigator.userActivation.hasBeenActive;
+function armBack() { if (backArmed || !touched()) return; try { history.pushState({sapBack: 1}, ""); backArmed = true; } catch (e) {} }
 function goTab(k) { backNav = true; try { const b = $('#tabbar [data-go="' + k + '"]'); if (b) b.click(); } finally { backNav = false; } }
 window.addEventListener("popstate", () => {
   backArmed = false;
@@ -2440,9 +2443,7 @@ window.addEventListener("popstate", () => {
   }
   armBack();
 });
-// 첫 화면이 다 그려진 뒤에 한 칸 쌓아 둔다 (사용자가 화면을 한 번이라도 누르면 확실히 쌓이도록 그때도 한 번)
-setTimeout(armBack, 300);
-document.addEventListener("pointerdown", armBack, {once: true, capture: true});
+["click", "keydown", "touchend", "pointerup"].forEach(t => document.addEventListener(t, () => setTimeout(armBack, 0), true));
 document.addEventListener("click", e => {   // 도구 화면에서 머리글 '전문 ↓' → 첫 화면으로 바꾼 뒤 법령 전문으로
   if (e.target.closest && e.target.closest('a[href="#full"]') && document.body.dataset.view === "tool") { $("#q").value = ""; intro(); setTab("full"); }
 }, true);
