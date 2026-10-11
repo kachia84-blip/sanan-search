@@ -1,6 +1,6 @@
 // 산안법 검색기: 한 번 연 뒤에는 인터넷이 없어도 열리게 (앱 파일 하나 + 아이콘만 저장)
 // 인터넷이 되면 늘 새 판을 받고(법령 갱신 반영), 안 되거나 8초 안에 응답이 없으면 저장해 둔 판을 연다.
-const C = "sanan-v3", PAGE = "./";
+const C = "sanan-v4", PAGE = "./";
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(C).then(c => c.addAll([PAGE, "manifest.json", "icon-192.png", "icon-512.png"])).catch(() => {}));
   self.skipWaiting();
