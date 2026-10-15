@@ -78,7 +78,7 @@ const TF = [
 const F = {};
 NF.forEach(r => { F[r[0]] = {id: r[0], t: "n", art: r[1], cl: r[2], q: r[3], a: r[4], u: r[5], dir: r[6], sum: r[7]}; });
 TF.forEach(r => { F[r[0]] = {id: r[0], t: "x", art: r[1], cl: r[2], q: r[3], ok: r[4], ans: r[5], sum: r[6]}; });
-const DIRT = {min: "이상", max: "이하", gt: "초과", eq: ""};
+const DIRT = {min: "이상", max: "이하", gt: "초과", lt: "미만", eq: ""};
 const need = f => f.t === "n" ? fmt(f.a) + f.u + (DIRT[f.dir] ? " " + DIRT[f.dir] : "") : f.ans;
 const fmt = n => String(Math.round(n * 1000) / 1000);
 
@@ -102,7 +102,87 @@ const ACC = {
   a_scaf_span: {n: "비계 붕괴 (기둥 간격)", ic: "🏗️", art: "제60조", tip: "기둥 간격은 띠장 방향 1.85m, 장선 방향 1.5m 이하."},
   a_scaf_bt: {n: "비계 좌굴 (띠장 간격)", ic: "📎", art: "제60조", tip: "띠장 간격은 2.0m 이하."},
 };
-const ACC_N = Object.keys(ACC).length;
+/* ---- 새 편(전기·밀폐공간·굴착·화재/기계)의 낱말 카드와 사고 ---- */
+[
+  // 전기
+  ["elb_v", "제304조", "제1항 제1호", "대지전압이 몇 V를 초과하는 이동형·휴대형 전기기계·기구에 누전차단기를 설치할까요?", 150, "V", "gt", "대지전압 150V 초과 이동형·휴대형 전기기계·기구 → 누전차단기"],
+  ["elb_ma", "제304조", "제5항 제1호", "누전차단기의 정격감도전류는 몇 mA 이하여야 할까요?", 30, "mA", "max", "정격감도전류 30mA 이하 (정격전부하전류 50A 이상은 200mA 이하 가능)"],
+  ["elb_t", "제304조", "제5항 제1호", "누전차단기의 작동시간은 몇 초 이내여야 할까요?", 0.03, "초", "max", "작동시간 0.03초 이내 (50A 이상은 0.1초 이내 가능)"],
+  ["elb_ma50", "제304조", "제5항 제1호 단서", "정격전부하전류 50A 이상 기계에 접속하는 누전차단기는 정격감도전류를 몇 mA 이하까지 할 수 있을까요?", 200, "mA", "max", "정격전부하전류 50A 이상 → 200mA 이하, 0.1초 이내 가능"],
+  ["gnd_h", "제302조", "제1항 제2호 가목", "지면이나 접지된 금속체로부터 수직거리 몇 m 이내의 노출된 비충전 금속체는 접지할까요?", 2.4, "m", "max", "수직거리 2.4m, 수평거리 1.5m 이내의 비충전 금속체는 접지"],
+  ["gnd_w", "제302조", "제1항 제2호 가목", "지면이나 접지된 금속체로부터 수평거리 몇 m 이내의 노출된 비충전 금속체는 접지할까요?", 1.5, "m", "max", "수직거리 2.4m, 수평거리 1.5m 이내의 비충전 금속체는 접지"],
+  ["gnd_v", "제302조", "제1항 제2호 라목", "사용전압이 대지전압 몇 V를 넘으면 노출된 비충전 금속체를 접지할까요?", 150, "V", "gt", "대지전압 150V를 넘는 것은 접지"],
+  ["work_sp", "제310조", "제1항", "전기기계·기구의 조작부분을 점검·보수할 때 확보할 작업공간의 폭은 몇 cm 이상일까요?", 70, "cm", "min", "조작부분 점검·보수 시 폭 70cm 이상 작업공간 확보"],
+  ["ap_03", "제321조", "제1항 제8호", "충전전로 선간전압 0.3 초과 0.75kV 이하(예: 380V)의 접근 한계거리는 몇 cm일까요?", 30, "cm", "eq", "접근 한계거리: 0.3~0.75kV 30cm"],
+  ["ap_2", "제321조", "제1항 제8호", "충전전로 선간전압 2 초과 15kV 이하(예: 6.6kV)의 접근 한계거리는 몇 cm일까요?", 60, "cm", "eq", "접근 한계거리: 2~15kV 60cm"],
+  ["ap_15", "제321조", "제1항 제8호", "충전전로 선간전압 15 초과 37kV 이하(예: 22.9kV)의 접근 한계거리는 몇 cm일까요?", 90, "cm", "eq", "접근 한계거리: 15~37kV 90cm"],
+  ["ap_unq", "제321조", "제1항 제7호", "유자격자가 아닌 근로자는 대지전압 50kV 이하 충전전로에 몇 cm 이내로 접근할 수 없을까요?", 300, "cm", "eq", "유자격자가 아닌 근로자는 대지전압 50kV 이하 충전전로에 300cm 이내 접근 금지"],
+  ["veh_300", "제322조", "제1항", "충전전로 인근에서 차량·기계장치 작업 시 충전부로부터 몇 cm 이상 이격할까요?", 300, "cm", "min", "차량·기계장치는 충전부로부터 300cm 이상 이격 (높이를 낮춰 이동할 땐 120cm 이상)"],
+  // 밀폐공간
+  ["o2_lo", "제618조", "제3호", "적정공기: 산소농도는 몇 % 이상이어야 할까요? (이보다 낮으면 산소결핍)", 18, "%", "min", "적정공기: 산소 18% 이상 23.5% 미만"],
+  ["o2_hi", "제618조", "제3호", "적정공기: 산소농도는 몇 % 미만이어야 할까요?", 23.5, "%", "lt", "적정공기: 산소 18% 이상 23.5% 미만"],
+  ["co2_hi", "제618조", "제3호", "적정공기: 이산화탄소 농도는 몇 % 미만일까요?", 1.5, "%", "lt", "적정공기: 이산화탄소 1.5% 미만"],
+  ["co_hi", "제618조", "제3호", "적정공기: 일산화탄소 농도는 몇 ppm 미만일까요?", 30, "ppm", "lt", "적정공기: 일산화탄소 30ppm 미만"],
+  ["h2s_hi", "제618조", "제3호", "적정공기: 황화수소 농도는 몇 ppm 미만일까요?", 10, "ppm", "lt", "적정공기: 황화수소 10ppm 미만"],
+  // 굴착
+  ["sl_sand", "제339조", "별표 11", "굴착면 기울기(높이 1에 대한 수평거리): 모래는 1 : 얼마 이상일까요?", 1.8, "", "min", "굴착면 기울기: 모래 1:1.8 · 연암·풍화암 1:1.0 · 경암 1:0.5 · 그 밖의 흙 1:1.2"],
+  ["sl_soft", "제339조", "별표 11", "굴착면 기울기(높이 1에 대한 수평거리): 연암 및 풍화암은 1 : 얼마 이상일까요?", 1, "", "min", "굴착면 기울기: 모래 1:1.8 · 연암·풍화암 1:1.0 · 경암 1:0.5 · 그 밖의 흙 1:1.2"],
+  ["sl_hard", "제339조", "별표 11", "굴착면 기울기(높이 1에 대한 수평거리): 경암은 1 : 얼마 이상일까요?", 0.5, "", "min", "굴착면 기울기: 모래 1:1.8 · 연암·풍화암 1:1.0 · 경암 1:0.5 · 그 밖의 흙 1:1.2"],
+  ["sl_soil", "제339조", "별표 11", "굴착면 기울기(높이 1에 대한 수평거리): 그 밖의 흙은 1 : 얼마 이상일까요?", 1.2, "", "min", "굴착면 기울기: 모래 1:1.8 · 연암·풍화암 1:1.0 · 경암 1:0.5 · 그 밖의 흙 1:1.2"],
+  // 화재
+  ["fire_r", "제241조의2", "제1항 제1호", "용접·용단 작업 시 작업반경 몇 m 이내에 가연성물질이 있으면 화재감시자를 배치할까요?", 11, "m", "max", "작업반경 11m 이내에 가연성물질이 있는 장소 → 화재감시자 배치"],
+].forEach(r => { NF.push(r); F[r[0]] = {id: r[0], t: "n", art: r[1], cl: r[2], q: r[3], a: r[4], u: r[5], dir: r[6], sum: r[7]}; });
+[
+  ["t_lock", "제319조", "제2항 제3호", "정전 작업 시 차단장치나 단로기에 꼬리표와 함께 붙이는 것은? (다른 사람이 전원을 넣지 못하게)", ["잠금장치", "잠금", "자물쇠", "락"], "잠금장치", "차단장치에 잠금장치 및 꼬리표 부착 (그 잠금장치·꼬리표는 설치한 근로자가 직접 철거)"],
+  ["t_detect", "제319조", "제2항 제5호", "전로를 차단한 뒤 작업 대상 기기가 충전되어 있는지 확인하는 기구는?", ["검전기", "검전"], "검전기", "검전기로 충전 여부 확인"],
+  ["t_discharge", "제319조", "제2항 제4호", "정전한 기기에 남은 전기에너지(잔류전하)가 위험할 수 있어 접촉 전에 완전히 해야 하는 것은?", ["방전"], "방전", "잔류전하는 접촉 전에 완전히 방전"],
+  ["t_obs", "제623조", "제1항", "밀폐공간 작업 중 작업 상황을 감시하려고 밀폐공간 외부에 배치하는 사람은?", ["감시인", "감시자"], "감시인", "밀폐공간 외부에 감시인 배치 + 항상 연락할 수 있는 설비"],
+  ["t_scba", "제625조", "", "밀폐공간에서 비상시 근로자를 구출하려면 구조자는 사다리·섬유로프 외에 반드시 무엇을 착용할까요? (맨몸 진입 금지)", ["공기호흡기", "송기마스크", "호흡기", "호흡보호구"], "공기호흡기·송기마스크", "공기호흡기 또는 송기마스크, 사다리·섬유로프 등 구출 기구를 갖추어 둘 것"],
+  ["t_119", "제623조", "제2항", "밀폐공간에서 근로자에게 이상이 생기면 감시인이 지체 없이 해야 할 일은?", ["119", "소방", "신고"], "소방관서(119)에 신고", "감시인은 지체 없이 관할 소방관서에 신고하고 조치 후 사업주·관리감독자에게 알림"],
+  ["t_support", "제340조", "", "굴착 중 토사 붕괴·낙하 우려가 있을 때 미리 설치해야 하는 대표적인 구조물은?", ["흙막이", "지보공"], "흙막이 지보공", "토사 붕괴 우려 시 흙막이 지보공·방호망 설치, 근로자 출입금지"],
+  ["t_guide", "제344조", "제1항", "굴착기계가 근로자의 작업장소로 후진해 접근할 우려가 있을 때 배치하는 사람은?", ["유도자"], "유도자", "굴착기계 후진 접근·굴러 떨어질 우려 → 유도자 배치"],
+  ["t_watch", "제241조의2", "제1항", "가연성물질이 있는 장소에서 용접·용단 작업을 할 때 작업장소에 지정해 배치하는 사람은?", ["화재감시자", "감시자", "감시인"], "화재감시자", "가연물 있는 장소 용접·용단 → 화재감시자 지정·배치"],
+  ["t_blanket", "제241조", "제2항 제4호", "화재위험작업 시 불꽃·불티 비산을 막으려고 설치하는 것은? (예: 용접불티 비산방지덮개)", ["방화포", "비산방지", "덮개", "불티"], "용접방화포·비산방지덮개", "용접불티 비산방지덮개·용접방화포 등으로 불꽃·불티 비산 방지"],
+  ["t_ext", "제241조", "제2항 제3호", "화기작업 중 인근 가연성물질을 방호하고 현장에 갖춰 두어야 하는 기구는?", ["소화기", "소화"], "소화기구", "인근 가연성물질 방호조치 및 소화기구 비치"],
+  ["t_o2", "제241조", "제1항", "통풍·환기가 충분하지 않은 장소에서 화재위험작업을 할 때, 환기용으로 사용해서는 안 되는 가스는?", ["산소"], "산소", "통풍·환기가 불충분한 장소에서 화재위험작업 시 환기에 산소 사용 금지"],
+  ["t_mlock", "제92조", "제2항", "정비·청소 중 다른 사람이 기계를 켜지 못하도록 기동장치에 하는 조치는? (열쇠는 별도 관리)", ["잠금", "잠금장치", "자물쇠"], "잠금장치", "기동장치에 잠금장치를 하고 열쇠를 별도 관리하거나 표지판 설치"],
+].forEach(r => { TF.push(r); F[r[0]] = {id: r[0], t: "x", art: r[1], cl: r[2], q: r[3], ok: r[4], ans: r[5], sum: r[6]}; });
+Object.assign(ACC, {
+  a_elb_none: {n: "누전차단기 없는 감전", ic: "⚡", art: "제304조", tip: "대지전압 150V 초과 이동형·휴대형 기계, 습윤·철판 위 작업 기계에는 누전차단기를 설치해야 합니다."},
+  a_elb_slow: {n: "늦게 차단된 누전", ic: "⏱️", art: "제304조", tip: "누전차단기는 정격감도전류 30mA 이하, 작동시간 0.03초 이내여야 사람이 견딥니다."},
+  a_loto_restart: {n: "정전 작업 중 재통전 감전", ic: "🔌", art: "제319조", tip: "차단 후 차단장치에 잠금장치와 꼬리표를 붙여야 다른 사람이 전원을 넣지 못합니다."},
+  a_loto_residual: {n: "잔류전하·미확인 감전", ic: "🔋", art: "제319조", tip: "접촉 전 잔류전하를 방전하고 검전기로 충전 여부를 확인해야 합니다."},
+  a_loto_unknown: {n: "다른 전원 간과 감전", ic: "📋", art: "제319조", tip: "먼저 도면·배선도로 공급 전원을 모두 확인한 뒤 차단 순서를 시작하세요."},
+  a_arc_lv: {n: "저압선 접촉 감전", ic: "⚡", art: "제321조", tip: "0.3~0.75kV 충전전로 접근 한계거리는 30cm."},
+  a_arc_hv: {n: "고압 아크 사고", ic: "🌩️", art: "제321조", tip: "2~15kV(6.6kV 등) 충전전로 접근 한계거리는 60cm."},
+  a_arc_xhv: {n: "특고압 방전 사고", ic: "☄️", art: "제321조", tip: "15~37kV(22.9kV 등) 충전전로 접근 한계거리는 90cm."},
+  a_gas_o2: {n: "산소결핍 질식", ic: "😵", art: "제618조", tip: "산소농도 18% 미만이면 산소결핍. 적정공기는 18% 이상 23.5% 미만."},
+  a_gas_co2: {n: "이산화탄소 질식", ic: "☁️", art: "제618조", tip: "이산화탄소는 1.5% 미만이 적정공기."},
+  a_gas_co: {n: "일산화탄소 중독", ic: "☠️", art: "제618조", tip: "일산화탄소는 30ppm 미만이 적정공기."},
+  a_gas_h2s: {n: "황화수소 중독", ic: "🥚", art: "제618조", tip: "황화수소는 10ppm 미만이 적정공기. 냄새를 못 느끼는 순간 이미 위험합니다."},
+  a_conf_nowatch: {n: "감시인 없는 질식", ic: "🙈", art: "제623조", tip: "밀폐공간 작업 중에는 외부에 감시인을 두고 항상 연락할 설비를 설치해야 합니다."},
+  a_conf_mask: {n: "방진마스크 질식", ic: "😶", art: "제620조", tip: "방진마스크는 산소결핍을 막지 못합니다. 공기호흡기·송기마스크를 써야 합니다."},
+  a_conf_fire: {n: "밀폐공간 화재·폭발", ic: "🔥", art: "제620조", tip: "밀폐공간에서 불꽃 확인 금지, 산소로 환기 금지. 환기로 적정공기를 유지하세요."},
+  a_conf_rescue: {n: "2차 재해 (맨몸 구조)", ic: "🆘", art: "제625조", tip: "구조자도 공기호흡기·송기마스크 없이 들어가면 함께 쓰러집니다. 구출 기구를 갖춰 두세요."},
+  a_conf_nocall: {n: "신고 지연 사고", ic: "📵", art: "제623조", tip: "이상이 생기면 감시인이 지체 없이 소방관서에 신고해야 합니다."},
+  a_conf_nometer: {n: "측정 없이 진입한 질식", ic: "📟", art: "제619조", tip: "작업 전 산소·유해가스 농도를 측정하고 환기하세요."},
+  a_exc_sand: {n: "모래 굴착면 붕괴", ic: "🏖️", art: "제339조", tip: "모래는 굴착면 기울기 1:1.8 이상으로 완만하게."},
+  a_exc_rock: {n: "연암·풍화암 붕괴", ic: "🪨", art: "제339조", tip: "연암 및 풍화암은 1:1.0."},
+  a_exc_hard: {n: "경암 낙석", ic: "⛰️", art: "제339조", tip: "경암은 1:0.5."},
+  a_exc_soil: {n: "흙 굴착면 붕괴", ic: "🟤", art: "제339조", tip: "그 밖의 흙은 1:1.2."},
+  a_exc_cave: {n: "흙막이 없는 토사 붕괴", ic: "🕳️", art: "제340조", tip: "토사 붕괴 우려 시 흙막이 지보공·방호망 설치, 근로자 출입금지."},
+  a_exc_rain: {n: "비 온 뒤 사면 붕괴", ic: "☔", art: "제339조", tip: "빗물 침투를 막기 위해 측구를 설치하거나 굴착경사면에 비닐을 덮으세요."},
+  a_exc_pipe: {n: "매설물 파손 가스 누출", ic: "🔧", art: "제341조", tip: "노출된 매설물은 방호하거나 이설하고, 관리감독자가 지휘합니다. 지하 공작물이 파손될 우려가 있으면 굴착을 중지."},
+  a_exc_machine: {n: "굴착기 후진 협착", ic: "🚜", art: "제344조", tip: "굴착기계가 후진해 근로자에게 접근할 우려가 있으면 유도자를 배치합니다."},
+  a_fire_spark: {n: "용접 불티 화재", ic: "🔥", art: "제241조", tip: "작업반경 11m 이내 가연물은 치우거나 용접방화포 등으로 방호하세요."},
+  a_fire_nowatch: {n: "화재감시자 없는 재발화", ic: "👀", art: "제241조의2", tip: "가연물이 있는 곳의 용접·용단 작업엔 화재감시자를 배치합니다."},
+  a_fire_nofx: {n: "소화기 없는 초기진화 실패", ic: "🧯", art: "제241조", tip: "화기작업 장소에는 소화기구를 비치합니다."},
+  a_mach_restart: {n: "정비 중 재가동 끼임", ic: "⚙️", art: "제92조", tip: "정비 중에는 기동장치를 잠그고 열쇠를 별도 관리하거나 표지판을 설치하세요."},
+  a_mach_nostop: {n: "가동 중 정비 말림", ic: "🌀", art: "제92조", tip: "동력 기계의 정비·청소·급유 작업은 운전을 정지하고 합니다."},
+  a_mach_pressure: {n: "잔압 분출 사고", ic: "💨", art: "제92조", tip: "내부에 압축된 기체·액체가 있으면 정비 전에 미리 방출하세요."},
+});
+
+const accN = () => Object.keys(ACC).length;
 
 /* =============== 유틸 =============== */
 function theme() {
@@ -117,6 +197,7 @@ const REDUCE = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: redu
 let root = null, host = null, alive = false, skip = false, busy = false, svgEl = null, sayEl = null;
 const $ = s => root.querySelector(s);
 const wait = ms => new Promise(r => setTimeout(r, skip ? 0 : ms));
+const frame = cb => { let d = false; const f = () => { if (d) return; d = true; cb(performance.now()); }; requestAnimationFrame(f); setTimeout(f, 40); };   // 화면이 가려져 rAF 가 멈춰도 진행되게
 function tw(ms, fn, e) {
   e = e || ease.io;
   return new Promise(res => {
@@ -128,7 +209,7 @@ function tw(ms, fn, e) {
       if (skip) { fn(1); return res(); }
       const p = Math.min(1, (now - t0) / ms);
       fn(e(p));
-      p < 1 ? requestAnimationFrame(step) : res();
+      p < 1 ? frame(step) : res();
     })(t0);
   });
 }
@@ -234,6 +315,11 @@ const CSS = `
 .gm-slots{grid-column:1/-1;display:flex;gap:6px;font-size:.8em;color:var(--sub);font-weight:700}
 .gm-slots span{border:1.5px dashed var(--line);border-radius:8px;padding:1px 9px}
 .gm-shk{animation:gmshake .4s}
+.gm-seq{grid-column:1/-1;margin:2px 0 4px;padding:0 0 0 1.4em;font-size:.92em}
+.gm-seq li{padding:2px 0}.gm-seq .gm-ph{list-style:none;margin-left:-1.4em;color:var(--sub)}
+.gm-col .gm-chip{width:100%;text-align:left;font-weight:600}
+.gm-clr{grid-column:1/-1;justify-self:start;border:0;background:none;color:var(--accent);font-weight:700;padding:4px 0}
+.gm-sub{grid-column:1/-1;font-size:.8em;color:var(--sub)}
 .gm-go{width:100%;margin-top:10px;border:0;border-radius:16px;padding:15px;font-size:1.1em;font-weight:900;background:var(--accent);color:var(--accent-ink,#fff);letter-spacing:-.02em;box-shadow:0 3px 0 var(--accent-dk,#1b64da);transition:transform .1s}
 .gm-go:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent-dk,#1b64da)}
 .gm-go[disabled]{opacity:.5}
@@ -777,6 +863,627 @@ const M5 = {
   },
 };
 
+/* =============== 새 편의 그림 부품 =============== */
+const ck = (f, label, ok, o) => Object.assign({f, label, ok}, o || {});
+async function zap(svg, x1, y1, x2, y2, ms) {
+  const p = document.createElementNS(NS, "polyline");
+  p.setAttribute("fill", "none"); p.setAttribute("stroke", "#ffd84a"); p.setAttribute("stroke-width", "2.6"); p.setAttribute("stroke-linejoin", "round");
+  p.setAttribute("style", "filter:drop-shadow(0 0 3px #fff)"); svg.appendChild(p);
+  await tw(ms || 500, () => {
+    const pts = [];
+    for (let i = 0; i <= 7; i++) { const t = i / 7, j = i && i < 7 ? 1 : 0; pts.push(`${(L(x1, x2, t) + j * (Math.random() - .5) * 14).toFixed(1)},${(L(y1, y2, t) + j * (Math.random() - .5) * 14).toFixed(1)}`); }
+    p.setAttribute("points", pts.join(" ")); p.setAttribute("opacity", Math.random() > .25 ? 1 : .35);
+  }, ease.lin);
+  p.remove();
+}
+const bubble = (svg, x, y, s, col) => pop(svg, x, y, s, col);
+function generic(svg, res, x, y) { say("⚠️ 기준과 다른 값이 있어요. 정확한 기준을 맞춰야 안전합니다."); pop(svg, x || 180, y || 100, "✘ 기준 불일치", "#e5484d"); sfx.bad(); }
+const failAcc = (res, a) => res.some(c => !c.ok && c.acc === a);
+const allOk = res => res.every(c => c.ok);
+const ownEl = (svg, html, name) => { const g = document.createElementNS(NS, "g"); g.setAttribute("data-r", name); g.innerHTML = html; svg.appendChild(g); return g; };
+
+/* ---------- 의뢰 6: 누전차단기 (제304조) ---------- */
+const M6 = {
+  draw(v) {
+    const ma = Number.isFinite(v.ma) ? fmt(v.ma) + "mA" : "?", t = Number.isFinite(v.t) ? fmt(v.t) + "초" : "?";
+    let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 192, 360, 48);
+    s += rc("g-steel", 18, 184, 232, 9, 'rx="2"') + `<ellipse cx="150" cy="192" rx="62" ry="5" fill="#5b8fd9" opacity=".55"/>`;
+    s += `<text x="16" y="24" class="g-tag">220V 전동드릴 · 젖은 철판 위</text>`;
+    s += `<g data-r="box">` + rc("g-conc2", 262, 92, 88, 100, 'rx="6"') + rc("", 270, 100, 72, 56, 'rx="3" fill="#1d2433"');
+    s += `<text x="306" y="116" text-anchor="middle" font-size="8.5" font-weight="800" fill="#cde4ff">누전차단기</text><text x="306" y="133" text-anchor="middle" font-size="11" font-weight="900" fill="#ffd84a">${ma}</text><text x="306" y="148" text-anchor="middle" font-size="11" font-weight="900" fill="#ffd84a">${t}</text>`;
+    s += `<circle data-r="lamp" cx="306" cy="172" r="7" fill="#3aa56d"/><text x="306" y="188" text-anchor="middle" font-size="7.5" fill="var(--sub)">전원</text></g>`;
+    s += `<path d="M262 150 C228 196 196 174 164 140" stroke="#222" fill="none" stroke-width="2.6"/>`;
+    s += `<g data-r="drill"><rect x="150" y="130" width="22" height="12" rx="2" fill="#e5a100"/><rect x="142" y="134" width="9" height="4" fill="#888"/></g>`;
+    s += wkr("w1", 110, 190, 72);
+    if (Number.isFinite(v.v)) s += `<text x="262" y="82" class="g-tag">${fmt(v.v)}V 초과에 설치</text>`;
+    return s;
+  },
+  eval(v) {
+    const c = [];
+    const o1 = v.v === 150;
+    c.push(ck("elb_v", "누전차단기 설치 대상 대지전압", o1, {dir: o1 ? null : v.v > 150 ? "down" : "up", val: fmt(v.v) + "V 초과", need: "150V 초과", acc: v.v > 150 ? "a_elb_none" : null}));
+    const o2 = v.ma <= 30 && v.ma > 0;
+    c.push(ck("elb_ma", "정격감도전류", o2, {dir: o2 ? null : "down", val: fmt(v.ma) + "mA", need: "30mA 이하", acc: "a_elb_slow"}));
+    const o3 = v.t <= 0.03 && v.t > 0;
+    c.push(ck("elb_t", "작동시간", o3, {dir: o3 ? null : "down", val: fmt(v.t) + "초", need: "0.03초 이내", acc: "a_elb_slow"}));
+    return c;
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), lamp = R(svg, "lamp");
+    say("젖은 철판 위에서 전동드릴로 작업합니다…");
+    await walk(w, 60, 112, 190, 800);
+    say("드릴 내부에서 누전이 발생합니다!");
+    if (failAcc(res, "a_elb_none")) {
+      say("누전차단기가 없어요. 전류가 몸으로 흐릅니다!");
+      await zap(svg, 160, 136, 118, 160, 700);
+      hurt(w); shake(); sfx.thud(); await tw(500, t => setT(w, 112, 190, 80 * t));
+      say("💥 누전차단기가 없어 감전됐습니다.");
+    } else if (failAcc(res, "a_elb_slow")) {
+      say("차단기가 있지만 반응이 느려요…");
+      await zap(svg, 160, 136, 118, 160, 1100);
+      lamp && lamp.setAttribute("fill", "#e5484d");
+      hurt(w); shake(); sfx.thud(); await tw(500, t => setT(w, 112, 190, 80 * t));
+      say("💥 감도·작동시간 기준을 못 맞춰 차단 전에 감전됐습니다.");
+    } else if (!allOk(res)) generic(svg, res, 150, 110);
+    else {
+      zap(svg, 160, 136, 150, 176, 160);
+      await wait(260);
+      lamp && lamp.setAttribute("fill", "#e5484d"); sfx.ok();
+      pop(svg, 306, 78, "딸깍! 차단", "#12a37f");
+      say("🟢 누전차단기가 즉시 전원을 끊어 작업자는 무사합니다.");
+    }
+  },
+};
+
+/* ---------- 의뢰 7: 정전 작업 순서 (제319조) ---------- */
+const LOTO = [
+  {id: "s1", t: "관련 도면·배선도로 공급 전원을 모두 확인"},
+  {id: "s2", t: "전원 차단 → 단로기 개방 후 확인"},
+  {id: "s3", t: "차단장치에 잠금장치·꼬리표 부착"},
+  {id: "s4", t: "잔류전하 방전"},
+  {id: "s5", t: "검전기로 충전 여부 확인"},
+  {id: "s6", t: "필요하면 단락 접지기구로 접지"},
+];
+const M7 = {
+  draw(v) {
+    let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 200, 360, 40);
+    s += `<g data-r="panel">` + rc("g-conc2", 120, 40, 120, 150, 'rx="6"') + rc("", 130, 50, 100, 120, 'rx="3" fill="#1d2433"');
+    s += `<text x="180" y="66" text-anchor="middle" font-size="9" font-weight="800" fill="#cde4ff">분전반</text>`;
+    s += `<rect data-r="handle" x="172" y="84" width="16" height="42" rx="3" fill="#e5484d"/><text data-r="onoff" x="180" y="150" text-anchor="middle" font-size="10" font-weight="900" fill="#ffd84a">ON</text></g>`;
+    s += `<g data-r="lockicon" opacity="0"><rect x="190" y="104" width="22" height="18" rx="3" fill="#ffd21f"/><path d="M195 104 v-6 a6 6 0 0 1 12 0 v6" stroke="#ffd21f" stroke-width="3" fill="none"/><rect x="194" y="126" width="16" height="10" fill="#fff" stroke="#e5484d"/></g>`;
+    s += rc("g-steel", 280, 150, 60, 50, 'rx="6"') + `<text x="310" y="180" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">전동기</text>`;
+    s += wkr("w2", 70, 200, 70, {vest: "#3b82f6", hat: "#fff"});
+    s += wkr("w1", 262, 200, 70);
+    const seq = v.seq || [];
+    seq.forEach((id, i) => { const it = LOTO.find(x => x.id === id); s += `<text x="14" y="${22 + i * 14}" class="g-tag">${i + 1}. ${esc(it.t.slice(0, 16))}</text>`; });
+    return s;
+  },
+  fields(v) {
+    return [{id: "seq", t: "seq", label: "정전 전로 작업 순서를 맞게 이어 보세요", items: LOTO, hints: ["근거: 제319조 제2항 (전로 차단 절차) — 1호부터 6호까지 순서대로", "첫 번째는 '도면 확인', 마지막은 '단락 접지'예요", "잠금장치·꼬리표는 차단 직후(3번째), 그 다음 방전 → 검전기"]}];
+  },
+  eval(v) {
+    const seq = v.seq || [], c = [], pos = id => seq.indexOf(id);
+    let main = null;
+    seq.forEach((id, i) => { const it = LOTO.find(x => x.id === id); c.push(ck(null, `${i + 1}번째: ${it.t}`, LOTO[i].id === id, {noSrs: true, dtxt: "✘ 이 자리가 아니에요", val: "", need: LOTO[i].t})); });
+    const ok = seq.every((id, i) => LOTO[i].id === id);
+    if (!ok) {
+      if (!(pos("s3") < pos("s4") && pos("s3") < pos("s5") && pos("s3") < pos("s6"))) main = "a_loto_restart";
+      else if (!(pos("s4") < pos("s5"))) main = "a_loto_residual";
+      else main = "a_loto_unknown";
+    }
+    c.push(ck("t_lock", "작업 순서", ok, {noSrs: true, acc: main, dtxt: "✘ 순서가 달라요", val: ok ? "맞아요" : "달라요", need: "도면확인→차단·개방→잠금·꼬리표→방전→검전→접지"}));
+    c.main = main;
+    return c;
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), w2 = R(svg, "w2"), seq = v.seq || [];
+    say("정전 작업을 시작합니다. 선택한 순서대로 진행해요…");
+    for (let i = 0; i < seq.length; i++) {
+      const it = LOTO.find(x => x.id === seq[i]); say(`${i + 1}. ${it.t}`);
+      if (it.id === "s2") { R(svg, "handle").setAttribute("y", "112"); R(svg, "onoff").textContent = "OFF"; }
+      if (it.id === "s3") R(svg, "lockicon").setAttribute("opacity", "1");
+      pop(svg, 180, 30, `${i + 1}`, "#2b6cb0"); await wait(700);
+    }
+    await walk(w, 262, 250, 200, 400);
+    const m = res.main || res[res.length - 1].acc;
+    if (!allOk(res)) {
+      if (m === "a_loto_restart") {
+        say("작업 중, 지나가던 동료가 꺼진 줄 알고 스위치를 올립니다!");
+        await walk(w2, 70, 150, 200, 900);
+        R(svg, "handle").setAttribute("y", "84"); R(svg, "onoff").textContent = "ON"; sfx.bad();
+        await zap(svg, 240, 120, 284, 170, 800);
+        hurt(w); shake(); sfx.thud(); await tw(500, t => setT(w, 250, 200, 80 * t));
+        say("💥 잠금장치·꼬리표가 없어 재통전되어 감전됐습니다.");
+      } else if (m === "a_loto_residual") {
+        say("전원은 껐지만 기기에 전기가 남아 있었어요…");
+        await zap(svg, 290, 150, 258, 150, 800);
+        hurt(w); shake(); sfx.thud(); await tw(500, t => setT(w, 250, 200, 80 * t));
+        say("💥 방전·검전 확인 전에 만져 잔류전하에 감전됐습니다.");
+      } else {
+        say("도면에 없던 다른 전원이 이 기기에 들어와 있었어요…");
+        await zap(svg, 340, 140, 288, 150, 800);
+        hurt(w); shake(); sfx.thud(); await tw(500, t => setT(w, 250, 200, 80 * t));
+        say("💥 공급 전원을 모두 확인하는 절차가 흐트러져 감전됐습니다.");
+      }
+    } else {
+      say("동료가 스위치 앞에 오지만 잠금장치가 있어 올릴 수 없어요.");
+      await walk(w2, 70, 120, 200, 700); await wait(300);
+      sfx.ok(); pop(svg, 180, 24, "✔ 안전!", "#12a37f");
+      say("🟢 절차를 순서대로 지켜 안전하게 작업을 마쳤습니다.");
+    }
+  },
+};
+
+/* ---------- 의뢰 8: 충전전로 접근 한계거리 (제321조) ---------- */
+const M8 = {
+  K: 0.9, wy: 66, gy: 226,
+  px: [66, 180, 294],
+  draw(v) {
+    const GY = this.gy, WY = this.wy, K = this.K, ids = ["d1", "d2", "d3"], volts = ["380V", "6.6kV", "22.9kV"];
+    let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, GY, 360, 24);
+    this.px.forEach((x, i) => {
+      s += rc("g-conc2", x - 3, WY, 6, GY - WY) + rc("g-steel", x - 40, WY - 4, 80, 4, 'rx="2"');
+      s += `<line x1="${x - 52}" y1="${WY - 6}" x2="${x + 52}" y2="${WY - 6}" stroke="#e5484d" stroke-width="2.6"/>`;
+      s += `<text x="${x}" y="${WY - 16}" text-anchor="middle" class="g-tag">${volts[i]}</text>`;
+      const d = v[ids[i]];
+      if (Number.isFinite(d)) { const y = WY - 6 + d * K; s += `<line x1="${x - 36}" y1="${y}" x2="${x + 36}" y2="${y}" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1.2"/><text x="${x}" y="${y + 11}" text-anchor="middle" class="g-tag">${fmt(d)}cm</text>`; }
+    });
+    s += wkr("w1", 36, GY, 44);
+    return s;
+  },
+  eval(v) {
+    const law = [30, 60, 90], ids = ["d1", "d2", "d3"], fs = ["ap_03", "ap_2", "ap_15"], accs = ["a_arc_lv", "a_arc_hv", "a_arc_xhv"], lab = ["380V 저압선", "6.6kV 고압선", "22.9kV 특고압선"];
+    return ids.map((id, i) => { const ok = v[id] >= law[i]; return ck(fs[i], lab[i] + " 접근 한계거리", ok, {dir: ok ? null : "up", val: fmt(v[id]) + "cm", need: law[i] + "cm", acc: accs[i]}); });
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), K = this.K, WY = this.wy, GY = this.gy, ids = ["d1", "d2", "d3"], law = [30, 60, 90];
+    let hit = false;
+    say("고소작업대를 타고 전선 바로 옆에서 작업합니다. 정한 한계선까지만 접근해요.");
+    for (let i = 0; i < 3 && !hit; i++) {
+      const x = this.px[i] + 22, lim = v[ids[i]];
+      const yHand = WY - 6 + lim * K, yFeet = yHand + 44;
+      await walk(w, i ? this.px[i - 1] + 22 : 36, x, GY, 700);
+      say(["380V 저압선", "6.6kV 고압선", "22.9kV 특고압선"][i] + " 작업 중…");
+      const lift = ownEl(svg, `<rect x="-14" y="0" width="28" height="4" class="g-steel"/><line x1="0" y1="4" x2="0" y2="${GY}" stroke="var(--gm-steel)" stroke-width="3"/>`, "lift" + i);
+      svg.appendChild(w);
+      await tw(900, t => { const y = L(GY, yFeet, t); mv(lift, x, y + 4, 0); lift.firstChild.setAttribute("transform", ""); lift.lastChild.setAttribute("y2", GY - y); setT(w, x, y, 0); });
+      if (lim < law[i]) {
+        hit = true; sfx.bad();
+        await zap(svg, this.px[i], WY - 6, x, yHand, 800);
+        hurt(w); shake(); sfx.thud();
+        await tw(600, t => setT(w, x, yFeet + (GY - yFeet) * t * t, 40 * t));
+        pop(svg, x, yFeet - 60, "방전!");
+        say("💥 한계거리가 기준(" + law[i] + "cm)보다 가까워 전류가 사람 쪽으로 튀었습니다.");
+      } else {
+        await wait(500);
+        await tw(600, t => { const y = L(yFeet, GY, t); mv(lift, x, y + 4, 0); lift.lastChild.setAttribute("y2", GY - y); setT(w, x, y, 0); });
+        lift.remove();
+      }
+    }
+    if (!hit) { if (!allOk(res)) generic(svg, res); else { sfx.ok(); pop(svg, 180, 40, "✔ 안전!", "#12a37f"); say("🟢 세 전압 모두 접근 한계거리를 지켜 안전하게 작업했습니다."); } }
+  },
+};
+
+/* ---------- 의뢰 9: 적정공기 측정 (제618조) ---------- */
+const GAS = [
+  {id: "o2lo", n: "산소 하한", fact: "o2_lo", law: 18, u: "%", read: "17.9%", acc: "a_gas_o2", lamp: 0},
+  {id: "o2hi", n: "산소 상한", fact: "o2_hi", law: 23.5, u: "%", read: "", acc: null, lamp: 0},
+  {id: "co2", n: "이산화탄소", fact: "co2_hi", law: 1.5, u: "%", read: "1.6%", acc: "a_gas_co2", lamp: 1},
+  {id: "co", n: "일산화탄소", fact: "co_hi", law: 30, u: "ppm", read: "31ppm", acc: "a_gas_co", lamp: 2},
+  {id: "h2s", n: "황화수소", fact: "h2s_hi", law: 10, u: "ppm", read: "10ppm", acc: "a_gas_h2s", lamp: 3},
+];
+const M9 = {
+  draw(v) {
+    let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, 62, 360, 188) + rc("g-void", 28, 62, 92, 170) + rc("g-conc2", 20, 56, 108, 8, 'rx="2"');
+    s += `<text x="74" y="246" text-anchor="middle" class="g-cap">맨홀 (깊이 약 3m)</text>`;
+    s += `<g data-r="meter">` + rc("g-conc2", 150, 70, 196, 170, 'rx="10"') + rc("", 158, 78, 180, 154, 'rx="6" fill="#1d2433"');
+    s += `<text x="248" y="94" text-anchor="middle" font-size="9" font-weight="800" fill="#cde4ff">가스 측정기 경보 설정</text>`;
+    const rows = [["산소", v.o2lo, v.o2hi, "%", "17.9%"], ["CO₂", v.co2, null, "%", "1.6%"], ["CO", v.co, null, "ppm", "31ppm"], ["H₂S", v.h2s, null, "ppm", "10ppm"]];
+    rows.forEach((r, i) => {
+      const y = 114 + i * 28, set = r[2] != null ? `${Number.isFinite(r[1]) ? fmt(r[1]) : "?"}~${Number.isFinite(r[2]) ? fmt(r[2]) : "?"}` : (Number.isFinite(r[1]) ? "< " + fmt(r[1]) : "?");
+      s += `<text x="168" y="${y}" font-size="9.5" font-weight="800" fill="#fff">${r[0]}</text><text x="214" y="${y}" font-size="9" fill="#9fc2ff">기준 ${set}${r[3]}</text>`;
+      s += `<text data-r="rd${i}" x="296" y="${y}" font-size="10" font-weight="900" fill="#ffd84a" opacity="0">${r[4]}</text><circle data-r="lp${i}" cx="326" cy="${y - 4}" r="6.5" fill="#444"/>`;
+    });
+    s += `</g>`;
+    s += wkr("w1", 150, 62, 56);
+    s += `<g data-r="probe"><line x1="100" y1="58" x2="100" y2="80" stroke="#222" stroke-width="2"/><rect x="94" y="80" width="12" height="16" rx="2" fill="#3b82f6"/></g>`;
+    return s;
+  },
+  eval(v) {
+    return GAS.map(g => {
+      const x = v[g.id], ok = x === g.law, lax = x > g.law || (g.id === "o2lo" && x < g.law);
+      return ck(g.fact, g.n + " 기준", ok, {dir: ok ? null : x > g.law ? "down" : "up", val: fmt(x) + g.u, need: fmt(g.law) + g.u + (g.id === "o2lo" ? " 이상" : g.id === "o2hi" ? " 미만" : " 미만"), acc: !ok && lax ? g.acc : null, dtxt: "✘ 기준값과 달라요 (정확히!)"});
+    });
+  },
+  fields() {
+    return [
+      {id: "o2lo", t: "num", label: "산소농도 하한 (적정공기)", unit: "%", ph: "몇 % 이상?", fact: "o2_lo"},
+      {id: "o2hi", t: "num", label: "산소농도 상한 (적정공기)", unit: "%", ph: "몇 % 미만?", fact: "o2_hi"},
+      {id: "co2", t: "num", label: "이산화탄소 (적정공기)", unit: "%", ph: "몇 % 미만?", fact: "co2_hi"},
+      {id: "co", t: "num", label: "일산화탄소 (적정공기)", unit: "ppm", ph: "몇 ppm 미만?", fact: "co_hi"},
+      {id: "h2s", t: "num", label: "황화수소 (적정공기)", unit: "ppm", ph: "몇 ppm 미만?", fact: "h2s_hi"},
+    ];
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), probe = R(svg, "probe");
+    say("맨홀에 들어가기 전, 측정기를 밧줄에 매달아 내려 공기를 측정합니다…");
+    await tw(900, t => mv(probe, 0, 60 * t, 0));
+    say("측정값이 올라옵니다. 설정한 기준으로 경보가 울리는지 봐요.");
+    const lamps = [0, 1, 2, 3].map(i => R(svg, "lp" + i));
+    const sil = [failAcc(res, "a_gas_o2"), failAcc(res, "a_gas_co2"), failAcc(res, "a_gas_co"), failAcc(res, "a_gas_h2s")];
+    for (let i = 0; i < 4; i++) { R(svg, "rd" + i).setAttribute("opacity", "1"); lamps[i].setAttribute("fill", sil[i] ? "#3aa56d" : "#e5484d"); await wait(450); }
+    const bad = sil.findIndex(x => x);
+    if (bad >= 0) {
+      say("어떤 가스는 경보가 안 울려요. 작업자는 '이상 없음'으로 알고 맨홀로 내려갑니다…");
+      await walk(w, 150, 100, 62, 600); svg.appendChild(w);
+      await tw(1100, t => setT(w, 74, 62 + 100 * t, 0, 1 - t * .06), ease.io);
+      hurt(w); sfx.bad(); shake(); await tw(500, t => setT(w, 74, 162, 80 * t));
+      const acc = [GAS[0].acc, GAS[2].acc, GAS[3].acc, GAS[4].acc][bad];
+      pop(svg, 74, 140, "...");
+      say("💥 " + ACC[acc].n + ": 기준을 느슨하게 알고 있으면 경보 없이 위험 공기를 마십니다.");
+    } else if (!allOk(res)) generic(svg, res, 250, 60);
+    else {
+      sfx.ok(); pop(svg, 248, 62, "경보! 환기 후 재측정", "#e5484d");
+      await wait(600); sfx.ok(); pop(svg, 74, 56, "✔ 안전 확인", "#12a37f");
+      say("🟢 위험 공기를 정확히 걸러 내고, 환기한 뒤에 들어가기로 합니다.");
+    }
+  },
+};
+
+/* ---------- 의뢰 10: 밀폐공간 작업 준비 (제619~625조) ---------- */
+const CONF_OPTS = [
+  {id: "vent", ic: "🌀", t: "송풍기로 환기 (작업 전·중)", ok: true, acc: "a_gas_o2", art: "제620조"},
+  {id: "meter", ic: "📟", t: "산소·유해가스 농도 측정기", ok: true, acc: "a_conf_nometer", art: "제619조"},
+  {id: "scba", ic: "😷", t: "공기호흡기·송기마스크", ok: true, acc: "a_conf_rescue", art: "제625조"},
+  {id: "belt", ic: "🪢", t: "안전대·구명밧줄", ok: true, acc: "a_conf_rescue", art: "제624조"},
+  {id: "watch", ic: "🧑‍🔧", t: "외부 감시인 + 연락 설비", ok: true, acc: "a_conf_nowatch", art: "제623조"},
+  {id: "ladder", ic: "🪜", t: "사다리·섬유로프 등 구출 기구", ok: true, acc: "a_conf_rescue", art: "제625조"},
+  {id: "sign", ic: "🚫", t: "출입금지 표지", ok: true, acc: "a_conf_nowatch", art: "제622조"},
+  {id: "o2tank", ic: "🧪", t: "순수 산소로 환기", ok: false, acc: "a_conf_fire", art: "제620조"},
+  {id: "dust", ic: "😶", t: "방진마스크 하나만 착용", ok: false, acc: "a_conf_mask", art: "제620조"},
+  {id: "solo", ic: "🙋", t: "혼자 빨리 들어갔다 나오기", ok: false, acc: "a_conf_nowatch", art: "제623조"},
+  {id: "lighter", ic: "🔥", t: "라이터 불로 가스 확인", ok: false, acc: "a_conf_fire", art: "제620조"},
+];
+function manholeScene(extra) {
+  let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, 70, 360, 180) + rc("g-void", 110, 70, 140, 170) + rc("g-conc2", 100, 64, 160, 8, 'rx="2"');
+  s += `<text x="180" y="236" text-anchor="middle" class="g-cap">맨홀 (깊이 약 3m)</text>`;
+  return s + (extra || "");
+}
+const M10 = {
+  fields() { return [{id: "sel", t: "multi", label: "밀폐공간(맨홀)에 들어가기 전, 꼭 갖출 것을 모두 고르세요", opts: CONF_OPTS, need: 7, hints: ["근거: 제619조~제625조 (밀폐공간 작업)", "필요한 건 모두 7가지예요. 틀린 보기도 섞여 있어요", "환기 · 측정 · 호흡보호 · 안전대 · 감시인 · 구출기구 · 출입금지 표지"]}]; },
+  draw(v) {
+    let s = manholeScene();
+    const sel = v.sel || [];
+    sel.forEach((id, i) => { const o = CONF_OPTS.find(x => x.id === id); s += `<text x="${16 + (i % 6) * 54}" y="${26 + Math.floor(i / 6) * 24}" font-size="20">${o.ic}</text>`; });
+    s += wkr("w1", 70, 70, 60);
+    return s;
+  },
+  eval(v) {
+    const sel = v.sel || [], c = [];
+    CONF_OPTS.filter(o => o.ok).forEach(o => { const has = sel.includes(o.id); c.push(ck(null, o.t, has, {noSrs: true, dtxt: "✘ 빠졌어요", val: has ? "준비함" : "빠짐", need: "필요 (" + o.art + ")", acc: has ? null : o.acc})); });
+    CONF_OPTS.filter(o => !o.ok).forEach(o => { if (sel.includes(o.id)) c.push(ck(null, o.t, false, {noSrs: true, dtxt: "✘ 위험한 선택이에요", val: "선택함", need: "하면 안 돼요 (" + o.art + ")", acc: o.acc})); });
+    return c;
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), sel = v.sel || [];
+    say("준비물을 확인하고 맨홀에 들어갑니다…");
+    await wait(700);
+    await walk(w, 70, 180, 70, 900);
+    const pri = ["a_conf_fire", "a_conf_mask", "a_gas_o2", "a_conf_nometer", "a_conf_nowatch", "a_conf_rescue"], hit = pri.find(a => failAcc(res, a));
+    svg.appendChild(w);
+    if (hit) {
+      await tw(1100, t => setT(w, 180, 70 + 100 * t, 0));
+      hurt(w); sfx.bad(); shake(); await tw(450, t => setT(w, 180, 170, 80 * t));
+      pop(svg, 180, 130, "…");
+      const m = {a_conf_fire: "라이터 불·순수 산소는 폭발·화재 위험이 커요", a_conf_mask: "방진마스크는 산소결핍을 막지 못해요", a_gas_o2: "환기를 안 해 산소가 부족했어요", a_conf_nometer: "농도를 측정하지 않고 들어갔어요", a_conf_nowatch: "감시인·표지가 없어 아무도 못 봤어요", a_conf_rescue: "구출·호흡 장비가 없어 위급할 때 대응이 불가능해요"}[hit];
+      say("💥 " + ACC[hit].n + " — " + m + ".");
+    } else {
+      await tw(900, t => setT(w, 180, 70 + 90 * t, 0)); await wait(500); await tw(900, t => setT(w, 180, 160 - 90 * t, 0));
+      sfx.ok(); pop(svg, 180, 54, "✔ 안전!", "#12a37f");
+      say("🟢 환기·측정·호흡보호·감시·구출 준비까지 갖춰 안전하게 작업을 마쳤습니다.");
+    }
+  },
+};
+
+/* ---------- 의뢰 11: 쓰러진 작업자 구조 (제623·625조) ---------- */
+const M11 = {
+  fields() { return [{id: "txt", t: "kw", label: "맨홀 안 동료가 쓰러졌습니다. 감시인인 당신이 해야 할 일 두 가지를 쓰세요", slots: 2, ph: "예) …에 신고하고, …를 쓰고 구조한다", hints: ["근거: 제623조 제2항, 제625조", "하나는 '어디에 알린다', 다른 하나는 '구조자의 호흡 보호'", "119(소방)에 신고 + 공기호흡기·송기마스크 착용 (맨몸 진입 금지)"]}]; },
+  draw(v) {
+    let s = manholeScene();
+    s += `<g data-r="victim">${wkr("w2", 180, 224, 56, {vest: "#3b82f6", hat: "#fff"})}</g>`;
+    s += wkr("w1", 70, 70, 60, {vest: "#12a37f"});
+    s += `<text x="16" y="24" class="g-tag">🆘 맨홀 안 작업자가 쓰러져 있어요</text>`;
+    return s;
+  },
+  eval(v) {
+    const t = v.txt || "", a = hasKw(t, ["119", "소방", "신고", "구조요청", "응급"]), b = hasKw(t, ["공기호흡기", "송기마스크", "호흡기", "호흡보호", "호흡"]);
+    return [
+      ck("t_119", "소방관서 신고", a, {dir: a ? null : "x", dtxt: "✘ 빠졌어요", val: a ? "신고 ✔" : "빠짐", need: "지체 없이 소방관서(119)에 신고", acc: "a_conf_nocall"}),
+      ck("t_scba", "구조자의 호흡 보호", b, {dir: b ? null : "x", dtxt: "✘ 빠졌어요", val: b ? "호흡보호구 ✔" : "빠짐", need: "공기호흡기·송기마스크 착용 후 구조 (맨몸 진입 금지)", acc: "a_conf_rescue"}),
+    ];
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), vic = R(svg, "w2");
+    hurt(vic);
+    say("감시인은 무엇부터 할까요…");
+    await wait(600);
+    if (failAcc(res, "a_conf_rescue")) {
+      say("마음이 급해 장비 없이 그대로 뛰어듭니다!");
+      await walk(w, 70, 180, 70, 700); svg.appendChild(w);
+      await tw(900, t => setT(w, 180, 70 + 100 * t, 0), ease.in);
+      hurt(w); sfx.bad(); shake(); await tw(400, t => setT(w, 150, 170, 80 * t));
+      say("💥 2차 재해! 구조자도 같은 공기에 쓰러졌습니다.");
+    } else if (failAcc(res, "a_conf_nocall")) {
+      say("호흡 장비를 갖춰 구조하지만 신고를 하지 않았어요…");
+      await wait(900); pop(svg, 100, 44, "⏳ 지체…", "#e5484d");
+      await wait(700); sfx.bad();
+      say("💥 구조대 도착이 늦어져 응급처치가 지연됐습니다. 이상이 있으면 지체 없이 신고!");
+    } else if (!allOk(res)) generic(svg, res);
+    else {
+      pop(svg, 100, 44, "📞 119!", "#2b6cb0"); sfx.ok(); await wait(800);
+      say("공기호흡기를 쓰고 줄을 묶어 내려갑니다…");
+      await walk(w, 70, 180, 70, 700); svg.appendChild(w);
+      await tw(800, t => setT(w, 180, 70 + 90 * t, 0));
+      await tw(1000, t => { setT(w, 180 - 20 * t, 160 - 90 * t, 0); setT(vic, 180 + 10 * t - 8, 224 - 150 * t, 80 * (1 - t)); });
+      sfx.star(); pop(svg, 160, 54, "✔ 구조 성공!", "#12a37f");
+      say("🟢 신고와 호흡보호가 모두 이뤄져 2차 재해 없이 구조했습니다.");
+    }
+  },
+};
+
+/* ---------- 의뢰 12: 굴착면 기울기 (제339조, 별표 11) ---------- */
+const SOILS = [
+  {id: "sand", n: "모래", fact: "sl_sand", law: 1.8, acc: "a_exc_sand", col: "#e6c66e"},
+  {id: "soft", n: "연암·풍화암", fact: "sl_soft", law: 1.0, acc: "a_exc_rock", col: "#a9a08f"},
+  {id: "hard", n: "경암", fact: "sl_hard", law: 0.5, acc: "a_exc_hard", col: "#6a6f78"},
+  {id: "soil", n: "그 밖의 흙", fact: "sl_soil", law: 1.2, acc: "a_exc_soil", col: "#9a6b43"},
+];
+const M12 = {
+  H: 52, x0: [8, 98, 188, 278], top: 100,
+  draw(v) {
+    const H = this.H, T = this.top;
+    let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, T, 360, 150);
+    SOILS.forEach((so, i) => {
+      const x0 = this.x0[i], r = Number.isFinite(v[so.id]) ? Math.max(0, Math.min(v[so.id], 2.4)) : 0.6, run = r * H;
+      s += `<g data-r="p${i}"><polygon points="${x0},${T} ${x0 + 80},${T} ${x0 + 80},${T + H} ${x0 + 14 + run},${T + H} ${x0 + 14},${T}" fill="${so.col}" opacity="0"/>`;
+      s += `<polygon points="${x0 + 12 + run},${T + H} ${x0 + 80},${T + H} ${x0 + 80},${T + H + 40} ${x0},${T + H + 40} ${x0},${T}" fill="none"/></g>`;
+      // 굴착면 (트렌치 단면): 땅속 그림 + 비어 있는 구멍
+      s += `<polygon points="${x0},${T} ${x0 + 80},${T} ${x0 + 80},${T + H + 14} ${x0},${T + H + 14}" fill="${so.col}"/>`;
+      s += `<polygon data-r="hole${i}" points="${x0 + 80},${T} ${x0 + 80 - 4 - run * 0},${T} ${x0 + 14},${T} ${x0 + 14 + run},${T + H} ${x0 + 80},${T + H}" fill="var(--gm-void)" opacity="0"/>`;
+      s += `<polygon points="${x0 + 14},${T} ${x0 + 14 + run},${T + H} ${x0 + 80},${T + H} ${x0 + 80},${T}" fill="var(--gm-void)"/>`;
+      s += `<line x1="${x0 + 14}" y1="${T}" x2="${x0 + 14 + run}" y2="${T + H}" stroke="#000" stroke-opacity=".35" stroke-width="1.5"/>`;
+      s += `<text x="${x0 + 40}" y="${T + H + 30}" text-anchor="middle" class="g-tag">${so.n}</text>`;
+      s += `<text x="${x0 + 40}" y="${T + H + 43}" text-anchor="middle" class="g-tag">${Number.isFinite(v[so.id]) ? "1 : " + fmt(v[so.id]) : "1 : ?"}</text>`;
+      s += wkr("w" + i, x0 + 62, T + H, 30);
+    });
+    s += `<text x="12" y="22" class="g-tag">높이 1에 대한 수평거리 (기울기 = 높이 : 수평거리)</text>`;
+    return s;
+  },
+  fields() { return SOILS.map(so => ({id: so.id, t: "num", label: so.n + " — 굴착면 기울기 (높이 1 : 수평거리 ?)", unit: "", ph: "1 : 몇?", fact: so.fact, dec: true})); },
+  eval(v) { return SOILS.map(so => { const ok = v[so.id] >= so.law; return ck(so.fact, so.n + " 굴착면 기울기", ok, {dir: ok ? null : "up", val: "1 : " + fmt(v[so.id]), need: "1 : " + fmt(so.law) + " 이상 (더 완만)", acc: so.acc}); }); },
+  async play(svg, v, res) {
+    const H = this.H, T = this.top;
+    say("네 종류의 지반을 굴착하고 근로자가 바닥에서 작업합니다…");
+    await wait(900);
+    let any = false;
+    for (let i = 0; i < 4; i++) {
+      const so = SOILS[i], w = R(svg, "w" + i), x0 = this.x0[i];
+      if (v[so.id] < so.law) {
+        any = true; sfx.bad(); say(so.n + " 굴착면이 너무 가파라요… 흙이 무너집니다!");
+        const r = Math.max(0, v[so.id]) * H;
+        const slide = ownEl(svg, `<polygon points="${x0 + 14},${T} ${x0 + 14 + (so.law * H)},${T + H} ${x0 + 14 + r},${T + H}" fill="${so.col}"/>`, "slide" + i);
+        await tw(900, t => { mv(slide, 0, 0, 0); slide.firstChild.setAttribute("points", `${x0 + 14},${T} ${L(x0 + 14 + r, x0 + 70, t)},${T + H} ${x0 + 14 + (so.law * H) * (1 - t) + 0},${T + H}`); });
+        hurt(w); shake(); sfx.thud(); await tw(300, t => setT(w, x0 + 62, T + H, 85 * t));
+        pop(svg, x0 + 40, T - 8, "와르르!");
+      } else { await wait(300); pop(svg, x0 + 40, T - 8, "✔", "#12a37f"); }
+    }
+    await wait(300);
+    if (!any) { if (!allOk(res)) generic(svg, res); else { sfx.ok(); say("🟢 지반마다 알맞은 기울기로 파서 굴착면이 안전합니다."); } }
+    else say("💥 굴착면 기울기를 기준보다 가파르게 하면 무너집니다. 모래 1:1.8 · 연암/풍화암 1:1.0 · 경암 1:0.5 · 그 밖의 흙 1:1.2");
+  },
+};
+
+/* ---------- 의뢰 13: 굴착 현장 안전조치 (제339~347조) ---------- */
+const EXC_OPTS = [
+  {id: "shore", ic: "🪵", t: "흙막이 지보공 설치 (조립도 작성)", ok: true, acc: "a_exc_cave", art: "제340조·제346조"},
+  {id: "net", ic: "🕸️", t: "방호망 설치·근로자 출입금지 구역", ok: true, acc: "a_exc_cave", art: "제340조"},
+  {id: "drain", ic: "☔", t: "측구 설치·경사면 비닐 덮기 (빗물 침투 방지)", ok: true, acc: "a_exc_rain", art: "제339조"},
+  {id: "guide", ic: "🚦", t: "굴착기계 유도자 배치", ok: true, acc: "a_exc_machine", art: "제344조"},
+  {id: "utility", ic: "🔌", t: "노출된 매설물 방호·이설 (관리감독자 지휘)", ok: true, acc: "a_exc_pipe", art: "제341조"},
+  {id: "inspect", ic: "🔍", t: "흙막이 지보공 정기 점검·계측", ok: true, acc: "a_exc_cave", art: "제347조"},
+  {id: "pile", ic: "⛰️", t: "굴착 가장자리에 흙을 쌓아 두기", ok: false, acc: "a_exc_cave", art: "제340조"},
+  {id: "rain", ic: "🌧️", t: "비 온 뒤 그대로 작업 계속", ok: false, acc: "a_exc_rain", art: "제339조"},
+  {id: "dig", ic: "⛏️", t: "지하 가스관이 걸려도 계속 굴착", ok: false, acc: "a_exc_pipe", art: "제342조"},
+];
+const M13 = {
+  fields() { return [{id: "sel", t: "multi", label: "깊게 파는 굴착 현장입니다. 필요한 안전조치를 모두 고르세요", opts: EXC_OPTS, need: 6, hints: ["근거: 제339조~제347조 (굴착 작업)", "필요한 건 6가지, 틀린 보기 3가지가 섞여 있어요", "흙막이 · 방호망/출입금지 · 빗물 · 유도자 · 매설물 · 정기점검"]}]; },
+  draw(v) {
+    const sel = v.sel || [], has = id => sel.includes(id);
+    let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, 92, 360, 158) + rc("g-void", 120, 92, 120, 120);
+    s += rc("", 120, 212, 120, 8, 'fill="var(--gm-conc2)"');
+    if (has("shore")) s += rc("", 114, 92, 8, 128, 'fill="#c8975a"') + rc("", 238, 92, 8, 128, 'fill="#c8975a"') + rc("", 120, 130, 120, 5, 'fill="#c8975a"');
+    if (has("net")) s += rc("", 100, 70, 4, 22, 'fill="var(--gm-rail)"') + rc("", 256, 70, 4, 22, 'fill="var(--gm-rail)"') + `<path d="M100 74 L260 74 M100 84 L260 84" stroke="var(--gm-rail)" stroke-width="2.5"/>`;
+    if (has("drain")) s += `<path d="M20 100 L60 100 L100 92" stroke="#2b6cb0" stroke-width="5" fill="none"/><rect x="264" y="88" width="50" height="5" fill="#2b6cb0" opacity=".6"/>`;
+    if (has("pile")) s += `<polygon points="248,92 276,66 304,92" fill="#9a6b43"/>`;
+    if (has("rain")) s += `<text x="270" y="30" font-size="26">🌧️</text>`;
+    if (has("dig")) s += `<text x="136" y="82" font-size="18">⛏️</text>`;
+    s += `<circle cx="120" cy="170" r="9" fill="#f5b50a" stroke="#c98d00" stroke-width="2"/><text x="136" y="186" class="g-cap">가스관</text>`;
+    if (has("utility")) s += `<circle cx="120" cy="170" r="14" fill="none" stroke="#12a37f" stroke-width="3" stroke-dasharray="4 3"/>`;
+    s += `<g data-r="exc"><rect x="10" y="64" width="64" height="26" rx="4" fill="#f2a900"/><rect x="42" y="52" width="26" height="14" rx="3" fill="#f2a900"/><path d="M70 70 L96 60 L92 80" stroke="#c98d00" stroke-width="5" fill="none"/><rect x="6" y="88" width="72" height="8" rx="3" fill="#333"/></g>`;
+    if (has("guide")) s += wkr("w3", 100, 92, 42, {vest: "#12a37f", hat: "#fff"});
+    s += wkr("w2", 40, 92, 42, {vest: "#3b82f6", hat: "#fff"});
+    s += wkr("w1", 180, 212, 52);
+    sel.forEach((id, i) => { const o = EXC_OPTS.find(x => x.id === id); s += `<text x="${10 + i * 28}" y="238" font-size="15">${o.ic}</text>`; });
+    return s;
+  },
+  eval(v) {
+    const sel = v.sel || [], c = [];
+    EXC_OPTS.filter(o => o.ok).forEach(o => { const has = sel.includes(o.id); c.push(ck(null, o.t, has, {noSrs: true, dtxt: "✘ 빠졌어요", val: has ? "함" : "빠짐", need: "필요 (" + o.art + ")", acc: has ? null : o.acc})); });
+    EXC_OPTS.filter(o => !o.ok).forEach(o => { if (sel.includes(o.id)) c.push(ck(null, o.t, false, {noSrs: true, dtxt: "✘ 위험한 선택이에요", val: "선택함", need: "하면 안 돼요 (" + o.art + ")", acc: o.acc})); });
+    return c;
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), exc = R(svg, "exc"), w2 = R(svg, "w2");
+    say("굴착이 진행되고 근로자가 바닥에서 배관 주변을 정리합니다…");
+    await wait(900);
+    if (failAcc(res, "a_exc_cave")) {
+      say("흙벽이 하중을 못 버텨요… 토사가 쏟아집니다!");
+      sfx.bad();
+      const m = ownEl(svg, `<polygon points="120,92 150,92 120,150" fill="#9a6b43"/><polygon points="240,92 210,92 240,150" fill="#9a6b43"/>`, "cave");
+      await tw(900, t => { m.innerHTML = `<polygon points="120,92 ${150 + 30 * t},${92 + 120 * t} 120,${150 + 62 * t}" fill="#9a6b43"/><polygon points="240,92 ${210 - 30 * t},${92 + 120 * t} 240,${150 + 62 * t}" fill="#9a6b43"/>`; });
+      hurt(w); shake(); sfx.thud(); await tw(300, t => setT(w, 180, 212, 85 * t));
+      pop(svg, 180, 140, "와르르!"); say("💥 흙막이 지보공·방호망·출입금지가 없어 토사가 무너졌습니다.");
+    } else if (failAcc(res, "a_exc_pipe")) {
+      say("굴착 중 노출된 가스관을 건드립니다!");
+      sfx.bad(); await tw(700, t => {}); const g = ownEl(svg, `<circle cx="120" cy="170" r="10" fill="#cfe9a8" opacity=".6"/>`, "gas");
+      await tw(900, t => { g.firstChild.setAttribute("r", 10 + 60 * t); g.firstChild.setAttribute("opacity", .6 * (1 - t * .4)); });
+      hurt(w); shake(); sfx.thud(); pop(svg, 150, 130, "가스 누출!"); say("💥 매설물을 방호·이설하지 않고 굴착해 가스관이 파손됐습니다.");
+    } else if (failAcc(res, "a_exc_machine")) {
+      say("굴착기가 후진합니다. 유도해 주는 사람이 없어요…");
+      await tw(1300, t => mv(exc, 80 * t, 0, 0), ease.io);
+      hurt(w2); shake(); sfx.thud(); await tw(300, t => setT(w2, 40 + 60, 92, 85 * t));
+      pop(svg, 110, 60, "쾅!"); say("💥 유도자 없이 후진한 굴착기에 근로자가 협착됐습니다.");
+    } else if (failAcc(res, "a_exc_rain")) {
+      say("큰 비가 내려 빗물이 사면으로 스며듭니다…");
+      sfx.bad(); const slope = ownEl(svg, `<polygon points="240,92 262,92 240,150" fill="#9a6b43"/>`, "ls");
+      await tw(1000, t => { slope.firstChild.setAttribute("points", `240,92 ${262 + 8 * t},${92 + 118 * t} 240,${150 + 62 * t}`); });
+      hurt(w); shake(); sfx.thud(); pop(svg, 220, 130, "와르르!"); say("💥 빗물 침투를 막지 않아 굴착면이 무너졌습니다.");
+    } else if (!allOk(res)) generic(svg, res);
+    else { sfx.ok(); pop(svg, 180, 150, "✔ 안전!", "#12a37f"); say("🟢 흙막이·방호·배수·유도·매설물 방호·점검이 갖춰진 안전한 굴착 현장입니다."); }
+  },
+};
+
+/* ---------- 의뢰 14: 용접 화재 예방 (제241조·제241조의2) ---------- */
+const M14 = {
+  S: 6.4,
+  draw(v) {
+    const GY = 200, r = Number.isFinite(v.r) ? Math.max(0, Math.min(v.r, 20)) : 0, S = this.S, cx = 120;
+    let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, GY, 360, 40);
+    s += `<circle cx="${cx}" cy="${GY - 24}" r="${r * S}" fill="#2b6cb0" opacity=".12" stroke="#2b6cb0" stroke-dasharray="5 4" stroke-width="1.6"/>`;
+    s += `<text x="${cx}" y="${GY - 24 - r * S - 4}" text-anchor="middle" class="g-tag">${Number.isFinite(v.r) ? "점검 반경 " + fmt(v.r) + "m" : "점검 반경 ?"}</text>`;
+    s += `<g data-r="paper"><rect x="${cx + 8 * S}" y="${GY - 26}" width="26" height="26" fill="#c8975a"/><rect x="${cx + 8 * S + 3}" y="${GY - 34}" width="20" height="8" fill="#dcb98a"/><text x="${cx + 8 * S + 13}" y="${GY - 8}" text-anchor="middle" font-size="9" font-weight="800" fill="#5a3b12">종이</text></g>`;
+    s += `<g><rect x="${cx + 15 * S}" y="${GY - 30}" width="16" height="30" rx="3" fill="#c0392b"/><text x="${cx + 15 * S + 8}" y="${GY - 12}" text-anchor="middle" font-size="7" font-weight="800" fill="#fff">인화</text></g>`;
+    s += `<g data-r="torch"><rect x="${cx + 12}" y="${GY - 38}" width="20" height="5" rx="2" fill="#555"/></g>`;
+    s += wkr("w1", cx, GY, 60);
+    return s;
+  },
+  fields() {
+    return [
+      {id: "r", t: "num", label: "가연성물질이 있는지 확인할 작업반경", unit: "m", ph: "몇 m?", fact: "fire_r"},
+      {id: "txt", t: "kw", label: "그리고 화재를 막기 위해 갖출 것 세 가지를 쓰세요", slots: 3, ph: "예) … 하고, … 비치하고, … 배치", hints: ["근거: 제241조 제2항, 제241조의2 제1항", "불티 막는 것 · 불을 끄는 것 · 지켜보는 사람", "방화포(비산방지덮개) · 소화기 · 화재감시자"]},
+    ];
+  },
+  eval(v) {
+    const t = v.txt || "", a = hasKw(t, ["방화포", "비산방지", "덮개", "불티", "차단막", "방호"]), b = hasKw(t, ["소화기", "소화"]), c = hasKw(t, ["화재감시자", "감시자", "감시인", "감시"]);
+    const okr = v.r >= 11;
+    return [
+      ck("fire_r", "가연물 확인 반경", okr, {dir: okr ? null : "up", val: fmt(v.r) + "m", need: "11m (작업반경)", acc: "a_fire_spark"}),
+      ck("t_blanket", "불티 비산 방지(방화포·덮개)", a, {dtxt: "✘ 빠졌어요", val: a ? "있음" : "빠짐", need: "용접방화포·비산방지덮개", acc: "a_fire_spark"}),
+      ck("t_ext", "소화기구 비치", b, {dtxt: "✘ 빠졌어요", val: b ? "있음" : "빠짐", need: "소화기구 비치", acc: "a_fire_nofx"}),
+      ck("t_watch", "화재감시자 배치", c, {dtxt: "✘ 빠졌어요", val: c ? "있음" : "빠짐", need: "화재감시자 지정·배치", acc: "a_fire_nowatch"}),
+    ];
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), GY = 200, cx = 120;
+    say("작업자가 철골을 용접합니다. 불티가 사방으로 튑니다…");
+    for (let i = 0; i < 6; i++) { zap(svg, cx + 28, GY - 36, cx + 28 + 40 + i * 12, GY - 6 + (i % 3) * 4, 260); await wait(160); }
+    if (failAcc(res, "a_fire_spark")) {
+      say("점검 범위 밖 종이 상자까지 불티가 닿았어요…");
+      const f = ownEl(svg, `<text x="${cx + 8 * this.S + 3}" y="${GY - 28}" font-size="30">🔥</text>`, "flame");
+      await tw(900, t => { f.firstChild.setAttribute("font-size", 18 + 26 * t); f.firstChild.setAttribute("y", GY - 20 - 14 * t); });
+      sfx.bad(); shake(); pop(svg, cx + 70, 80, "불이야!");
+      say("💥 반경 11m 안 가연물을 확인·방호하지 않아 불티가 옮겨붙었습니다.");
+    } else if (failAcc(res, "a_fire_nofx")) {
+      say("작은 불씨가 번졌는데 소화기가 없어요…");
+      const f = ownEl(svg, `<text x="${cx + 8 * this.S + 3}" y="${GY - 28}" font-size="22">🔥</text>`, "flame");
+      await tw(1000, t => { f.firstChild.setAttribute("font-size", 20 + 24 * t); }); sfx.bad(); shake();
+      say("💥 소화기가 없어 초기 진화에 실패했습니다.");
+    } else if (failAcc(res, "a_fire_nowatch")) {
+      say("용접을 마치고 모두 떠난 뒤, 숨은 불씨가 다시 살아납니다…");
+      await walk(w, cx, cx - 60, GY, 500); await wait(600);
+      const f = ownEl(svg, `<text x="${cx + 8 * this.S + 3}" y="${GY - 28}" font-size="16">🔥</text>`, "flame");
+      await tw(1200, t => { f.firstChild.setAttribute("font-size", 14 + 30 * t); }); sfx.bad(); shake();
+      say("💥 화재감시자가 없어 재발화를 아무도 보지 못했습니다.");
+    } else if (!allOk(res)) generic(svg, res);
+    else { await wait(500); sfx.ok(); pop(svg, cx, 60, "✔ 안전!", "#12a37f"); say("🟢 11m 이내 가연물을 점검·방호하고 소화기·화재감시자까지 갖췄습니다."); }
+  },
+};
+
+/* ---------- 의뢰 15: 기계 정비 (제92조) ---------- */
+const MACH = [
+  {id: "k1", t: "기계 운전을 정지한다"},
+  {id: "k2", t: "기동장치에 잠금장치를 하고 열쇠는 별도 관리한다"},
+  {id: "k3", t: "'정비 중' 표지판을 건다"},
+  {id: "k4", t: "내부에 압축된 기체·액체를 미리 방출한다"},
+  {id: "k5", t: "정비·청소 작업을 한다"},
+];
+const M15 = {
+  draw(v) {
+    let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 200, 360, 40);
+    s += `<g data-r="mach">` + rc("g-steel", 150, 100, 130, 100, 'rx="6"') + `<g data-r="gear"><circle cx="215" cy="150" r="30" fill="#c9ced6" stroke="#6b7684" stroke-width="3"/><path d="M215 120 v60 M185 150 h60 M194 129 l42 42 M236 129 l-42 42" stroke="#6b7684" stroke-width="4"/></g></g>`;
+    s += rc("g-conc2", 40, 120, 40, 64, 'rx="4"') + `<circle data-r="sw" cx="60" cy="140" r="9" fill="#12a37f"/><text x="60" y="166" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">기동</text>`;
+    s += `<g data-r="lockg" opacity="0"><rect x="66" y="128" width="16" height="13" rx="2" fill="#ffd21f"/></g><g data-r="tagg" opacity="0"><rect x="32" y="104" width="46" height="14" rx="2" fill="#fff" stroke="#e5484d"/><text x="55" y="114" text-anchor="middle" font-size="7.5" font-weight="900" fill="#e5484d">정비 중</text></g>`;
+    s += wkr("w2", 100, 200, 66, {vest: "#3b82f6", hat: "#fff"});
+    s += wkr("w1", 140, 200, 70);
+    (v.seq || []).forEach((id, i) => { const it = MACH.find(x => x.id === id); s += `<text x="14" y="${22 + i * 14}" class="g-tag">${i + 1}. ${esc(it.t.slice(0, 14))}</text>`; });
+    return s;
+  },
+  fields() { return [{id: "seq", t: "seq", label: "컨베이어 기계를 정비·청소하기 전, 해야 할 순서를 맞게 이어 보세요", items: MACH, hints: ["근거: 제92조 (정비 등의 작업 시 운전정지)", "'정비 작업'은 맨 마지막이에요. 운전정지가 맨 처음", "정지 → 잠금(열쇠 별도 관리) → 표지판 → 압축된 것 방출 → 정비 (표지판과 방출은 순서를 바꿔도 돼요)"]}]; },
+  eval(v) {
+    const seq = v.seq || [], c = [], p = id => seq.indexOf(id);
+    const ord = ["k1", "k2"].every((id, i) => seq[i] === id) && seq[4] === "k5" && ((seq[2] === "k3" && seq[3] === "k4") || (seq[2] === "k4" && seq[3] === "k3"));
+    seq.forEach((id, i) => { const it = MACH.find(x => x.id === id); const okp = i < 2 ? id === MACH[i].id : i === 4 ? id === "k5" : (id === "k3" || id === "k4"); c.push(ck(null, `${i + 1}번째: ${it.t}`, okp, {noSrs: true, dtxt: "✘ 이 자리가 아니에요", val: "", need: ""})); });
+    let main = null;
+    if (!ord) { if (p("k5") < p("k2") || p("k5") < p("k3")) main = "a_mach_restart"; else if (p("k1") > p("k5")) main = "a_mach_nostop"; else if (p("k4") > p("k5")) main = "a_mach_pressure"; else main = "a_mach_restart"; if (p("k1") !== 0 && p("k1") > p("k2")) main = "a_mach_nostop"; }
+    c.push(ck("t_mlock", "정비 전 순서", ord, {noSrs: true, acc: main, dtxt: "✘ 순서가 달라요", val: ord ? "맞아요" : "달라요", need: "정지 → 잠금 → 표지판/압력 방출 → 정비"}));
+    c.main = main;
+    return c;
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1"), w2 = R(svg, "w2"), gear = R(svg, "gear"), seq = v.seq || [];
+    say("기계를 청소하러 갑니다. 선택한 순서대로 진행해요…");
+    let spin = true, ang = 0; const spinner = (async () => { while (spin && alive) { ang += 14; gear.setAttribute("transform", `rotate(${ang} 215 150)`); await new Promise(r => frame(r)); if (skip) break; } })();
+    for (let i = 0; i < seq.length; i++) {
+      const it = MACH.find(x => x.id === seq[i]); say(`${i + 1}. ${it.t}`);
+      if (it.id === "k1") { spin = false; R(svg, "sw").setAttribute("fill", "#e5484d"); }
+      if (it.id === "k2") R(svg, "lockg").setAttribute("opacity", "1");
+      if (it.id === "k3") R(svg, "tagg").setAttribute("opacity", "1");
+      pop(svg, 120, 40, `${i + 1}`, "#2b6cb0"); await wait(700);
+    }
+    spin = false;
+    const m = res.main || (res[res.length - 1] && res[res.length - 1].acc);
+    if (!allOk(res)) {
+      if (m === "a_mach_nostop") {
+        say("기계가 돌아가는 채로 청소를 시작합니다!");
+        spin = true; ang = 0; const sp2 = (async () => { while (alive && ang < 700 && !skip) { ang += 16; gear.setAttribute("transform", `rotate(${ang} 215 150)`); await new Promise(r => frame(r)); } })();
+        await walk(w, 140, 150, 200, 500); await tw(600, t => setT(w, 150 + 20 * t, 200, 12 * t));
+        hurt(w); shake(); sfx.thud(); pop(svg, 170, 110, "윽!"); await sp2;
+        say("💥 운전을 정지하지 않고 정비해 장갑이 말려 들어갔습니다.");
+      } else if (m === "a_mach_pressure") {
+        say("정비 도중 내부에 남아 있던 압력이 터져 나옵니다!");
+        await walk(w, 140, 160, 200, 500); sfx.bad();
+        const puff = ownEl(svg, `<circle cx="190" cy="120" r="6" fill="#dfe6ee" opacity=".9"/>`, "puff");
+        await tw(700, t => { puff.firstChild.setAttribute("r", 6 + 40 * t); puff.firstChild.setAttribute("opacity", .9 * (1 - t)); });
+        hurt(w); shake(); sfx.thud(); say("💥 잔압을 미리 방출하지 않아 압축된 기체가 분출했습니다.");
+      } else {
+        say("정비 중 다른 사람이 기동 스위치를 누릅니다!");
+        await walk(w, 140, 168, 200, 500); await walk(w2, 100, 70, 200, 500);
+        R(svg, "sw").setAttribute("fill", "#12a37f"); sfx.bad();
+        spin = true; ang = 0; const sp3 = (async () => { while (alive && ang < 700 && !skip) { ang += 18; gear.setAttribute("transform", `rotate(${ang} 215 150)`); await new Promise(r => frame(r)); } })();
+        await tw(500, t => setT(w, 168 + 12 * t, 200, 14 * t));
+        hurt(w); shake(); sfx.thud(); pop(svg, 190, 110, "끼임!"); await sp3;
+        say("💥 잠금장치·표지판 없이 정비하다 재가동되어 끼였습니다.");
+      }
+    } else {
+      await walk(w, 140, 168, 200, 500);
+      say("동료가 스위치에 손을 대지만 잠금장치와 표지판이 막아 줍니다.");
+      await walk(w2, 100, 76, 200, 500); await wait(500);
+      sfx.ok(); pop(svg, 150, 56, "✔ 안전!", "#12a37f"); say("🟢 정지→잠금→표지판→압력 방출 후에 정비해 안전하게 마쳤습니다.");
+    }
+    await spinner;
+  },
+};
+
 /* =============== 의뢰 목록 =============== */
 const MS = [
   {
@@ -826,6 +1533,75 @@ const MS = [
     lessons: ["강관비계: 비계기둥 간격 띠장 방향 1.85m 이하 · 장선 방향 1.5m 이하, 띠장 간격 2.0m 이하, 기둥 간 적재하중 400kg 이하.", "작업발판은 폭 40cm 이상, 발판재료 틈 3cm 이하 (비계 높이 2m 이상 작업장소).", "높이 5m 이상 비계 조립·해체는 관리감독자 지휘로, 강관비계는 쌍줄로 조립합니다."],
   },
 ];
+/* ---- 새 의뢰 등록 ---- */
+MS.forEach(m => { m.pack = "fall"; });
+MS.push(
+  {
+    id: "m6", pack: "elec", ic: "⚡", title: "젖은 철판 위 전동드릴", sub: "누전차단기 · 제304조", vb: "0 0 360 240", mod: M6, arts: ["제304조"],
+    brief: "비 온 뒤 <b>젖은 철판 위</b>에서 220V 전동드릴을 씁니다. 누전이 생기면 사람이 위험해요. <b>누전차단기</b>의 설치 기준과 성능을 직접 정하세요.",
+    fields: [
+      {id: "v", t: "num", label: "대지전압이 몇 V를 넘는 이동형·휴대형 기계에 누전차단기를 설치하나요?", unit: "V", ph: "몇 V?", fact: "elb_v"},
+      {id: "ma", t: "num", label: "누전차단기 정격감도전류 (몇 mA 이하)", unit: "mA", ph: "몇 mA?", fact: "elb_ma"},
+      {id: "t", t: "num", label: "누전차단기 작동시간 (몇 초 이내)", unit: "초", ph: "몇 초?", fact: "elb_t", dec: true},
+    ],
+    lessons: ["대지전압 150V 초과 이동형·휴대형 기계, 물기 있는 습윤장소·철판 위 같은 도전성 높은 장소의 이동형·휴대형 기계, 임시배선 장소의 기계에는 감전방지용 누전차단기를 설치합니다.", "정격감도전류 30mA 이하, 작동시간 0.03초 이내 (정격전부하전류 50A 이상은 200mA 이하·0.1초 이내 가능).", "사용 전에 누전차단기 작동상태를 점검하고, 이상이 있으면 즉시 보수·교환합니다."],
+  },
+  {
+    id: "m7", pack: "elec", ic: "🔌", title: "정전 전로 작업 순서", sub: "정전전로 · 제319조", vb: "0 0 360 240", mod: M7, arts: ["제319조"],
+    brief: "전동기 점검을 위해 <b>분전반 전원을 끄고</b> 작업합니다. 다른 사람이 스위치를 올리지 못하게 <b>정전 절차의 순서</b>를 올바르게 이어 보세요.",
+    lessons: ["정전 절차(제319조 제2항): ① 도면·배선도로 모든 전원 확인 → ② 전원 차단 후 단로기 개방·확인 → ③ 잠금장치·꼬리표 부착 → ④ 잔류전하 방전 → ⑤ 검전기로 충전 여부 확인 → ⑥ 필요하면 단락 접지.", "작업 후 전원을 넣을 땐 작업기구·접지기구를 치우고 모두 떨어져 있는지 확인, 잠금장치·꼬리표는 설치한 사람이 직접 철거합니다."],
+  },
+  {
+    id: "m8", pack: "elec", ic: "🌩️", title: "고압선 옆 작업", sub: "접근 한계거리 · 제321조", vb: "0 0 360 250", mod: M8, arts: ["제321조"],
+    brief: "전주 위 <b>세 가지 전압의 선</b> 옆에서 고소작업대로 작업합니다. 유자격자가 충전전로에 접근할 수 있는 <b>한계거리(cm)</b>를 전압별로 정하세요.",
+    fields: [
+      {id: "d1", t: "num", label: "380V 저압선 (0.3 초과 0.75kV 이하)", unit: "cm", ph: "몇 cm?", fact: "ap_03"},
+      {id: "d2", t: "num", label: "6.6kV 고압선 (2 초과 15kV 이하)", unit: "cm", ph: "몇 cm?", fact: "ap_2"},
+      {id: "d3", t: "num", label: "22.9kV 특고압선 (15 초과 37kV 이하)", unit: "cm", ph: "몇 cm?", fact: "ap_15"},
+    ],
+    lessons: ["충전전로 접근 한계거리(선간전압): 0.3kV 이하 접촉금지 / 0.3~0.75kV 30cm / 0.75~2kV 45cm / 2~15kV 60cm / 15~37kV 90cm / 37~88kV 110cm …", "유자격자가 아닌 근로자는 대지전압 50kV 이하 충전전로에 300cm 이내로 접근할 수 없습니다.", "충전전로 인근에서 차량·기계장치 작업은 충전부로부터 300cm 이상 이격 (높이를 낮춰 이동할 땐 120cm 이상)."],
+  },
+  {
+    id: "m9", pack: "conf", ic: "📟", title: "맨홀 진입 전 공기 측정", sub: "적정공기 · 제618조", vb: "0 0 360 250", mod: M9, arts: ["제618조"],
+    brief: "하수 맨홀에 들어가기 전, <b>가스 측정기의 경보 기준</b>을 설정합니다. 지금 맨홀 안 공기는 산소 17.9%, 이산화탄소 1.6%, 일산화탄소 31ppm, 황화수소 10ppm이에요. <b>적정공기 기준</b>을 정확히 입력하세요.",
+    lessons: ["적정공기: 산소 18% 이상 23.5% 미만, 이산화탄소 1.5% 미만, 일산화탄소 30ppm 미만, 황화수소 10ppm 미만.", "산소농도가 18% 미만이면 '산소결핍'. 작업 시작 전과 작업 중에 적정공기가 유지되도록 환기합니다 (제620조).", "환기가 곤란하면 공기호흡기 또는 송기마스크를 착용합니다."],
+  },
+  {
+    id: "m10", pack: "conf", ic: "🕳️", title: "맨홀 작업 준비물", sub: "밀폐공간 작업 · 제619~625조", vb: "0 0 360 250", mod: M10, arts: ["제619조", "제623조"],
+    brief: "정화조 <b>맨홀 안 청소</b> 작업이 잡혔어요. 들어가기 전에 갖춰야 할 것을 <b>모두</b> 고르세요. 위험한 보기도 섞여 있어요.",
+    lessons: ["밀폐공간 작업: 작업 프로그램 수립(제619조), 작업 전·중 환기(제620조), 입·퇴장 인원 점검(제621조), 출입금지 표지(제622조), 외부 감시인과 연락 설비(제623조).", "추락 우려 시 안전대·구명밧줄·공기호흡기 또는 송기마스크 착용(제624조), 공기호흡기·사다리·섬유로프 등 구출 기구 비치(제625조).", "순수 산소로 환기하거나 불꽃으로 가스를 확인하는 건 화재·폭발 위험이 큽니다."],
+  },
+  {
+    id: "m11", pack: "conf", ic: "🆘", title: "쓰러진 동료 구조", sub: "감시인 · 제623·625조", vb: "0 0 360 250", mod: M11, arts: ["제623조", "제625조"],
+    brief: "맨홀 안에서 작업하던 동료가 갑자기 <b>쓰러졌습니다</b>. 밖에서 지켜보던 감시인인 당신은 무엇을 해야 할까요? 정답은 <b>두 가지</b>입니다.",
+    lessons: ["감시인은 근로자에게 이상이 생기면 지체 없이 관할 소방관서에 신고하고, 소방관서장의 협조를 받아 적절한 조치를 한 뒤 사업주·관리감독자에게 알립니다 (제623조 제2항).", "구조자도 공기호흡기 또는 송기마스크 등 구출 기구를 갖추고 들어가야 2차 재해를 막을 수 있습니다 (제625조)."],
+  },
+  {
+    id: "m12", pack: "exc", ic: "⛏️", title: "굴착면 기울기", sub: "별표 11 · 제339조", vb: "0 0 360 250", mod: M12, arts: ["제339조"],
+    brief: "네 종류의 지반을 굴착합니다. 높이 1에 대한 수평거리 <b>(1 : ?)</b>인 굴착면 기울기를 지반별로 정하세요. 수가 클수록 완만해요.",
+    lessons: ["굴착면 기울기(별표 11): 모래 1:1.8 · 연암 및 풍화암 1:1.0 · 경암 1:0.5 · 그 밖의 흙 1:1.2.", "기울기는 높이에 대한 수평거리의 비율입니다. 설계도서상의 기울기를 따르거나 흙막이 등으로 붕괴를 막은 경우는 예외입니다.", "비가 올 때를 대비해 측구를 설치하거나 경사면에 비닐을 덮습니다 (제339조 제2항)."],
+  },
+  {
+    id: "m13", pack: "exc", ic: "🚜", title: "깊은 굴착 현장", sub: "굴착 안전조치 · 제340~347조", vb: "0 0 360 250", mod: M13, arts: ["제340조", "제341조"],
+    brief: "도심에서 <b>깊게 파는 굴착 현장</b>입니다. 지하에는 가스관이 지나가고, 비 소식도 있고, 굴착기가 오갑니다. 필요한 안전조치를 <b>모두</b> 고르세요.",
+    lessons: ["토사 붕괴 우려 시 흙막이 지보공·방호망 설치, 근로자 출입금지 (제340조). 흙막이 지보공은 조립도를 작성해 조립하고(제346조) 정기 점검·계측합니다(제347조).", "노출된 매설물은 방호하거나 이설하고 관리감독자가 지휘 (제341조). 가스도관 등이 파손될 우려가 있으면 굴착을 중지 (제342조).", "굴착기계가 후진해 접근할 우려가 있으면 유도자를 배치 (제344조)."],
+  },
+  {
+    id: "m14", pack: "fire", ic: "🔥", title: "철골 용접 작업", sub: "화재위험작업 · 제241조", vb: "0 0 360 240", mod: M14, arts: ["제241조", "제241조의2"],
+    brief: "공장 안에서 <b>철골 용접</b>을 합니다. 근처에 종이 상자와 인화성 물질이 있어요. 가연물을 확인할 <b>작업반경</b>과, 화재를 막기 위해 <b>갖출 것 세 가지</b>를 정하세요.",
+    lessons: ["작업반경 11m 이내에 가연성물질이 있는 장소에서 용접·용단 작업을 하면 화재감시자를 지정·배치합니다 (제241조의2).", "화재위험작업 시 인근 가연물 방호, 소화기구 비치, 용접불티 비산방지덮개·용접방화포 설치 (제241조 제2항).", "통풍이 불충분한 장소에서는 환기용으로 산소를 사용해서는 안 됩니다 (제241조 제1항)."],
+  },
+  {
+    id: "m15", pack: "fire", ic: "⚙️", title: "컨베이어 정비·청소", sub: "운전정지 · 제92조", vb: "0 0 360 240", mod: M15, arts: ["제92조"],
+    brief: "컨베이어 기계를 <b>청소·정비</b>하려 합니다. 다른 사람이 실수로 기동하면 끼일 수 있어요. 정비 전에 해야 할 일을 <b>올바른 순서</b>로 이어 보세요.",
+    lessons: ["동력 기계의 정비·청소·급유·검사·수리·교체·조정 작업을 할 때는 운전을 정지합니다 (제92조 제1항).", "다른 사람이 기계를 운전하지 못하게 기동장치에 잠금장치를 하고 열쇠를 별도 관리하거나 표지판을 설치합니다 (제2항).", "내부에 압축된 기체·액체가 방출될 우려가 있으면 미리 방출합니다 (제4항)."],
+  },
+);
+const PACKS = [
+  {id: "fall", n: "추락 편", ic: "🧗"}, {id: "elec", n: "전기 편", ic: "⚡"}, {id: "conf", n: "밀폐공간 편", ic: "🕳️"},
+  {id: "exc", n: "굴착 편", ic: "⛏️"}, {id: "fire", n: "화재·기계 편", ic: "🔥"},
+];
+
 const MSBY = {}; MS.forEach(m => { MSBY[m.id] = m; });
 const fieldsOf = (m, v) => m.mod.fields ? m.mod.fields(v) : m.fields;
 
@@ -857,14 +1633,17 @@ function renderHome() {
   let h = topBar();
   h += `<div class="gm-hero"><h2>무사고 현장</h2><p>숫자를 직접 떠올려 현장을 지키는 안전 게임</p>` +
     `<div class="gm-lv"><b>LV.${lv.i + 1}</b>${lv.title}</div><div class="gm-xp"><i style="width:${lv.max ? 100 : Math.round(lv.cur / lv.need * 100)}%"></i></div>` +
-    `<div class="gm-stats"><span>🛡️ 무사고 ${S.cur}연속 (최고 ${S.best})</span><span>📕 사고도감 ${dexN}/${ACC_N}</span><span>✅ 의뢰 ${cleared}/${MS.length}</span></div></div>`;
+    `<div class="gm-stats"><span>🛡️ 무사고 ${S.cur}연속 (최고 ${S.best})</span><span>📕 사고도감 ${dexN}/${accN()}</span><span>✅ 의뢰 ${cleared}/${MS.length}</span></div></div>`;
   if (due.length) h += `<button type="button" class="gm-alert" data-a="redo"><span class="sir">🚨</span><span>속보: 재발 사고 ${due.length}건!<small>잊어버릴 때쯤 같은 사고가 또 터졌어요. 지금 출동</small></span></button>`;
   if (!cleared) h += `<div class="gm-guide"><b>이렇게 해요</b><div>① 의뢰를 고르면 현장 그림이 나와요</div><div>② <b>기준 숫자를 보기 없이 직접 입력</b>하면 그림이 바로 바뀌어요</div><div>③ <b>착공!</b>을 누르면 결과가 눈앞에서 벌어져요. 틀리면 사고가 나고, 사고는 <b>도감</b>에 모여요</div><div>④ 틀린 숫자는 며칠 뒤 <b>재발 사고</b>로 다시 터져요. 그때 또 맞히면 완전히 내 것!</div></div>`;
-  h += `<div class="gm-sec">의뢰 · 추락 편</div>`;
-  MS.forEach((m, i) => { h += `<button type="button" class="gm-mc" data-a="mis" data-id="${m.id}"><span class="gm-mn">${m.ic}</span><span class="gm-mt"><b>${i + 1}. ${m.title}</b><small>${m.sub}</small></span>${starStr(S.stars[m.id] || 0)}</button>`; });
+  PACKS.forEach(pk => {
+    const list = MS.map((m, i) => [m, i]).filter(x => x[0].pack === pk.id), n = list.filter(x => S.stars[x[0].id]).length;
+    h += `<div class="gm-sec">${pk.ic} ${pk.n} · ${n}/${list.length}</div>`;
+    list.forEach(([m, i]) => { h += `<button type="button" class="gm-mc" data-a="mis" data-id="${m.id}"><span class="gm-mn">${m.ic}</span><span class="gm-mt"><b>${i + 1}. ${m.title}</b><small>${m.sub}</small></span>${starStr(S.stars[m.id] || 0)}</button>`; });
+  });
   const bossOK = cleared >= 3;
   h += `<div class="gm-sec">보스</div><button type="button" class="gm-mc boss" data-a="boss" ${bossOK ? "" : "disabled"}><span class="gm-mn">🧑‍✈️</span><span class="gm-mt"><b>감독관 불시점검</b><small>${bossOK ? "시간 안에 직접 답을 떠올려 쓰세요 · 목숨 3개" + (S.insp ? " · 통과 " + S.insp + "회" : "") : "의뢰 3개 이상 클리어하면 열려요"}</small></span><span class="gm-ms" style="color:#fff">${bossOK ? "▶" : "🔒"}</span></button>`;
-  h += `<div class="gm-sec">기록</div><button type="button" class="gm-mc" data-a="dex"><span class="gm-mn">📕</span><span class="gm-mt"><b>사고 도감</b><small>일부러(?) 사고를 내서 모아 보세요 · ${dexN}/${ACC_N}</small></span></button>`;
+  h += `<div class="gm-sec">기록</div><button type="button" class="gm-mc" data-a="dex"><span class="gm-mn">📕</span><span class="gm-mt"><b>사고 도감</b><small>일부러(?) 사고를 내서 모아 보세요 · ${dexN}/${accN()}</small></span></button>`;
   h += `<div class="gm-note">참고용 학습 게임이에요. 숫자는 「산업안전보건기준에 관한 규칙」 조문에서 옮겼고, 실제 현장 적용 전에는 조문 원문과 고용노동부 고시를 꼭 확인하세요. 장면의 크기·동작은 이해를 돕는 그림입니다.</div>`;
   root.innerHTML = `<div class="gm">${h}</div>`;
   window.scrollTo(0, 0);
@@ -875,6 +1654,21 @@ function fieldHTML(f, v, hn) {
   const hh = (hn[f.id] || []).map(t => `<div>💡 ${esc(t)}</div>`).join("");
   if (f.t === "num") return `<div class="gm-f" data-f="${f.id}"><span class="gm-fl">${esc(f.label)}</span><span class="gm-fi"><input data-in="${f.id}" inputmode="decimal" autocomplete="off" placeholder="${esc(f.ph || "")}" value="${Number.isFinite(v[f.id]) ? v[f.id] : ""}"><i>${f.unit}</i></span><button type="button" class="gm-hint" data-a="hint" data-f="${f.id}" aria-label="힌트">💡</button><span class="gm-hn" data-hn="${f.id}">${hh}</span></div>`;
   if (f.t === "pick") return `<div class="gm-f" data-f="${f.id}"><span class="gm-fl">${esc(f.label)}</span><button type="button" class="gm-hint" data-a="hint" data-f="${f.id}" aria-label="힌트">💡</button><div class="gm-chips">${f.opts.map(o => `<button type="button" class="gm-chip${v[f.id] === o.id ? " on" : ""}" data-a="pick" data-f="${f.id}" data-v="${o.id}">${o.ic} ${o.t}</button>`).join("")}</div><span class="gm-hn" data-hn="${f.id}">${hh}</span></div>`;
+  if (f.t === "seq") {
+    const chosen = v[f.id] || [];
+    cm.shuf = cm.shuf || {}; if (!cm.shuf[f.id]) cm.shuf[f.id] = shuffle(f.items.map(x => x.id));
+    const rest = cm.shuf[f.id].filter(id => !chosen.includes(id)), tx = id => esc(f.items.find(x => x.id === id).t);
+    return `<div class="gm-f" data-f="${f.id}"><span class="gm-fl">${esc(f.label)}</span><button type="button" class="gm-hint" data-a="hint" data-f="${f.id}" aria-label="힌트">💡</button>` +
+      `<ol class="gm-seq">${chosen.map(id => `<li>${tx(id)}</li>`).join("") || '<li class="gm-ph">아래에서 순서대로 눌러 담아요</li>'}</ol>` +
+      `<div class="gm-chips gm-col">${rest.map(id => `<button type="button" class="gm-chip" data-a="seqadd" data-f="${f.id}" data-v="${id}">${tx(id)}</button>`).join("")}</div>` +
+      (chosen.length ? `<button type="button" class="gm-clr" data-a="seqclr" data-f="${f.id}">↺ 다시 고르기</button>` : "") + `<span class="gm-hn" data-hn="${f.id}">${hh}</span></div>`;
+  }
+  if (f.t === "multi") {
+    const sel = v[f.id] || [];
+    return `<div class="gm-f" data-f="${f.id}"><span class="gm-fl">${esc(f.label)}</span><button type="button" class="gm-hint" data-a="hint" data-f="${f.id}" aria-label="힌트">💡</button>` +
+      `<div class="gm-chips gm-col">${f.opts.map(o => `<button type="button" class="gm-chip${sel.includes(o.id) ? " on" : ""}" data-a="multi" data-f="${f.id}" data-v="${o.id}">${o.ic} ${esc(o.t)}</button>`).join("")}</div>` +
+      `<span class="gm-sub">${sel.length}개 선택</span><span class="gm-hn" data-hn="${f.id}">${hh}</span></div>`;
+  }
   return `<div class="gm-f" data-f="${f.id}"><span class="gm-fl">${esc(f.label)}</span><button type="button" class="gm-hint" data-a="hint" data-f="${f.id}" aria-label="힌트">💡</button><span class="gm-fi" style="grid-column:1/-1"><textarea data-in="${f.id}" placeholder="${esc(f.ph || "")}">${esc(v[f.id] || "")}</textarea></span><span class="gm-slots">${"<span>?</span>".repeat(f.slots)}</span><span class="gm-hn" data-hn="${f.id}">${hh}</span></div>`;
 }
 function hintText(m, f, lv) {
@@ -910,7 +1704,7 @@ async function launch() {
   if (busy || !cm) return;
   readVals();
   const m = cm.m, fs = fieldsOf(m, cm.v);
-  const miss = fs.filter(f => f.t === "num" ? !Number.isFinite(cm.v[f.id]) : f.t === "pick" ? !cm.v[f.id] : !String(cm.v[f.id] || "").trim());
+  const miss = fs.filter(f => f.t === "num" ? !Number.isFinite(cm.v[f.id]) : f.t === "pick" ? !cm.v[f.id] : f.t === "seq" ? (cm.v[f.id] || []).length < f.items.length : f.t === "multi" ? !(cm.v[f.id] || []).length : !String(cm.v[f.id] || "").trim());
   if (miss.length) {
     miss.forEach(f => { const e = root.querySelector(`[data-f="${f.id}"]`); if (e) { e.classList.remove("gm-shk"); void e.offsetWidth; e.classList.add("gm-shk"); } });
     host && host.toast("빈칸이 있어요. 직접 떠올려 채워 주세요"); return;
@@ -983,7 +1777,7 @@ function retry() {
 /* ---------- 사고 도감 ---------- */
 function renderDex() {
   scr = "dex"; stopQ();
-  let h = topBar() + `<div class="gm-bar"><button type="button" class="gm-back" data-a="home">← 현장 사무소</button><h3>📕 사고 도감 ${Object.keys(S.dex).length}/${ACC_N}</h3></div><div class="gm-dex">`;
+  let h = topBar() + `<div class="gm-bar"><button type="button" class="gm-back" data-a="home">← 현장 사무소</button><h3>📕 사고 도감 ${Object.keys(S.dex).length}/${accN()}</h3></div><div class="gm-dex">`;
   Object.keys(ACC).forEach(id => {
     const a = ACC[id];
     h += S.dex[id] ? `<div class="gm-dc"><div class="ic">${a.ic}</div><b>${esc(a.n)}</b><div>${esc(a.tip)}</div><button type="button" data-a="read" data-art="${a.art}">📖 ${a.art}</button></div>` : `<div class="gm-dc lock"><div class="ic">❓</div><b>???</b><div>${a.art} 관련 사고</div></div>`;
@@ -993,7 +1787,7 @@ function renderDex() {
 
 /* ---------- 감독관 불시점검 / 재발 사고 ---------- */
 let Q = null;
-function stopQ() { if (Q && Q.raf) cancelAnimationFrame(Q.raf); if (Q && Q.tm) clearTimeout(Q.tm); Q = null; }
+function stopQ() { if (Q && Q.tm) clearTimeout(Q.tm); Q = null; }
 function pickQuestions(kind) {
   let ids;
   if (kind === "redo") ids = shuffle(dueList()).slice(0, 8);
@@ -1029,9 +1823,9 @@ function renderQ() {
     const p = Math.max(0, 1 - (now - Q.t0) / Q.dur), bar = $("#qTm");
     if (bar) { bar.style.transform = `scaleX(${p})`; bar.style.background = p > .5 ? "var(--gm-good)" : p > .22 ? "var(--gm-gold)" : "var(--gm-bad)"; }
     if (p <= 0) { answerQ(null, true); return; }
-    Q.raf = requestAnimationFrame(tick);
+    frame(tick);
   };
-  Q.raf = requestAnimationFrame(tick);
+  frame(tick);
 }
 function answerQ(raw, timeout) {
   if (!Q || Q.mark) return;
@@ -1062,7 +1856,7 @@ function nextQ() {
   Q.i++; renderQ();
 }
 function endQ() {
-  const q = Q; Q.done = true; if (q.raf) cancelAnimationFrame(q.raf);
+  const q = Q; Q.done = true;
   const total = q.ids.length, answered = q.i + 1, pass = q.lives > 0 && q.right >= Math.ceil(total * .75);
   const xp = q.right * 5 + (pass ? 20 : 0);
   addXP(xp);
@@ -1101,6 +1895,9 @@ function onClick(e) {
       readVals(); cm.v[t.dataset.f] = t.dataset.v;
       renderForm(); drawScene(); break;
     }
+    case "seqadd": { cm.v[t.dataset.f] = (cm.v[t.dataset.f] || []).concat(t.dataset.v); renderForm(); drawScene(); break; }
+    case "seqclr": { cm.v[t.dataset.f] = []; renderForm(); drawScene(); break; }
+    case "multi": { const a = (cm.v[t.dataset.f] || []).slice(), i = a.indexOf(t.dataset.v); if (i >= 0) a.splice(i, 1); else a.push(t.dataset.v); cm.v[t.dataset.f] = a; renderForm(); drawScene(); break; }
     case "hint": {
       const fid = t.dataset.f, f = fieldsOf(cm.m, cm.v).find(x => x.id === fid);
       const lv = (cm.hintLv[fid] || 0) + 1, txt = f && hintText(cm.m, f, lv);
