@@ -182,6 +182,64 @@ Object.assign(ACC, {
   a_mach_pressure: {n: "잔압 분출 사고", ic: "💨", art: "제92조", tip: "내부에 압축된 기체·액체가 있으면 정비 전에 미리 방출하세요."},
 });
 
+/* ---- 보건 편: 낱말 카드와 사고 ---- */
+[
+  ["noise_85", "제512조", "제1호", "'소음작업'은 1일 8시간 기준으로 몇 dB 이상의 소음이 발생하는 작업일까요?", 85, "dB", "min", "소음작업: 1일 8시간 기준 85dB 이상 (청력보호구 지급·착용, 청력보존 프로그램 대상)"],
+  ["noise_90", "제512조", "제2호 가목", "'강렬한 소음작업': 90dB 이상 소음이 1일 몇 시간 이상 발생하는 작업일까요?", 8, "시간", "min", "강렬한 소음작업: 90dB 8시간 · 95dB 4시간 · 100dB 2시간 · 105dB 1시간 · 110dB 30분 · 115dB 15분 (이상)"],
+  ["noise_95", "제512조", "제2호 나목", "'강렬한 소음작업': 95dB 이상 소음이 1일 몇 시간 이상 발생하는 작업일까요?", 4, "시간", "min", "강렬한 소음작업: 90dB 8시간 · 95dB 4시간 · 100dB 2시간 · 105dB 1시간 · 110dB 30분 · 115dB 15분 (이상)"],
+  ["noise_100", "제512조", "제2호 다목", "'강렬한 소음작업': 100dB 이상 소음이 1일 몇 시간 이상 발생하는 작업일까요?", 2, "시간", "min", "강렬한 소음작업: 90dB 8시간 · 95dB 4시간 · 100dB 2시간 · 105dB 1시간 · 110dB 30분 · 115dB 15분 (이상)"],
+  ["noise_105", "제512조", "제2호 라목", "'강렬한 소음작업': 105dB 이상 소음이 1일 몇 시간 이상 발생하는 작업일까요?", 1, "시간", "min", "강렬한 소음작업: 90dB 8시간 · 95dB 4시간 · 100dB 2시간 · 105dB 1시간 · 110dB 30분 · 115dB 15분 (이상)"],
+  ["noise_110", "제512조", "제2호 마목", "'강렬한 소음작업': 110dB 이상 소음이 1일 몇 분 이상 발생하는 작업일까요?", 30, "분", "min", "강렬한 소음작업: 90dB 8시간 · 95dB 4시간 · 100dB 2시간 · 105dB 1시간 · 110dB 30분 · 115dB 15분 (이상)"],
+  ["noise_115", "제512조", "제2호 바목", "'강렬한 소음작업': 115dB 이상 소음이 1일 몇 분 이상 발생하는 작업일까요?", 15, "분", "min", "강렬한 소음작업: 90dB 8시간 · 95dB 4시간 · 100dB 2시간 · 105dB 1시간 · 110dB 30분 · 115dB 15분 (이상)"],
+  ["imp_120", "제512조", "제3호 가목", "'충격소음작업': 120dB을 초과하는 소음이 1일 몇 회 이상 발생하는 작업일까요?", 10000, "회", "min", "충격소음작업: 120dB 초과 1만회 · 130dB 초과 1천회 · 140dB 초과 1백회 이상 (1초 이상 간격)"],
+  ["imp_130", "제512조", "제3호 나목", "'충격소음작업': 130dB을 초과하는 소음이 1일 몇 회 이상 발생하는 작업일까요?", 1000, "회", "min", "충격소음작업: 120dB 초과 1만회 · 130dB 초과 1천회 · 140dB 초과 1백회 이상 (1초 이상 간격)"],
+  ["imp_140", "제512조", "제3호 다목", "'충격소음작업': 140dB을 초과하는 소음이 1일 몇 회 이상 발생하는 작업일까요?", 100, "회", "min", "충격소음작업: 120dB 초과 1만회 · 130dB 초과 1천회 · 140dB 초과 1백회 이상 (1초 이상 간격)"],
+  ["hood_gas_enc", "제429조", "별표 13", "관리대상 유해물질 후드 제어풍속: 가스 상태, 포위식 포위형은 몇 m/sec 이상일까요?", 0.4, "m/s", "min", "후드 제어풍속(별표 13): 가스 포위식 0.4 · 외부식 측방·하방 0.5 · 상방 1.0 / 입자 포위식 0.7 · 측방·하방 1.0 · 상방 1.2"],
+  ["hood_gas_side", "제429조", "별표 13", "관리대상 유해물질 후드 제어풍속: 가스 상태, 외부식 측방흡인형은 몇 m/sec 이상일까요?", 0.5, "m/s", "min", "후드 제어풍속(별표 13): 가스 포위식 0.4 · 외부식 측방·하방 0.5 · 상방 1.0 / 입자 포위식 0.7 · 측방·하방 1.0 · 상방 1.2"],
+  ["hood_gas_up", "제429조", "별표 13", "관리대상 유해물질 후드 제어풍속: 가스 상태, 외부식 상방흡인형은 몇 m/sec 이상일까요?", 1, "m/s", "min", "후드 제어풍속(별표 13): 가스 포위식 0.4 · 외부식 측방·하방 0.5 · 상방 1.0 / 입자 포위식 0.7 · 측방·하방 1.0 · 상방 1.2"],
+  ["hood_dust_enc", "제429조", "별표 13", "관리대상 유해물질 후드 제어풍속: 입자 상태(흄·분진·미스트), 포위식 포위형은 몇 m/sec 이상일까요?", 0.7, "m/s", "min", "후드 제어풍속(별표 13): 가스 포위식 0.4 · 외부식 측방·하방 0.5 · 상방 1.0 / 입자 포위식 0.7 · 측방·하방 1.0 · 상방 1.2"],
+  ["hood_dust_side", "제429조", "별표 13", "관리대상 유해물질 후드 제어풍속: 입자 상태, 외부식 측방흡인형은 몇 m/sec 이상일까요?", 1, "m/s", "min", "후드 제어풍속(별표 13): 가스 포위식 0.4 · 외부식 측방·하방 0.5 · 상방 1.0 / 입자 포위식 0.7 · 측방·하방 1.0 · 상방 1.2"],
+  ["hood_dust_up", "제429조", "별표 13", "관리대상 유해물질 후드 제어풍속: 입자 상태, 외부식 상방흡인형은 몇 m/sec 이상일까요?", 1.2, "m/s", "min", "후드 제어풍속(별표 13): 가스 포위식 0.4 · 외부식 측방·하방 0.5 · 상방 1.0 / 입자 포위식 0.7 · 측방·하방 1.0 · 상방 1.2"],
+  ["env_first", "시행규칙 제190조", "제1항", "작업환경측정 대상 작업장이 된 날부터 며칠 이내에 첫 작업환경측정을 할까요?", 30, "일", "max", "신규 가동·변경 후 30일 이내 첫 측정, 이후 반기(6개월)에 1회 이상"],
+  ["env_half", "시행규칙 제190조", "제1항", "첫 측정 후 작업환경측정은 정기적으로 몇 개월에 1회 이상 할까요? (반기)", 6, "개월", "max", "신규 가동·변경 후 30일 이내 첫 측정, 이후 반기(6개월)에 1회 이상"],
+  ["env_exceed", "시행규칙 제190조", "제1항 각 호", "측정치가 노출기준을 초과한 유해인자는 측정일부터 몇 개월에 1회 이상 다시 측정할까요?", 3, "개월", "max", "노출기준 초과(일부 물질은 2배 이상 초과) 시 3개월에 1회 이상 측정"],
+  ["env_report", "시행규칙 제188조", "제1항", "작업환경측정 결과는 시료채취를 마친 날부터 며칠 이내에 지방고용노동관서에 보고할까요?", 30, "일", "max", "측정 결과보고서는 시료채취를 마친 날부터 30일 이내 제출"],
+  ["env_improve", "시행규칙 제188조", "제3항", "노출기준을 초과한 작업공정의 개선 증명서류·개선 계획은 시료채취를 마친 날부터 며칠 이내에 제출할까요?", 60, "일", "max", "노출기준 초과 공정은 시료채취일부터 60일 이내 개선 증명서류·계획 제출"],
+  ["gen_exam", "시행규칙 제197조", "제1항", "일반건강진단은 사무직이 아닌 근로자에게 몇 년에 1회 이상 실시할까요?", 1, "년", "max", "일반건강진단: 사무직 2년에 1회 이상, 그 밖의 근로자 1년에 1회 이상"],
+  ["gen_office", "시행규칙 제197조", "제1항", "일반건강진단은 사무직 근로자에게 몇 년에 1회 이상 실시할까요?", 2, "년", "max", "일반건강진단: 사무직 2년에 1회 이상, 그 밖의 근로자 1년에 1회 이상"],
+].forEach(r => { NF.push(r); F[r[0]] = {id: r[0], t: "n", art: r[1], cl: r[2], q: r[3], a: r[4], u: r[5], dir: r[6], sum: r[7]}; });
+[
+  ["t_msds", "법 제114조", "제1항", "화학물질의 유해성과 취급 주의사항을 적어, 취급 작업장 안에 근로자가 쉽게 볼 수 있게 게시·비치해야 하는 자료의 이름은? (약칭 MSDS)", ["물질안전보건자료", "msds", "MSDS", "엠에스디에스"], "물질안전보건자료(MSDS)", "MSDS는 취급 작업장 안에 근로자가 쉽게 볼 수 있는 장소에 게시하거나 갖추어 둔다"],
+  ["t_label", "법 제115조", "제2항", "사업장에서 쓰는 물질안전보건자료대상물질을 담은 용기에는 무엇을 해야 할까요?", ["경고표시", "경고 표시", "라벨", "경고표지"], "경고표시", "사업장에서 사용하는 대상물질 용기에도 경고표시를 한다"],
+  ["t_hear", "제516조", "제2항", "소음작업 근로자에게 지급하는 청력보호구는 누구 전용으로 지급해야 할까요?", ["개인", "개인전용", "근로자 개인", "각자"], "근로자 개인 전용", "청력보호구는 근로자 개인 전용으로 지급"],
+  ["t_hcp", "제517조", "", "소음작업 사업장에서 소음노출 평가·청력보호구·교육·청력검사 등을 담아 수립·시행하는 계획의 이름은?", ["청력보존 프로그램", "청력보존프로그램", "청력보존"], "청력보존 프로그램", "소음작업·강렬한 소음작업·충격소음작업 사업장은 청력보존 프로그램 수립·시행"],
+  ["t_tankmask", "제450조", "제1항", "유기화합물을 넣었던 탱크 내부의 세척·페인트칠 업무에는 어떤 마스크를 지급해 착용시킬까요?", ["송기마스크"], "송기마스크", "유기화합물 탱크 내부 세척·페인트칠, 유기화합물 취급 특별장소 업무 → 송기마스크"],
+].forEach(r => { TF.push(r); F[r[0]] = {id: r[0], t: "x", art: r[1], cl: r[2], q: r[3], ok: r[4], ans: r[5], sum: r[6]}; });
+Object.assign(ACC, {
+  a_noise_85: {n: "소음작업 방치 난청", ic: "🔉", art: "제512조", tip: "1일 8시간 기준 85dB 이상이면 소음작업입니다. 청력보호구 지급·청력보존 프로그램 대상이에요."},
+  a_noise_95: {n: "95dB 장시간 노출 난청", ic: "🔊", art: "제512조", tip: "95dB 이상이 1일 4시간 이상이면 강렬한 소음작업."},
+  a_noise_100: {n: "100dB 노출 난청", ic: "📢", art: "제512조", tip: "100dB 이상이 1일 2시간 이상이면 강렬한 소음작업."},
+  a_noise_110: {n: "110dB 노출 청력 손상", ic: "🚨", art: "제512조", tip: "110dB 이상이 1일 30분 이상이면 강렬한 소음작업."},
+  a_noise_115: {n: "115dB 노출 청력 손상", ic: "💥", art: "제512조", tip: "115dB 이상이 1일 15분 이상이면 강렬한 소음작업."},
+  a_hood_gas: {n: "유기용제 증기 흡입 중독", ic: "🧪", art: "제429조", tip: "가스 상태 물질의 후드 제어풍속: 포위식 0.4 · 측방·하방 0.5 · 상방 1.0 m/s 이상."},
+  a_hood_dust: {n: "분진·흄 흡입 호흡기 손상", ic: "🌫️", art: "제429조", tip: "입자 상태 물질의 후드 제어풍속: 포위식 0.7 · 측방·하방 1.0 · 상방 1.2 m/s 이상."},
+  a_env_late: {n: "측정 지연으로 늦게 발견된 유해환경", ic: "📅", art: "시행규칙 제190조", tip: "작업환경측정 대상이 되면 30일 이내 첫 측정, 이후 반기에 1회 이상."},
+  a_env_exceed: {n: "초과 작업장 재측정 지연", ic: "📈", art: "시행규칙 제190조", tip: "노출기준을 초과한 유해인자는 3개월에 1회 이상 다시 측정."},
+  a_env_report: {n: "측정 결과 보고 지연", ic: "📝", art: "시행규칙 제188조", tip: "시료채취를 마친 날부터 30일 이내에 결과를 보고합니다."},
+  a_env_improve: {n: "개선 지연", ic: "🔧", art: "시행규칙 제188조", tip: "노출기준 초과 공정은 60일 이내 개선 증명서류·계획을 제출합니다."},
+  a_msds_hidden: {n: "금고 속 MSDS", ic: "📁", art: "법 제114조", tip: "MSDS는 취급 근로자가 쉽게 볼 수 있는 곳에 게시하거나 갖추어 둡니다."},
+  a_msds_label: {n: "표시 없는 용기 오사용", ic: "🏷️", art: "법 제115조", tip: "옮겨 담은 용기에도 경고표시를 합니다."},
+  a_msds_edu: {n: "교육 없이 취급해 일어난 혼합 사고", ic: "🎓", art: "법 제114조", tip: "대상물질을 취급하는 근로자 모두를 교육합니다."},
+  a_msds_mix: {n: "눈대중 혼합 유독가스", ic: "⚗️", art: "법 제114조", tip: "성질을 모르는 약품을 섞으면 유독가스가 생길 수 있어요. MSDS로 확인하세요."},
+  a_msds_proc: {n: "관리요령 없는 공정 오조작", ic: "📋", art: "법 제114조", tip: "작업공정별로 물질의 관리 요령을 게시합니다."},
+  a_msds_ppe: {n: "보호구·응급조치를 몰라 피해 확대", ic: "🧤", art: "제442조", tip: "관리대상 유해물질 작업장에는 명칭·영향·주의사항·보호구·응급조치를 게시합니다."},
+  a_ppe_tank: {n: "탱크 내부 유기용제 중독", ic: "🛢️", art: "제450조", tip: "유기화합물을 넣었던 탱크 내부 작업에는 송기마스크를 착용합니다."},
+  a_ppe_solvent: {n: "용제 증기 흡입", ic: "😷", art: "제450조", tip: "밀폐설비·국소배기장치가 없는 곳의 유기화합물 취급에는 송기마스크나 방독마스크."},
+  a_ppe_dust: {n: "분진 흡입 진폐", ic: "🌫️", art: "제617조", tip: "분진작업 근로자에게 호흡용 보호구를 지급해 착용시킵니다(설비 조치 시 예외)."},
+  a_ppe_noise: {n: "보호구 없이 소음 노출", ic: "🎧", art: "제516조", tip: "소음작업 근로자에게 개인 전용 청력보호구를 지급·착용시킵니다."},
+  a_ppe_skin: {n: "부식성 물질 피부 손상", ic: "🧴", art: "제451조", tip: "피부 자극성·부식성 물질에는 불침투성 보호복·장갑·장화를 갖춰 두고 사용하게 합니다."},
+});
+
 const accN = () => Object.keys(ACC).length;
 
 /* =============== 유틸 =============== */
@@ -239,6 +297,9 @@ const sfx = {
 const CSS = `
 .gm{--gm-sky:#d7ecfb;--gm-in:#e9edf3;--gm-grnd:#a5b894;--gm-conc:#c4cad3;--gm-conc2:#a7afbb;--gm-wall:#eadfc9;--gm-steel:#7b8696;--gm-glass:#bcd9ee;--gm-rail:#ff9f1a;--gm-rail2:#ffc15e;--gm-net:#27a36a;--gm-dark:#2a3140;--gm-void:#bfc7d3;
   --gm-good:#12a37f;--gm-bad:#e5484d;--gm-gold:#f5b50a;font-size:16px;line-height:1.5;color:var(--ink);padding:10px 0 24px;-webkit-user-select:none;user-select:none}
+.gm{word-break:keep-all;overflow-wrap:break-word}
+.gm-brief,.gm-say,.gm-less,.gm-bub,.gm-fb,.gm-ck span,.gm-guide{text-wrap:pretty}
+.gm-fl,.gm-mt b,.gm-sec{text-wrap:balance}
 .gm input,.gm textarea{-webkit-user-select:text;user-select:text}
 [data-gm="dark"] .gm{--gm-sky:#182638;--gm-in:#232a36;--gm-grnd:#34402d;--gm-conc:#4b5363;--gm-conc2:#394050;--gm-wall:#3d3a33;--gm-steel:#8d98ab;--gm-glass:#27425a;--gm-void:#262d3a}
 .gm button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -265,6 +326,10 @@ const CSS = `
 .gm-guide{margin-top:12px;background:var(--panel);border-radius:16px;padding:12px 14px;font-size:.9em;line-height:1.6;box-shadow:var(--shadow,none)}
 .gm-guide b:first-child{display:block;margin-bottom:2px}
 .gm-guide div b{color:var(--accent)}
+.gm-rnd{background:linear-gradient(135deg,#1c3b73,#2a9d8f);color:#fff}.gm-rnd .gm-mn{background:rgba(255,255,255,.2)}.gm-rnd small{color:rgba(255,255,255,.8)}
+.gm-rnd2 .gm-mn{background:#fff3cf}
+.gm-fold{display:block;width:100%;border:0;background:none;color:var(--sub);font-weight:700;padding:2px 6px 8px;text-align:left;font-size:.86em}
+.gm-rtag{display:inline-block;background:#fff3cf;color:#5b3d00;border-radius:99px;padding:1px 10px;font-size:.82em;font-weight:800;margin-right:6px}
 .gm-sec{margin:20px 2px 8px;font-size:.84em;color:var(--sub);font-weight:700;letter-spacing:.02em}
 .gm-mc{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:var(--panel);color:var(--ink);border-radius:16px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow,0 1px 2px rgba(0,0,0,.05));transition:transform .15s}
 .gm-mc:active{transform:scale(.98)}
@@ -1484,6 +1549,275 @@ const M15 = {
   },
 };
 
+/* =============== 보건 편 장면 =============== */
+const panelBox = (x, w, y0, h) => `<rect x="${x}" y="${y0}" width="${w}" height="${h}" rx="9" fill="var(--panel)" opacity=".92"/>`;
+const eqCk = (f, label, x, law, u, accLax, o) => {
+  const ok = x === law, lax = x > law;
+  return ck(f, label, ok, Object.assign({dir: ok ? null : lax ? "down" : "up", val: fmt(x) + u, need: fmt(law) + u + " 이상", acc: !ok && lax ? accLax : null, dtxt: "✘ 기준값과 달라요 (정확히!)"}, o || {}));
+};
+
+/* ---------- 의뢰 16: 소음 (제512조) ---------- */
+const NOISE = [
+  {id: "n85", fact: "noise_85", law: 85, u: "dB", lab: "소음작업", db: 85, exp: "8시간", acc: "a_noise_85"},
+  {id: "n95", fact: "noise_95", law: 4, u: "시간", lab: "95dB", db: 95, exp: "4시간", acc: "a_noise_95"},
+  {id: "n100", fact: "noise_100", law: 2, u: "시간", lab: "100dB", db: 100, exp: "2시간", acc: "a_noise_100"},
+  {id: "n110", fact: "noise_110", law: 30, u: "분", lab: "110dB", db: 110, exp: "30분", acc: "a_noise_110"},
+  {id: "n115", fact: "noise_115", law: 15, u: "분", lab: "115dB", db: 115, exp: "15분", acc: "a_noise_115"},
+];
+const M16 = {
+  w: 68, x0: [6, 76, 146, 216, 286],
+  draw(v) {
+    let s = rc("g-in", 0, 0, 360, 240);
+    NOISE.forEach((n, i) => {
+      const x = this.x0[i], cx = x + 33, val = v[n.id];
+      s += panelBox(x, 68, 10, 220);
+      s += `<text x="${cx}" y="36" text-anchor="middle" font-size="15" font-weight="900" fill="var(--ink)">${n.db}dB</text>`;
+      s += `<text x="${cx}" y="52" text-anchor="middle" class="g-cap">하루 ${n.exp}</text><text x="${cx}" y="63" text-anchor="middle" class="g-cap">일하면…</text>`;
+      for (let k = 0; k < 3; k++) s += `<path d="M${cx - 12 - k * 6} ${96 - k * 5} q${12 + k * 6} ${-16 - k * 6} ${24 + k * 12} 0" fill="none" stroke="#e5484d" stroke-width="2" opacity="${.9 - k * .25}"/>`;
+      s += `<text x="${cx}" y="116" text-anchor="middle" font-size="20">🔊</text>`;
+      s += wkr("w" + i, cx, 192, 62);
+      s += `<text data-r="ear${i}" x="${cx}" y="150" text-anchor="middle" font-size="20" opacity="0">🎧</text>`;
+      s += `<text x="${cx}" y="212" text-anchor="middle" class="g-tag" style="stroke:none">${Number.isFinite(val) ? "기준 " + fmt(val) + n.u : "기준 ?"}</text>`;
+    });
+    return s;
+  },
+  fields() { return [
+    {id: "n85", t: "num", label: "소음작업 — 1일 8시간 기준 몇 dB 이상?", unit: "dB", ph: "몇 dB?", fact: "noise_85"},
+    {id: "n95", t: "num", label: "강렬한 소음작업 — 95dB 이상이 1일 몇 시간 이상?", unit: "시간", ph: "몇 시간?", fact: "noise_95"},
+    {id: "n100", t: "num", label: "강렬한 소음작업 — 100dB 이상이 1일 몇 시간 이상?", unit: "시간", ph: "몇 시간?", fact: "noise_100"},
+    {id: "n110", t: "num", label: "강렬한 소음작업 — 110dB 이상이 1일 몇 분 이상?", unit: "분", ph: "몇 분?", fact: "noise_110"},
+    {id: "n115", t: "num", label: "강렬한 소음작업 — 115dB 이상이 1일 몇 분 이상?", unit: "분", ph: "몇 분?", fact: "noise_115"},
+  ]; },
+  eval(v) { return NOISE.map(n => { const x = v[n.id], ok = x === n.law, lax = x > n.law; return ck(n.fact, n.lab + " 기준", ok, {dir: ok ? null : lax ? "down" : "up", val: fmt(x) + n.u, need: fmt(n.law) + n.u + " 이상", acc: !ok && lax ? n.acc : null, dtxt: "✘ 기준값과 달라요 (정확히!)"}); }); },
+  async play(svg, v, res) {
+    say("다섯 작업자가 각자 하루 동안 큰 소음 속에서 일합니다. 정한 기준에서 청력보호가 시작돼요…");
+    await wait(800);
+    let hit = 0;
+    for (let i = 0; i < 5; i++) {
+      const n = NOISE[i], w = R(svg, "w" + i), ear = R(svg, "ear" + i), x = this.x0[i] + 33;
+      const bad = failAcc(res, n.acc);
+      if (bad) {
+        hit++; sfx.bad(); hurt(w); pop(svg, x, 140, "삐—"); await tw(350, t => setT(w, x, 192, 14 * Math.sin(t * Math.PI * 6)));
+        setT(w, x, 192, 0);
+      } else { ear.setAttribute("opacity", "1"); pop(svg, x, 140, "✔", "#12a37f"); sfx.ok(); }
+      await wait(380);
+    }
+    if (hit) { shake(); say("💥 기준을 느슨하게 알면 그 구간의 작업자는 보호구 없이 소음에 노출되어 난청이 생깁니다."); }
+    else if (!allOk(res)) generic(svg, res);
+    else say("🟢 소음작업과 강렬한 소음작업 기준을 정확히 알아 모두 청력을 보호했습니다.");
+  },
+};
+
+/* ---------- 의뢰 17: 후드 제어풍속 (제429조 별표 13) ---------- */
+const HOODS = [
+  {id: "g1", fact: "hood_gas_enc", law: 0.4, lab: "가스 · 포위식", kind: "enc", gas: true, acc: "a_hood_gas"},
+  {id: "g2", fact: "hood_gas_side", law: 0.5, lab: "가스 · 측방흡인", kind: "side", gas: true, acc: "a_hood_gas"},
+  {id: "d1", fact: "hood_dust_enc", law: 0.7, lab: "입자 · 포위식", kind: "enc", gas: false, acc: "a_hood_dust"},
+  {id: "d2", fact: "hood_dust_up", law: 1.2, lab: "입자 · 상방흡인", kind: "up", gas: false, acc: "a_hood_dust"},
+];
+const M17 = {
+  x0: [6, 94, 182, 270], gy: 196,
+  draw(v) {
+    const GY = this.gy;
+    let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, GY, 360, 44);
+    HOODS.forEach((h, i) => {
+      const x = this.x0[i], cx = x + 36, val = Number.isFinite(v[h.id]) ? Math.min(v[h.id], 3) : 0, len = val * 26;
+      s += panelBox(x, 84, 8, 224);
+      s += `<text x="${cx}" y="24" text-anchor="middle" class="g-tag" style="stroke:none">${h.lab}</text>`;
+      // 발생원
+      s += h.gas ? `<path d="M${cx - 22} ${GY - 22} h14 l-2 22 h-10z" fill="#9fd0ee" stroke="#4a8db8"/>` : `<polygon points="${cx - 26},${GY} ${cx - 15},${GY - 16} ${cx - 4},${GY}" fill="#b89b6b"/>`;
+      // 후드
+      if (h.kind === "enc") s += `<path d="M${cx - 32} ${GY} v-52 h38 v6" fill="none" stroke="var(--gm-steel)" stroke-width="4"/>`;
+      if (h.kind === "side") s += `<polygon points="${cx - 42},${GY - 46} ${cx - 34},${GY - 40} ${cx - 34},${GY - 8} ${cx - 42},${GY - 2}" fill="var(--gm-steel)"/>`;
+      if (h.kind === "up") s += `<polygon points="${cx - 34},${GY - 78} ${cx + 4},${GY - 78} ${cx - 8},${GY - 96} ${cx - 22},${GY - 96}" fill="var(--gm-steel)"/><rect x="${cx - 17}" y="${GY - 120}" width="6" height="24" fill="var(--gm-steel)"/>`;
+      // 흡인 화살표
+      const ax = h.kind === "side" ? [cx - 18, GY - 24, cx - 18 - len, GY - 24] : h.kind === "up" ? [cx - 15, GY - 30, cx - 15, GY - 30 - len] : [cx - 6, GY - 26, cx - 6 - len * .6, GY - 26 - len * .6];
+      if (val > 0) s += `<line x1="${ax[0]}" y1="${ax[1]}" x2="${ax[2]}" y2="${ax[3]}" stroke="#2b6cb0" stroke-width="2.4" stroke-dasharray="4 2"/>`;
+      s += `<text x="${cx}" y="${GY + 14}" text-anchor="middle" class="g-tag">${Number.isFinite(v[h.id]) ? fmt(v[h.id]) + " m/s" : "? m/s"}</text>`;
+      s += wkr("w" + i, cx + 24, GY, 46);
+    });
+    return s;
+  },
+  fields() { return [
+    {id: "g1", t: "num", label: "가스 상태 · 포위식 후드 제어풍속", unit: "m/s", ph: "몇 m/s 이상?", fact: "hood_gas_enc"},
+    {id: "g2", t: "num", label: "가스 상태 · 외부식 측방흡인형", unit: "m/s", ph: "몇 m/s 이상?", fact: "hood_gas_side"},
+    {id: "d1", t: "num", label: "입자 상태(흄·분진·미스트) · 포위식", unit: "m/s", ph: "몇 m/s 이상?", fact: "hood_dust_enc"},
+    {id: "d2", t: "num", label: "입자 상태 · 외부식 상방흡인형", unit: "m/s", ph: "몇 m/s 이상?", fact: "hood_dust_up"},
+  ]; },
+  eval(v) { return HOODS.map(h => { const ok = v[h.id] >= h.law; return ck(h.fact, h.lab + " 제어풍속", ok, {dir: ok ? null : "up", val: fmt(v[h.id]) + "m/s", need: fmt(h.law) + "m/s 이상", acc: h.acc}); }); },
+  async play(svg, v, res) {
+    const GY = this.gy;
+    say("네 작업장에서 유해물질이 발생합니다. 후드가 얼마나 잘 빨아들이는지 봐요…");
+    const dots = [];
+    HOODS.forEach((h, i) => { const cx = this.x0[i] + 36; for (let k = 0; k < 6; k++) dots.push({h, i, k, el: ownEl(svg, `<circle r="2.6" fill="${h.gas ? "#8bbf5a" : "#9a8f7a"}" opacity=".85"/>`, "dot" + i + "_" + k)}); });
+    await tw(2200, t => {
+      dots.forEach(d => {
+        const cx = this.x0[d.i] + 36, ok = d.h.law <= (v[d.h.id] || 0), ph = (t * 1.6 + d.k / 6) % 1;
+        const sx = cx - 15, sy = GY - 22;
+        let x, y;
+        if (ok) { const tx = d.h.kind === "side" ? cx - 40 : d.h.kind === "up" ? cx - 15 : cx - 6, ty = d.h.kind === "up" ? GY - 100 : GY - 40; x = L(sx, tx, ph) + Math.sin(ph * 9 + d.k) * 3; y = L(sy, ty, ph); }
+        else { x = L(sx, cx + 22, ph) + Math.sin(ph * 7 + d.k) * 3; y = L(sy, GY - 54 - d.k * 2, ph); }
+        d.el.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`); d.el.firstChild.setAttribute("opacity", ok && ph > .85 ? .2 : .85);
+      });
+    }, ease.lin);
+    let hit = 0;
+    HOODS.forEach((h, i) => { const w = R(svg, "w" + i); if (failAcc(res, h.acc) && !(v[h.id] >= h.law)) { hit++; hurt(w); pop(svg, this.x0[i] + 60, GY - 56, "콜록!"); } else pop(svg, this.x0[i] + 60, GY - 56, "✔", "#12a37f"); });
+    dots.forEach(d => d.el.remove());
+    if (hit) { sfx.bad(); shake(); say("💥 제어풍속이 기준보다 약하면 증기·분진이 새어 나와 작업자가 흡입합니다."); }
+    else if (!allOk(res)) generic(svg, res);
+    else { sfx.ok(); say("🟢 모든 후드가 기준 이상으로 빨아들여 유해물질이 작업자에게 오지 않았습니다."); }
+  },
+};
+
+/* ---------- 의뢰 18: 작업환경측정 일정 (시행규칙 제188·190조) ---------- */
+const M18 = {
+  X0: 22, MX: 25,
+  draw(v) {
+    const X0 = this.X0, MX = this.MX, mark = d => X0 + d / 30 * MX, T = (x, y, t, an) => `<text x="${x}" y="${y}" ${an ? `text-anchor="${an}"` : ""} class="g-tag">${t}</text>`;
+    let s = rc("g-in", 0, 0, 360, 250);
+    s += `<text x="12" y="18" class="g-cap">작업환경측정 일정 (가로축 = 달력, 1칸 = 1개월)</text>`;
+    for (let m = 0; m <= 12; m++) s += `<line x1="${X0 + m * MX}" y1="${m % 6 === 0 ? 26 : 30}" x2="${X0 + m * MX}" y2="34" stroke="var(--sub)" stroke-width="${m % 6 === 0 ? 1.6 : 1}"/><text x="${X0 + m * MX}" y="46" text-anchor="middle" class="g-cap">${m}</text>`;
+    s += `<line x1="${X0}" y1="34" x2="${X0 + 12 * MX}" y2="34" stroke="var(--sub)"/>`;
+    s += `<text x="12" y="66" class="g-cap">① 가동 → 첫 측정 → 정기 측정</text><circle cx="${X0}" cy="82" r="5" fill="var(--ink)"/>`;
+    if (Number.isFinite(v.d1)) { const x = mark(v.d1); s += `<path d="M${x} 72 v20" stroke="#2b6cb0" stroke-width="3"/>` + T(Math.min(x + 4, 250), 104, "첫 측정 " + fmt(v.d1) + "일"); }
+    if (Number.isFinite(v.m1) && v.m1 > 0) for (let k = 1; k * v.m1 <= 12; k++) s += `<path d="M${X0 + k * v.m1 * MX} 74 v16" stroke="#12a37f" stroke-width="3"/>`;
+    if (Number.isFinite(v.m1)) s += T(X0 + 12 * MX, 104, "정기: " + fmt(v.m1) + "개월마다", "end");
+    s += `<text x="12" y="128" class="g-cap">② 노출기준을 넘은 인자 — 측정일부터 다시</text><circle cx="${X0}" cy="144" r="5" fill="#e5484d"/>`;
+    if (Number.isFinite(v.m2) && v.m2 > 0) for (let k = 1; k * v.m2 <= 12; k++) s += `<path d="M${X0 + k * v.m2 * MX} 136 v16" stroke="#e5a100" stroke-width="3"/>`;
+    if (Number.isFinite(v.m2)) s += T(X0 + 12 * MX, 166, "재측정: " + fmt(v.m2) + "개월마다", "end");
+    s += `<text x="12" y="188" class="g-cap">③ 시료채취를 마친 날부터 (일)</text><circle cx="${X0}" cy="204" r="5" fill="var(--ink)"/>`;
+    if (Number.isFinite(v.d3)) { const x = mark(v.d3); s += `<rect x="${X0}" y="199" width="${Math.max(0, x - X0)}" height="5" fill="#2b6cb0" opacity=".55"/><path d="M${x} 194 v14" stroke="#2b6cb0" stroke-width="3"/>` + T(Math.min(x + 4, 230), 226, "보고 " + fmt(v.d3) + "일"); }
+    if (Number.isFinite(v.d4)) { const x = mark(v.d4); s += `<rect x="${X0}" y="206" width="${Math.max(0, x - X0)}" height="5" fill="#e5a100" opacity=".55"/><path d="M${x} 200 v16" stroke="#e5a100" stroke-width="3"/>` + T(Math.min(x + 4, 220), 242, "개선 서류 " + fmt(v.d4) + "일"); }
+    s += wkr("w1", 328, 244, 40);
+    s += `<line data-r="cur" x1="${X0}" y1="50" x2="${X0}" y2="214" stroke="#e5484d" stroke-width="2" opacity="0"/>`;
+    return s;
+  },
+  fields() { return [
+    {id: "d1", t: "num", label: "측정 대상이 된 날부터 몇 일 이내에 첫 측정?", unit: "일", ph: "몇 일?", fact: "env_first"},
+    {id: "m1", t: "num", label: "그 뒤 정기 측정 — 몇 개월에 1회 이상? (반기)", unit: "개월", ph: "몇 개월?", fact: "env_half"},
+    {id: "m2", t: "num", label: "노출기준 초과 인자 — 몇 개월에 1회 이상 재측정?", unit: "개월", ph: "몇 개월?", fact: "env_exceed"},
+    {id: "d3", t: "num", label: "측정 결과 보고 — 시료채취 후 몇 일 이내?", unit: "일", ph: "몇 일?", fact: "env_report"},
+    {id: "d4", t: "num", label: "초과 공정 개선 서류·계획 — 시료채취 후 몇 일 이내?", unit: "일", ph: "몇 일?", fact: "env_improve"},
+  ]; },
+  eval(v) {
+    const sp = [["d1", "env_first", 30, "일", "a_env_late", "첫 측정 기한"], ["m1", "env_half", 6, "개월", "a_env_late", "정기 측정 주기"], ["m2", "env_exceed", 3, "개월", "a_env_exceed", "초과 인자 재측정 주기"], ["d3", "env_report", 30, "일", "a_env_report", "결과 보고 기한"], ["d4", "env_improve", 60, "일", "a_env_improve", "개선 서류 제출 기한"]];
+    return sp.map(r => { const x = v[r[0]], ok = x === r[2], lax = x > r[2]; return ck(r[1], r[5], ok, {dir: ok ? null : lax ? "down" : "up", val: fmt(x) + r[3], need: fmt(r[2]) + r[3] + " 이내", acc: !ok && lax ? r[4] : null, dtxt: "✘ 기준과 달라요 (정확히!)"}); });
+  },
+  async play(svg, v, res) {
+    const cur = R(svg, "cur"), X0 = this.X0, MX = this.MX, w = R(svg, "w1");
+    say("달력이 넘어갑니다. 법정 기한마다 일정이 지켜지는지 확인해요…");
+    cur.setAttribute("opacity", "1");
+    const stops = [[1, "첫 측정 30일", 30 / 30, "a_env_late", "d1", 30], [6, "정기 측정 6개월", 6, "a_env_late", "m1", 6], [3, "초과 재측정 3개월", 3, "a_env_exceed", "m2", 3], [1, "보고 30일", 1, "a_env_report", "d3", 30], [2, "개선 60일", 2, "a_env_improve", "d4", 60]];
+    let hit = false;
+    let xnow = X0;
+    for (let si = 0; si < stops.length; si++) {
+      const st = stops[si], xt = X0 + st[2] * MX;
+      if (si === 2 || si === 3) { xnow = X0; cur.setAttribute("x1", X0); cur.setAttribute("x2", X0); }
+      await tw(Math.max(400, Math.abs(xt - xnow) * 8), t => cur.setAttribute("x1", L(xnow, xt, t)) || cur.setAttribute("x2", L(xnow, xt, t)), ease.io);
+      xnow = xt;
+      const late = failAcc(res, st[3]) && v[st[4]] > st[5];
+      if (late) { hit = true; sfx.bad(); pop(svg, xt, 62, "⏰ 기한 지남!"); hurt(w); } else { pop(svg, xt, 62, "✔", "#12a37f"); }
+      await wait(250);
+    }
+    if (hit) { shake(); say("💥 법정 기한을 넘기면 유해환경이 늦게 발견되고 근로자 건강장해·과태료로 이어집니다."); }
+    else if (!allOk(res)) generic(svg, res);
+    else { sfx.ok(); say("🟢 모든 측정·보고·개선 기한을 지켜 근로자 건강을 지켰습니다."); }
+  },
+};
+
+/* ---------- 의뢰 19: 화학물질 취급 (MSDS · 법 제114·115조) ---------- */
+const MSDS_OPTS = [
+  {id: "board", ic: "📋", t: "MSDS를 작업장 안, 근로자가 쉽게 볼 곳에 게시·비치", ok: true, acc: "a_msds_hidden", art: "법 제114조 ①"},
+  {id: "proc", ic: "🪧", t: "작업공정별 물질 관리요령 게시", ok: true, acc: "a_msds_proc", art: "법 제114조 ②"},
+  {id: "edu", ic: "🎓", t: "취급 근로자 모두에게 교육", ok: true, acc: "a_msds_edu", art: "법 제114조 ③"},
+  {id: "label", ic: "🏷️", t: "옮겨 담은 용기에도 경고표시", ok: true, acc: "a_msds_label", art: "법 제115조 ②"},
+  {id: "ppe", ic: "🥽", t: "명칭·영향·주의사항·보호구·응급조치 게시", ok: true, acc: "a_msds_ppe", art: "제442조"},
+  {id: "safe", ic: "🗄️", t: "MSDS는 사무실 금고에 잘 보관", ok: false, acc: "a_msds_hidden", art: "법 제114조 ①"},
+  {id: "one", ic: "🙋", t: "교육은 대표 한 사람에게만", ok: false, acc: "a_msds_edu", art: "법 제114조 ③"},
+  {id: "mix", ic: "⚗️", t: "처음 보는 약품이라 눈대중으로 섞어 보기", ok: false, acc: "a_msds_mix", art: "법 제114조"},
+];
+const M19 = {
+  fields() { return [{id: "sel", t: "multi", label: "새 화학물질(MSDS 대상)을 쓰기 시작합니다. 사업주가 해야 할 일을 모두 고르세요", opts: MSDS_OPTS, need: 5, hints: ["근거: 법 제114조·제115조, 안전보건규칙 제442조", "해야 할 일은 5가지, 하면 안 되는 보기 3개가 섞여 있어요", "게시·비치 · 공정별 관리요령 · 교육 · 경고표시 · 보호구·응급조치 게시"]}]; },
+  draw(v) {
+    const sel = v.sel || [], has = id => sel.includes(id);
+    let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 192, 360, 48);
+    s += rc("g-conc2", 24, 70, 200, 8, 'rx="2"') + rc("g-conc2", 24, 124, 200, 8, 'rx="2"');
+    const cols = ["#3b82f6", "#e5484d", "#f5b50a", "#12a37f", "#a855f7", "#e5484d"];
+    [0, 1, 2, 3, 4, 5].forEach(i => { const y = i < 3 ? 70 : 124, x = 36 + (i % 3) * 60; s += `<rect x="${x}" y="${y - 38}" width="26" height="38" rx="5" fill="${cols[i]}"/><rect x="${x + 8}" y="${y - 46}" width="10" height="9" fill="#555"/>` + (has("label") ? `<rect x="${x + 3}" y="${y - 28}" width="20" height="14" fill="#fff"/><path d="M${x + 13} ${y - 26} l-5 9 h10z" fill="#e5484d"/>` : `<text x="${x + 13}" y="${y - 14}" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">?</text>`); });
+    if (has("board")) s += rc("", 240, 56, 56, 74, 'rx="4" fill="#fff" stroke="#6b7684"') + `<text x="268" y="78" text-anchor="middle" font-size="9" font-weight="900" fill="#1d2433">MSDS</text><path d="M248 88 h40 M248 98 h40 M248 108 h30" stroke="#9aa3b5" stroke-width="2"/>`;
+    if (has("proc")) s += rc("", 304, 56, 46, 40, 'rx="3" fill="#ffe9a8" stroke="#c98d00"') + `<text x="327" y="80" text-anchor="middle" font-size="8" font-weight="900" fill="#5b3d00">관리요령</text>`;
+    if (has("ppe")) s += rc("", 304, 102, 46, 30, 'rx="3" fill="#dff6ec" stroke="#12a37f"') + `<text x="327" y="121" text-anchor="middle" font-size="8" font-weight="900" fill="#0a5b44">보호구·응급</text>`;
+    s += wkr("w1", 270, 192, 70);
+    sel.forEach((id, i) => { const o = MSDS_OPTS.find(x => x.id === id); s += `<text x="${12 + i * 26}" y="22" font-size="16">${o.ic}</text>`; });
+    return s;
+  },
+  eval(v) {
+    const sel = v.sel || [], c = [];
+    MSDS_OPTS.filter(o => o.ok).forEach(o => { const has = sel.includes(o.id); c.push(ck(null, o.t, has, {noSrs: true, dtxt: "✘ 빠졌어요", val: has ? "함" : "빠짐", need: "해야 해요 (" + o.art + ")", acc: has ? null : o.acc})); });
+    MSDS_OPTS.filter(o => !o.ok).forEach(o => { if (sel.includes(o.id)) c.push(ck(null, o.t, false, {noSrs: true, dtxt: "✘ 위험한 선택이에요", val: "선택함", need: "하면 안 돼요 (" + o.art + ")", acc: o.acc})); });
+    return c;
+  },
+  async play(svg, v, res) {
+    const w = R(svg, "w1");
+    say("새 약품을 쓰는 첫날, 작업자가 약품장 앞으로 갑니다…");
+    await walk(w, 270, 160, 192, 900);
+    const pri = ["a_msds_mix", "a_msds_label", "a_msds_edu", "a_msds_hidden", "a_msds_proc", "a_msds_ppe"], hit = pri.find(a => failAcc(res, a));
+    if (hit) {
+      sfx.bad();
+      const gas = ownEl(svg, `<circle cx="120" cy="120" r="8" fill="#9bd05a" opacity=".7"/>`, "gas");
+      const msg = {a_msds_mix: "성질을 모르는 약품을 섞자 유독가스가 피어오릅니다!", a_msds_label: "표시 없는 병이 뭔지 몰라 잘못 집어 듭니다!", a_msds_edu: "교육받지 못해 위험한 두 약품을 함께 쓰다 가스가 생깁니다!", a_msds_hidden: "사고가 났는데 MSDS가 금고 속에 있어 확인할 수 없어요!", a_msds_proc: "공정별 관리요령이 없어 약품을 잘못 다룹니다!", a_msds_ppe: "보호구·응급조치를 몰라 피해가 커집니다!"}[hit];
+      say(msg);
+      await tw(1000, t => { gas.firstChild.setAttribute("r", 8 + 56 * t); gas.firstChild.setAttribute("opacity", .7 * (1 - t * .3)); });
+      hurt(w); shake(); pop(svg, 150, 120, "콜록!");
+      say("💥 " + ACC[hit].n + " — " + ACC[hit].tip);
+    } else if (!allOk(res)) generic(svg, res);
+    else { await wait(500); sfx.ok(); pop(svg, 150, 90, "✔ 확인!", "#12a37f"); pop(svg, 268, 52, "MSDS 확인", "#2b6cb0"); say("🟢 게시된 MSDS·관리요령으로 확인하고, 용기 표시를 보고 교육받은 대로 안전하게 다룹니다."); }
+  },
+};
+
+/* ---------- 의뢰 20: 상황별 보호구 (제450·451·516·617조) ---------- */
+const PPE_OPTS = [
+  {id: "air", ic: "🫁", t: "송기마스크", s: "송기마스크"}, {id: "gas", ic: "😷", t: "방독마스크", s: "방독마스크"}, {id: "dust", ic: "🌫️", t: "방진마스크", s: "방진마스크"},
+  {id: "ear", ic: "🎧", t: "청력보호구", s: "청력보호구"}, {id: "skin", ic: "🧤", t: "불침투성 보호복·장갑·장화", s: "보호복·장갑"}, {id: "belt", ic: "🪢", t: "안전대", s: "안전대"},
+];
+const PPE_CASES = [
+  {id: "p1", ic: "🛢️", q: "유기화합물을 넣었던 탱크 내부 세척·페인트칠", ok: ["air"], acc: "a_ppe_tank", art: "제450조 제1항", fact: "t_tankmask", hints: ["근거: 제450조 제1항", "신선한 공기를 공급받는 마스크예요"]},
+  {id: "p2", ic: "🧪", q: "밀폐설비·국소배기장치가 없는 곳에서 유기화합물 취급", ok: ["air", "gas"], acc: "a_ppe_solvent", art: "제450조 제2항", hints: ["근거: 제450조 제2항", "송기마스크 '나' 방독마스크 중 하나"]},
+  {id: "p3", ic: "🌫️", q: "분진작업 (밀폐·국소배기 설비 없음)", ok: ["dust"], acc: "a_ppe_dust", art: "제617조 제1항", hints: ["근거: 제617조 제1항", "분진을 걸러 주는 호흡용 보호구"]},
+  {id: "p4", ic: "🔊", q: "1일 8시간 기준 85dB 이상의 소음작업", ok: ["ear"], acc: "a_ppe_noise", art: "제516조", fact: "t_hear", hints: ["근거: 제516조 제1·2항", "개인 전용으로 지급해요"]},
+  {id: "p5", ic: "⚗️", q: "피부 자극성·부식성 관리대상 유해물질 취급", ok: ["skin"], acc: "a_ppe_skin", art: "제451조 제1항", hints: ["근거: 제451조 제1항", "물이 스며들지 않는 보호복·장갑·장화"]},
+];
+const M20 = {
+  draw(v) {
+    let s = rc("g-in", 0, 0, 360, 240);
+    PPE_CASES.forEach((c, i) => {
+      const x = 6 + i * 70, cx = x + 33, p = v[c.id], o = PPE_OPTS.find(z => z.id === p);
+      s += panelBox(x, 68, 10, 220);
+      s += `<text x="${cx}" y="44" text-anchor="middle" font-size="26">${c.ic}</text>`;
+      s += `<text x="${cx}" y="62" text-anchor="middle" class="g-cap">${["탱크 내부", "유기용제", "분진", "소음", "부식성"][i]}</text>`;
+      s += wkr("w" + i, cx, 190, 70);
+      s += `<text data-r="ic${i}" x="${cx}" y="${190 - 74}" text-anchor="middle" font-size="22">${o ? o.ic : ""}</text>`;
+      s += `<text x="${cx}" y="212" text-anchor="middle" class="g-tag" style="stroke:none">${o ? o.s : "?"}</text>`;
+    });
+    return s;
+  },
+  fields() { return PPE_CASES.map(c => ({id: c.id, t: "pick", label: c.ic + " " + c.q, opts: PPE_OPTS, hints: c.hints})); },
+  eval(v) { return PPE_CASES.map(c => { const ok = c.ok.includes(v[c.id]); return ck(c.fact || null, c.q.slice(0, 18) + "…", ok, {noSrs: !c.fact, dtxt: "✘ 맞는 보호구가 아니에요", val: (PPE_OPTS.find(z => z.id === v[c.id]) || {}).t, need: c.ok.map(i => PPE_OPTS.find(z => z.id === i).t).join(" 또는 ") + " (" + c.art + ")", acc: ok ? null : c.acc}); }); },
+  async play(svg, v, res) {
+    say("다섯 작업자가 선택한 보호구를 쓰고 일을 시작합니다…");
+    await wait(700);
+    let hit = 0;
+    for (let i = 0; i < 5; i++) {
+      const c = PPE_CASES[i], w = R(svg, "w" + i), x = 6 + i * 70 + 33;
+      if (!c.ok.includes(v[c.id])) { hit++; sfx.bad(); hurt(w); pop(svg, x, 100, "윽!"); await tw(320, t => setT(w, x, 190, 12 * Math.sin(t * Math.PI * 6))); setT(w, x, 190, 0); }
+      else { sfx.ok(); pop(svg, x, 100, "✔", "#12a37f"); }
+      await wait(320);
+    }
+    if (hit) { shake(); say("💥 상황에 맞지 않는 보호구는 유해인자를 막지 못합니다."); }
+    else say("🟢 다섯 작업 모두 알맞은 보호구로 건강을 지켰습니다.");
+  },
+};
+
 /* =============== 의뢰 목록 =============== */
 const MS = [
   {
@@ -1602,7 +1936,61 @@ const PACKS = [
   {id: "exc", n: "굴착 편", ic: "⛏️"}, {id: "fire", n: "화재·기계 편", ic: "🔥"},
 ];
 
+/* ---- 보건 편 의뢰 등록 ---- */
+MS.push(
+  {
+    id: "m16", pack: "health", ic: "🔊", title: "시끄러운 공장", sub: "소음작업 · 제512조", vb: "0 0 360 240", mod: M16, arts: ["제512조", "제516조"],
+    brief: "다섯 작업자가 <b>소음이 큰 곳</b>에서 하루 일합니다. 어느 소음에서부터 <b>소음작업·강렬한 소음작업</b>으로 보고 보호하는지, 기준을 정확히 입력하세요. 기준을 느슨하게 알면 그 구간 작업자는 무방비예요.",
+    lessons: ["소음작업: 1일 8시간 기준 85dB 이상. 강렬한 소음작업: 90dB 8시간 · 95dB 4시간 · 100dB 2시간 · 105dB 1시간 · 110dB 30분 · 115dB 15분 이상 (5dB 오를 때마다 시간이 절반).", "충격소음작업(1초 이상 간격): 120dB 초과 1만회 · 130dB 초과 1천회 · 140dB 초과 1백회 이상.", "소음작업 근로자에게는 개인 전용 청력보호구를 지급·착용시키고(제516조), 청력보존 프로그램을 수립·시행합니다(제517조)."],
+  },
+  {
+    id: "m17", pack: "health", ic: "🌀", title: "유해물질 국소배기 후드", sub: "후드 제어풍속 · 제429조·별표 13", vb: "0 0 360 240", mod: M17, arts: ["제429조"],
+    brief: "관리대상 유해물질을 다루는 네 작업장에 <b>국소배기 후드</b>를 답니다. 후드 형식과 물질 상태(가스·입자)별로 필요한 <b>최소 제어풍속(m/s)</b>을 정하세요. 약하면 유해물질이 새어 나와요.",
+    lessons: ["관리대상 유해물질 후드 제어풍속(별표 13): 가스 상태 — 포위식 0.4 · 외부식 측방·하방 0.5 · 상방 1.0 m/s 이상.", "입자 상태(흄·분진·미스트) — 포위식 0.7 · 외부식 측방·하방 1.0 · 상방 1.2 m/s 이상.", "분진작업장소 국소배기장치도 별표 17의 제어풍속 이상의 성능을 갖춰야 합니다 (제609조)."],
+  },
+  {
+    id: "m18", pack: "health", ic: "📅", title: "작업환경측정 일정", sub: "측정 주기·보고 · 시행규칙 제188·190조", vb: "0 0 360 250", mod: M18, arts: ["법 제125조", "시행규칙 제190조"],
+    brief: "소음·유기용제가 있는 공장이 <b>작업환경측정 대상</b>이 되었어요. 첫 측정, 정기 측정, 노출기준 초과 시 재측정, 결과 보고·개선 서류 <b>기한</b>을 정확히 정하세요. 달력이 넘어가며 기한을 확인합니다.",
+    lessons: ["대상 작업장이 된 날부터 30일 이내에 첫 측정, 그 후 반기(6개월)에 1회 이상 (시행규칙 제190조).", "노출기준을 초과한 인자는 측정일부터 3개월에 1회 이상. 최근 1년 변화가 없고 소음이 최근 2회 연속 85dB 미만이면 연 1회도 가능.", "결과는 시료채취를 마친 날부터 30일 이내 보고, 초과 공정은 60일 이내 개선 증명서류·계획 제출 (시행규칙 제188조).", "일반건강진단은 사무직 2년에 1회, 그 밖의 근로자 1년에 1회 이상 (시행규칙 제197조)."],
+  },
+  {
+    id: "m19", pack: "health", ic: "🧴", title: "새 화학물질 도입", sub: "MSDS · 법 제114·115조", vb: "0 0 360 240", mod: M19, arts: ["제442조"],
+    brief: "공장에 <b>새 화학물질</b>이 들어왔습니다. 물질안전보건자료(MSDS) 대상이에요. 사업주가 해야 할 일을 <b>모두</b> 고르세요. 하면 안 되는 보기도 섞여 있어요.",
+    lessons: ["MSDS 대상물질을 취급하는 사업주는 MSDS를 작업장 안, 근로자가 쉽게 볼 수 있는 장소에 게시하거나 갖추어 둡니다 (법 제114조 제1항).", "작업공정별 관리 요령을 게시하고(제2항), 취급 근로자를 교육합니다(제3항).", "사업장에서 쓰는 대상물질 용기에는 경고표시를 합니다 (법 제115조 제2항).", "관리대상 유해물질 작업장에는 명칭·인체 영향·취급 주의사항·보호구·응급조치를 게시합니다 (안전보건규칙 제442조)."],
+  },
+  {
+    id: "m20", pack: "health", ic: "😷", title: "상황별 보호구", sub: "호흡용·청력·보호복 · 제450·451·516·617조", vb: "0 0 360 240", mod: M20, arts: ["제450조", "제617조"],
+    brief: "다섯 가지 작업이 시작됩니다. 작업마다 <b>알맞은 보호구</b>를 고르세요. 안 맞는 보호구는 유해인자를 못 막아요.",
+    lessons: ["유기화합물 넣었던 탱크 내부 세척·페인트칠, 유기화합물 취급 특별장소 업무 → 송기마스크 (제450조 제1항).", "밀폐설비·국소배기장치가 없는 곳의 유기화합물 취급 등 → 송기마스크나 방독마스크 (제450조 제2항).", "분진작업 → 적절한 호흡용 보호구 (설비 조치를 한 경우는 예외, 제617조). 소음작업 → 개인 전용 청력보호구 (제516조).", "피부 자극성·부식성 관리대상 유해물질 → 불침투성 보호복·장갑·장화와 피부보호용 바르는 약품 (제451조)."],
+  },
+);
+PACKS.push({id: "health", n: "보건 편", ic: "🩺"});
+
 const MSBY = {}; MS.forEach(m => { MSBY[m.id] = m; });
+// 랜덤 상황: 제목·조문 없이 상황만 보여 주고, 필요한 안전조치를 먼저 떠올려 쓰게 한다 (kw: 인정하는 낱말, name: 정답 공개용)
+const RAND_INFO = {
+  m1: {sit: "신축 건물 2층 슬래브 가장자리에서 철근 작업이 시작됩니다. 아래층에는 다른 근로자가 있어요.", name: "안전난간", kw: ["난간", "발끝막이"]},
+  m2: {sit: "바닥에 구멍이 뚫려 있고, 작업자들이 이 길로 자재를 나릅니다.", name: "개구부 방호 (난간·울타리·방망·덮개)", kw: ["개구부", "덮개", "울타리", "방망", "난간"]},
+  m3: {sit: "높은 곳에서 외벽 작업을 합니다. 작업 중 사람이 떨어질 수 있어요.", name: "추락방호망", kw: ["방호망", "그물", "방망", "네트"]},
+  m4: {sit: "지붕층을 점검해야 합니다. 벽 위 지붕선까지 올라가야 해요.", name: "사다리 설치 기준", kw: ["사다리"]},
+  m5: {sit: "높이 4m 정도의 구조물을 세워 외벽 작업을 하려 합니다. 자재를 가득 올릴 예정이에요.", name: "강관비계", kw: ["비계", "발판", "띠장"]},
+  m6: {sit: "비 온 뒤 젖은 철판 위에서 220V 전동드릴을 씁니다.", name: "누전차단기", kw: ["누전", "차단기", "접지"]},
+  m7: {sit: "전동기를 점검하려는데 분전반 전원이 켜져 있어요. 다른 사람이 곁을 지나다닙니다.", name: "정전 작업 절차 (잠금·꼬리표)", kw: ["정전", "잠금", "꼬리표", "검전", "차단", "로토", "loto"]},
+  m8: {sit: "전주 위, 세 가지 전압의 선 옆에서 고소작업대로 작업해야 합니다.", name: "충전전로 접근 한계거리", kw: ["접근", "한계", "이격", "절연", "충전"]},
+  m9: {sit: "하수 맨홀에 들어가야 합니다. 안쪽 공기가 어떤지 모릅니다.", name: "적정공기 측정", kw: ["측정", "가스", "산소", "적정공기", "농도"]},
+  m10: {sit: "정화조 맨홀 안 청소 작업이 잡혔어요.", name: "밀폐공간 작업 준비 (환기·측정·감시인…)", kw: ["밀폐", "환기", "감시인", "송풍", "공기호흡기", "측정"]},
+  m11: {sit: "맨홀 안에서 작업하던 동료가 갑자기 쓰러졌습니다. 밖에서 지켜보던 사람은 당신입니다.", name: "신고 + 호흡보호구 착용 구조", kw: ["119", "신고", "구조", "호흡기", "송기"]},
+  m12: {sit: "네 종류의 지반을 파 내려갑니다. 근로자가 바닥에서 작업해요.", name: "굴착면 기울기", kw: ["기울기", "경사", "비탈", "구배", "사면"]},
+  m13: {sit: "도심에서 깊게 파는 굴착 현장입니다. 지하에는 가스관이 지나가고 비 소식도 있고 굴착기가 오갑니다.", name: "굴착 현장 안전조치 (흙막이·유도자·매설물…)", kw: ["흙막이", "지보공", "굴착", "유도자", "매설물", "배수"]},
+  m14: {sit: "공장 안에서 철골 용접을 합니다. 근처에 종이 상자와 인화성 물질이 있어요.", name: "화재 예방 (방화포·소화기·화재감시자)", kw: ["화재", "방화포", "소화기", "불티", "감시자"]},
+  m15: {sit: "돌아가는 컨베이어 기계를 청소·정비하려 합니다. 근처에 다른 작업자도 있어요.", name: "운전정지·잠금·표지판", kw: ["정지", "잠금", "표지판", "꼬리표", "락"]},
+  m16: {sit: "소음이 큰 공장에서 다섯 작업자가 하루 일합니다.", name: "청력보호 (소음작업 기준)", kw: ["청력", "귀마개", "귀덮개", "소음", "보호구"]},
+  m17: {sit: "유해한 가스와 분진이 나는 네 작업장입니다. 설비로 빨아들이려 해요.", name: "국소배기 후드 (제어풍속)", kw: ["후드", "국소배기", "배기", "환기", "제어풍속"]},
+  m18: {sit: "소음·유기용제가 있는 공장이 막 가동을 시작했어요. 근로자 건강이 걱정됩니다.", name: "작업환경측정 일정", kw: ["측정", "작업환경", "주기", "보고"]},
+  m19: {sit: "공장에 새 화학물질이 들어왔습니다. 근로자들은 처음 보는 약품이에요.", name: "MSDS (게시·교육·경고표시)", kw: ["msds", "물질안전", "경고표시", "라벨", "교육", "게시"]},
+  m20: {sit: "다섯 가지 위험한 작업이 동시에 시작됩니다. 작업자들이 무엇을 쓰고 일해야 할까요?", name: "상황별 보호구", kw: ["보호구", "마스크", "보호복", "귀마개", "호흡"]},
+};
+MS.forEach(m => Object.assign(m, RAND_INFO[m.id] || {}));
 const fieldsOf = (m, v) => m.mod.fields ? m.mod.fields(v) : m.fields;
 
 /* =============== 학습 기록 (잊을 때쯤 다시: 간격 반복) =============== */
@@ -1621,9 +2009,18 @@ function addXP(n) { const a = lvInfo(S.xp).i; S.xp += n; const b = lvInfo(S.xp).
 
 /* =============== 화면 =============== */
 let scr = "home", cm = null; // 현재 화면, 현재 의뢰 상태
+const openPacks = {};   // 홈에서 펼친 편
+function missionFacts(m) { try { return fieldsOf(m, {}).map(f => f.fact).filter(Boolean); } catch (e) { return []; } }
+function pickRandom(pack) {   // 아직 못 깬 의뢰·약한 낱말이 걸린 의뢰가 더 자주 나온다 (방금 한 것은 제외)
+  const list = MS.filter(m => pack === "all" || m.pack === pack);
+  const w = list.map(m => 1 + (S.stars[m.id] ? 3 - S.stars[m.id] : 3) + missionFacts(m).filter(id => factDue(id)).length * 2 - (m.id === S.lastRand ? 99 : 0));
+  const sum = w.reduce((a, b) => a + Math.max(.05, b), 0); let r = Math.random() * sum;
+  for (let i = 0; i < list.length; i++) { r -= Math.max(.05, w[i]); if (r <= 0) return list[i]; }
+  return list[0];
+}
 const starStr = n => `<span class="gm-ms${n ? "" : " z"}">${"★".repeat(n)}${"☆".repeat(3 - n)}</span>`;
 function topBar() {
-  return `<div class="gm-top"><div class="gm-mode"><button type="button" data-a="toread">📖 읽기</button><button type="button" class="on">🎮 게임</button></div>` +
+  return `<div class="gm-top"><div class="gm-mode"><button type="button" data-a="toread">📖 공부</button><button type="button" class="on">🎮 게임</button></div>` +
     `<button type="button" class="gm-ib" data-a="snd" aria-label="효과음" title="효과음">${S.snd ? "🔊" : "🔇"}</button><button type="button" class="gm-ib" data-a="close" aria-label="공부 닫기">✕</button></div>`;
 }
 function renderHome() {
@@ -1636,10 +2033,13 @@ function renderHome() {
     `<div class="gm-stats"><span>🛡️ 무사고 ${S.cur}연속 (최고 ${S.best})</span><span>📕 사고도감 ${dexN}/${accN()}</span><span>✅ 의뢰 ${cleared}/${MS.length}</span></div></div>`;
   if (due.length) h += `<button type="button" class="gm-alert" data-a="redo"><span class="sir">🚨</span><span>속보: 재발 사고 ${due.length}건!<small>잊어버릴 때쯤 같은 사고가 또 터졌어요. 지금 출동</small></span></button>`;
   if (!cleared) h += `<div class="gm-guide"><b>이렇게 해요</b><div>① 의뢰를 고르면 현장 그림이 나와요</div><div>② <b>기준 숫자를 보기 없이 직접 입력</b>하면 그림이 바로 바뀌어요</div><div>③ <b>착공!</b>을 누르면 결과가 눈앞에서 벌어져요. 틀리면 사고가 나고, 사고는 <b>도감</b>에 모여요</div><div>④ 틀린 숫자는 며칠 뒤 <b>재발 사고</b>로 다시 터져요. 그때 또 맞히면 완전히 내 것!</div></div>`;
+  h += `<div class="gm-sec">🎲 랜덤 현장</div><button type="button" class="gm-mc gm-rnd" data-a="rand" data-pack="all"><span class="gm-mn">🎲</span><span class="gm-mt"><b>아무 현장이나 순찰</b><small>모든 편에서 랜덤으로 상황이 터져요 · 약한 곳이 더 자주 나와요</small></span><span class="gm-ms" style="color:#fff">▶</span></button>`;
   PACKS.forEach(pk => {
     const list = MS.map((m, i) => [m, i]).filter(x => x[0].pack === pk.id), n = list.filter(x => S.stars[x[0].id]).length;
     h += `<div class="gm-sec">${pk.ic} ${pk.n} · ${n}/${list.length}</div>`;
-    list.forEach(([m, i]) => { h += `<button type="button" class="gm-mc" data-a="mis" data-id="${m.id}"><span class="gm-mn">${m.ic}</span><span class="gm-mt"><b>${i + 1}. ${m.title}</b><small>${m.sub}</small></span>${starStr(S.stars[m.id] || 0)}</button>`; });
+    h += `<button type="button" class="gm-mc gm-rnd2" data-a="rand" data-pack="${pk.id}"><span class="gm-mn">🎲</span><span class="gm-mt"><b>${pk.n} 랜덤 상황</b><small>${list.length}가지 상황 중 하나가 갑자기 발생해요</small></span><span class="gm-ms" style="color:var(--accent)">▶</span></button>`;
+    h += `<button type="button" class="gm-fold" data-a="fold" data-pack="${pk.id}">${openPacks[pk.id] ? "▾ 의뢰 목록 접기" : "▸ 골라서 하기 (의뢰 " + list.length + "개)"}</button>`;
+    if (openPacks[pk.id]) list.forEach(([m, i]) => { h += `<button type="button" class="gm-mc" data-a="mis" data-id="${m.id}"><span class="gm-mn">${m.ic}</span><span class="gm-mt"><b>${i + 1}. ${m.title}</b><small>${m.sub}</small></span>${starStr(S.stars[m.id] || 0)}</button>`; });
   });
   const bossOK = cleared >= 3;
   h += `<div class="gm-sec">보스</div><button type="button" class="gm-mc boss" data-a="boss" ${bossOK ? "" : "disabled"}><span class="gm-mn">🧑‍✈️</span><span class="gm-mt"><b>감독관 불시점검</b><small>${bossOK ? "시간 안에 직접 답을 떠올려 쓰세요 · 목숨 3개" + (S.insp ? " · 통과 " + S.insp + "회" : "") : "의뢰 3개 이상 클리어하면 열려요"}</small></span><span class="gm-ms" style="color:#fff">${bossOK ? "▶" : "🔒"}</span></button>`;
@@ -1679,19 +2079,45 @@ function hintText(m, f, lv) {
   const a = fc.a, b = a >= 100 ? 50 : a >= 20 ? 10 : a >= 5 ? 5 : 1, lo = Math.floor(a / b) * b;
   return `정답은 ${fmt(lo)} ~ ${fmt(lo + b)} 사이`;
 }
-function renderMission(id) {
+function renderMission(id, rand) {
   const m = MSBY[id]; scr = "mis"; stopQ();
-  cm = {m, v: {}, att: 0, hints: 0, hintLv: {}, hn: {}, wrongF: {}, hinted: {}, over: false};
-  root.innerHTML = `<div class="gm">${topBar()}<div class="gm-bar"><button type="button" class="gm-back" data-a="home">← 현장 사무소</button><h3>${m.ic} ${m.title}</h3></div>` +
-    `<div class="gm-brief">${m.brief}</div><div class="gm-stage"><svg class="gm-scene" id="gmSvg" viewBox="${m.vb}" role="img" aria-label="${esc(m.title)} 현장 그림"></svg><button type="button" class="gm-skip" id="gmSkip" data-a="skip" hidden>⏩ 건너뛰기</button></div>` +
+  cm = {m, v: {}, att: 0, hints: 0, hintLv: {}, hn: {}, wrongF: {}, hinted: {}, over: false, rand: rand || null, stage: rand ? "id" : "fill", idWrong: 0};
+  if (rand) { S.lastRand = id; save(); }
+  root.innerHTML = `<div class="gm">${topBar()}<div class="gm-bar"><button type="button" class="gm-back" data-a="home">← 현장 사무소</button><h3 id="gmTitle">${rand ? "🎲 갑자기 상황 발생!" : m.ic + " " + m.title}</h3></div>` +
+    `<div class="gm-brief">${rand ? `<span class="gm-rtag">🎲 랜덤 상황</span>${m.sit || ""}` : m.brief}</div><div class="gm-stage"><svg class="gm-scene" id="gmSvg" viewBox="${m.vb}" role="img" aria-label="${rand ? "현장 그림" : esc(m.title) + " 현장 그림"}"></svg><button type="button" class="gm-skip" id="gmSkip" data-a="skip" hidden>⏩ 건너뛰기</button></div>` +
     `<div class="gm-say" id="gmSay"></div><div class="gm-form" id="gmForm"></div><button type="button" class="gm-go" id="gmGo" data-a="go">🏗️ 착공!</button><div id="gmRes"></div></div>`;
   svgEl = $("#gmSvg"); sayEl = $("#gmSay");
-  drawScene(); renderForm(); say("값을 입력하면 현장이 바로 바뀌어요.");
+  drawScene(); renderForm(); say(rand ? "그림을 보고, 어떤 안전조치가 필요한 상황인지 먼저 떠올려 보세요." : "값을 입력하면 현장이 바로 바뀌어요.");
   window.scrollTo(0, 0);
+}
+function topicCheck(reveal) {
+  if (!cm || cm.stage !== "id") return;
+  const m = cm.m, inp = $("#gmTopic"), txt = reveal ? "" : (inp ? inp.value : "");
+  const ok = reveal || hasKw(txt.toLowerCase(), (m.kw || []).map(k => k.toLowerCase()));
+  if (!ok) {
+    if (!String(txt).trim()) { host && host.toast("떠오르는 안전조치를 써 보세요"); return; }
+    cm.idWrong++;
+    const hn = $("#gmTopicHn"); if (hn) hn.innerHTML = `<div>🤔 아쉬워요. 그림과 상황을 다시 보세요.${cm.idWrong >= 2 ? " (한 번 더 틀리면 정답이 공개돼요)" : ""}</div>`;
+    sfx.bad();
+    if (cm.idWrong >= 3) topicCheck(true);
+    return;
+  }
+  if (reveal) cm.hints++;
+  cm.stage = "fill";
+  const t = $("#gmTitle"); if (t) t.textContent = "🎲 " + m.ic + " " + m.name;
+  sfx.ok(); say((reveal ? "정답: " : "✔ 맞아요! ") + m.name + " — 이제 기준을 직접 입력해 현장을 지키세요.");
+  renderForm(); drawScene();
 }
 function drawScene(res) { if (!cm) return; svgEl.innerHTML = cm.m.mod.draw(cm.v, res); bind(svgEl); }
 function renderForm() {
   if (!cm) return;
+  const go = $("#gmGo");
+  if (cm.stage === "id") {
+    if (go) go.hidden = true;
+    $("#gmForm").innerHTML = `<div class="gm-f gm-idc"><span class="gm-fl">🧠 이 상황에서 가장 필요한 안전조치는 무엇일까요?</span><span class="gm-fi" style="grid-column:1/-1"><input id="gmTopic" data-in="topic" autocomplete="off" placeholder="직접 떠올려 한두 낱말로 써 보세요"></span><div class="gm-btns" style="grid-column:1/-1"><button type="button" class="pri" data-a="topicgo">확인</button><button type="button" data-a="topicshow">모르겠어요 (정답 공개 −힌트)</button></div><span class="gm-hn" id="gmTopicHn"></span></div>`;
+    return;
+  }
+  if (go) go.hidden = false;
   $("#gmForm").innerHTML = fieldsOf(cm.m, cm.v).map(f => fieldHTML(f, cm.v, cm.hn)).join("");
 }
 function readVals() {
@@ -1701,7 +2127,7 @@ function readVals() {
   });
 }
 async function launch() {
-  if (busy || !cm) return;
+  if (busy || !cm || cm.stage === "id") return;
   readVals();
   const m = cm.m, fs = fieldsOf(m, cm.v);
   const miss = fs.filter(f => f.t === "num" ? !Number.isFinite(cm.v[f.id]) : f.t === "pick" ? !cm.v[f.id] : f.t === "seq" ? (cm.v[f.id] || []).length < f.items.length : f.t === "multi" ? !(cm.v[f.id] || []).length : !String(cm.v[f.id] || "").trim());
@@ -1759,9 +2185,9 @@ function showResult(res) {
   if (pass || full) h += `<div class="gm-less">${m.lessons.map(t => `<div>📌 ${esc(t)}</div>`).join("")}${res.filter(c => !c.ok && ACC[c.acc]).map(c => `<div>⚠️ ${esc(ACC[c.acc].tip)}</div>`).join("")}</div>`;
   const idx = MS.findIndex(x => x.id === m.id), nx = MS[idx + 1];
   h += `<div class="gm-btns">`;
-  h += pass ? (nx ? `<button type="button" class="pri" data-a="mis" data-id="${nx.id}">다음 의뢰 ▶</button>` : `<button type="button" class="pri" data-a="home">현장 사무소로</button>`) : `<button type="button" class="pri" data-a="retry">🔁 다시 짓기</button>`;
+  h += pass ? (cm.rand ? `<button type="button" class="pri" data-a="rand" data-pack="${cm.rand}">🎲 다음 상황 ▶</button>` : nx ? `<button type="button" class="pri" data-a="mis" data-id="${nx.id}">다음 의뢰 ▶</button>` : `<button type="button" class="pri" data-a="home">현장 사무소로</button>`) : `<button type="button" class="pri" data-a="retry">🔁 다시 짓기</button>`;
   h += `<button type="button" data-a="read" data-art="${m.arts[0]}">📖 ${m.arts[0]} 보기</button>`;
-  h += pass ? (nx ? `<button type="button" data-a="retry">다시 해보기</button>` : "") : `<button type="button" data-a="home">나가기</button>`;
+  h += pass ? `<button type="button" data-a="retry">다시 해보기</button>` : `<button type="button" data-a="home">나가기</button>`;
   h += `</div></div>`;
   $("#gmRes").innerHTML = h;
   $("#gmGo").hidden = true;
@@ -1881,6 +2307,10 @@ function onClick(e) {
     case "snd": S.snd = !S.snd; save(); t.textContent = S.snd ? "🔊" : "🔇"; if (S.snd) sfx.ok(); break;
     case "home": stopQ(); renderHome(); break;
     case "mis": renderMission(t.dataset.id); break;
+    case "rand": renderMission(pickRandom(t.dataset.pack).id, t.dataset.pack); break;
+    case "topicgo": topicCheck(false); break;
+    case "topicshow": topicCheck(true); break;
+    case "fold": openPacks[t.dataset.pack] = !openPacks[t.dataset.pack]; renderHome(); break;
     case "go": launch(); break;
     case "retry": retry(); break;
     case "skip": skip = true; break;
@@ -1890,7 +2320,7 @@ function onClick(e) {
     case "qok": { const i = $("#qIn"); answerQ(i ? i.value : ""); } break;
     case "qskip": answerQ(null, false); break;
     case "qnext": nextQ(); break;
-    case "read": host && host.read(t.dataset.art); break;
+    case "read": { const m = /^(법|시행규칙|시행령) (제\d+조(?:의\d+)?)/.exec(t.dataset.art || ""); host && (m ? host.read(m[2], {"법": "law", "시행규칙": "rule", "시행령": "decree"}[m[1]]) : host.read(String(t.dataset.art).replace(/ .*$/, ""))); break; }
     case "pick": {
       readVals(); cm.v[t.dataset.f] = t.dataset.v;
       renderForm(); drawScene(); break;
@@ -1922,6 +2352,7 @@ function onInput(e) {
 function onKey(e) {
   if (e.key !== "Enter") return;
   if (scr === "q" && e.target.id === "qIn") { e.preventDefault(); answerQ(e.target.value); }
+  else if (scr === "mis" && e.target.id === "gmTopic") { e.preventDefault(); topicCheck(false); }
   else if (scr === "mis" && e.target.matches("input[data-in]") && !busy) {
     e.preventDefault();
     const ins = [...root.querySelectorAll("input[data-in]")], i = ins.indexOf(e.target);
