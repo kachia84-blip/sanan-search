@@ -2426,9 +2426,9 @@ function autoMod(def) {
     draw(v) {
       let s = (SC.bg === "indoor" || SC.bg === "factory") ? rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 196, 360, 44) : rc("g-sky", 0, 0, 360, 240) + rc("g-grnd", 0, 196, 360, 44);
       const props = SC.props || [];
-      props.slice(0, 4).forEach((p, i) => { s += `<text x="${30 + i * 64}" y="${SC.bg === "indoor" ? 120 : 150}" font-size="34" opacity=".9">${p}</text>`; });
-      s += `<text data-r="hz" x="290" y="190" text-anchor="middle" font-size="64">${SC.hazard || "⚠️"}</text>`;
-      s += wkr("w1", 110, 196, 78);
+      props.slice(0, 4).forEach((p, i) => { s += `<text x="${168 + i * 46}" y="104" font-size="30" text-anchor="middle" opacity=".92">${p}</text>`; });   // 위쪽 줄에 두어 작업자·위험물과 겹치지 않게
+      s += `<ellipse cx="290" cy="196" rx="34" ry="6" fill="#000" opacity=".12"/><text data-r="hz" x="290" y="192" text-anchor="middle" font-size="60">${SC.hazard || "⚠️"}</text>`;
+      s += wkr("w1", 70, 196, 78);
       let y = 20;
       def.fields.forEach((f, i) => {
         const x = v["f" + i]; let txt = "";
@@ -2471,13 +2471,13 @@ function autoMod(def) {
     async play(svg, v, res) {
       const w = R(svg, "w1"), hz = R(svg, "hz");
       say("상황이 시작됩니다…");
-      await walk(w, 110, 200, 196, 900);
+      await walk(w, 70, 190, 196, 900);
       const bad = res.find(c => !c.ok && c.acc && ACC[c.acc]);
       if (bad) {
         sfx.bad();
-        await tw(500, t => hz.setAttribute("font-size", 64 + 36 * Math.sin(t * Math.PI)));
+        await tw(500, t => hz.setAttribute("font-size", 60 + 36 * Math.sin(t * Math.PI)));
         hurt(w); shake(); sfx.thud(); pop(svg, 200, 120, "쿵!");
-        await tw(450, t => setT(w, 200, 196, 80 * t));
+        await tw(450, t => setT(w, 190, 196, 80 * t));
         say("💥 " + ACC[bad.acc].n + " — " + ACC[bad.acc].tip);
       } else if (!allOk(res)) generic(svg, res);
       else { sfx.ok(); pop(svg, 200, 120, "✔ 안전!", "#12a37f"); say("🟢 " + (def.okMsg || "기준을 정확히 지켜 안전하게 마쳤습니다.")); }
