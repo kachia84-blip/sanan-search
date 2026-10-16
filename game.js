@@ -2385,6 +2385,35 @@ function onKey(e) {
   }
 }
 
+/* =============== 자동 의뢰 장면 테마: 그림이 상황을 말하게 (배경 + 큼직한 소품) =============== */
+const GY = 196;
+const gnd = (cls) => rc(cls || "g-grnd", 0, GY, 360, 44);
+const THEMES = {
+  site: () => rc("g-sky", 0, 0, 360, 240) + gnd() + [200, 250, 300].map(x => rc("g-conc2", x, 70, 8, 126)).join("") + [70, 114, 158].map(y => rc("g-conc", 194, y, 124, 8)).join("") +
+    rc("g-steel", 338, 24, 8, 172) + `<line x1="214" y1="30" x2="352" y2="30" stroke="var(--gm-steel)" stroke-width="5"/><line x1="258" y1="32" x2="258" y2="64" stroke="#222" stroke-width="1.5"/><rect x="250" y="64" width="16" height="12" fill="#c8975a"/>` + `<polygon points="120,196 130,176 140,196" fill="#ff7a1a"/>`,
+  scaffold: () => rc("g-sky", 0, 0, 360, 240) + gnd() + rc("g-wall", 300, 40, 60, 156) + [180, 240, 300].map(x => rc("g-steel", x - 2, 70, 4, 126)).join("") + [110, 150].map(y => rc("g-steel", 178, y, 126, 3)).join("") + rc("", 168, 66, 146, 5, 'fill="#c8975a"') + `<line x1="180" y1="196" x2="240" y2="150" stroke="var(--gm-steel)" stroke-width="2"/>`,
+  crane: () => rc("g-sky", 0, 0, 360, 240) + gnd() + rc("", 170, 160, 110, 26, 'rx="4" fill="#f2a900"') + rc("", 236, 146, 40, 16, 'rx="3" fill="#f2a900"') + [190, 262].map(x => `<circle cx="${x}" cy="190" r="9" fill="#333"/>`).join("") + `<line x1="200" y1="158" x2="330" y2="52" stroke="#c98d00" stroke-width="7"/><line x1="330" y1="52" x2="330" y2="104" stroke="#222" stroke-width="1.5"/><rect x="318" y="104" width="24" height="18" fill="#c8975a"/>`,
+  forklift: () => rc("g-in", 0, 0, 360, 240) + gnd("g-conc") + [210, 300].map(x => rc("g-steel", x, 40, 5, 156)).join("") + [80, 130, 170].map(y => rc("g-steel", 206, y, 104, 4)).join("") + [[214, 54], [262, 54], [214, 104], [270, 104]].map(p => rc("", p[0], p[1], 32, 24, 'fill="#c8975a"')).join("") + rc("", 120, 150, 56, 32, 'rx="4" fill="#f2a900"') + rc("g-steel", 176, 120, 5, 68) + rc("g-steel", 176, 184, 28, 4) + [132, 164].map(x => `<circle cx="${x}" cy="190" r="7" fill="#333"/>`).join(""),
+  factory: () => rc("g-in", 0, 0, 360, 240) + gnd("g-conc") + `<line x1="0" y1="44" x2="360" y2="44" stroke="var(--gm-steel)" stroke-width="6"/><line x1="0" y1="58" x2="360" y2="58" stroke="var(--gm-steel)" stroke-width="4"/>` + rc("g-steel", 196, 100, 110, 92, 'rx="6"') + `<circle cx="250" cy="146" r="26" fill="none" stroke="#fff" stroke-width="4"/><path d="M250 122v48M226 146h48" stroke="#fff" stroke-width="3"/>` + rc("g-conc2", 110, 184, 250, 12) + [130, 170].map(x => rc("", x, 168, 26, 16, 'fill="#c8975a"')).join(""),
+  chem: () => rc("g-sky", 0, 0, 360, 240) + gnd() + [[190, 70], [262, 90]].map(t => rc("g-steel", t[0], t[1], 56, 196 - t[1], 'rx="8"')).join("") + `<line x1="246" y1="150" x2="262" y2="150" stroke="#e5484d" stroke-width="5"/>` + rc("g-steel", 336, 40, 6, 156) + `<ellipse cx="339" cy="34" rx="7" ry="10" fill="#ff7a1a"/>` + [[150, 176], [166, 176]].map(d => rc("", d[0], d[1], 14, 20, 'rx="2" fill="#c0392b"')).join(""),
+  elec: () => rc("g-sky", 0, 0, 360, 240) + gnd() + rc("g-conc2", 210, 40, 7, 156) + rc("g-steel", 180, 50, 68, 5) + `<path d="M0 62 Q120 90 214 52 M360 62 Q300 84 246 52" stroke="#444" stroke-width="2" fill="none"/>` + rc("g-steel", 280, 112, 54, 84, 'rx="4"') + `<path d="M312 130 l-10 22 h10 l-8 20" stroke="#ffd84a" stroke-width="3" fill="none"/>`,
+  excav: () => rc("g-sky", 0, 0, 360, 240) + rc("g-grnd", 0, 150, 360, 90) + rc("g-void", 190, 150, 110, 70) + `<polygon points="150,150 170,128 200,150" fill="#9a6b43"/><polygon points="300,150 322,126 350,150" fill="#9a6b43"/>` + rc("", 120, 128, 56, 22, 'rx="3" fill="#f2a900"') + `<line x1="168" y1="132" x2="200" y2="168" stroke="#c98d00" stroke-width="5"/>`,
+  confined: () => rc("g-sky", 0, 0, 360, 240) + rc("g-grnd", 0, 150, 360, 90) + rc("g-void", 200, 150, 80, 90) + rc("g-conc2", 192, 144, 96, 7, 'rx="2"') + `<line x1="210" y1="144" x2="240" y2="96" stroke="var(--gm-steel)" stroke-width="3"/><line x1="270" y1="144" x2="240" y2="96" stroke="var(--gm-steel)" stroke-width="3"/><line x1="240" y1="96" x2="240" y2="170" stroke="#222" stroke-width="1.5"/>`,
+  classroom: () => rc("g-in", 0, 0, 360, 240) + gnd("g-conc") + rc("", 170, 36, 170, 96, 'rx="4" fill="#fff" stroke="#9aa3b5" stroke-width="3"') + `<path d="M184 56h120M184 76h96M184 96h130M184 114h70" stroke="#2b6cb0" stroke-width="3" opacity=".7"/>` + [[150, 160], [230, 160], [310, 160]].map(d => rc("g-conc2", d[0] - 28, d[1], 56, 6) + rc("g-conc2", d[0] - 24, d[1] + 6, 4, 30) + rc("g-conc2", d[0] + 20, d[1] + 6, 4, 30)).join(""),
+  heat: () => rc("g-sky", 0, 0, 360, 240) + gnd() + `<circle cx="300" cy="50" r="30" fill="#ffc83d"/><g stroke="#ffc83d" stroke-width="4">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="${300 + 38 * Math.cos(a * Math.PI / 180)}" y1="${50 + 38 * Math.sin(a * Math.PI / 180)}" x2="${300 + 50 * Math.cos(a * Math.PI / 180)}" y2="${50 + 50 * Math.sin(a * Math.PI / 180)}"/>`).join("")}</g>` + `<polygon points="150,150 250,150 262,168 138,168" fill="#3b82f6"/><rect x="152" y="168" width="4" height="28" fill="#555"/><rect x="244" y="168" width="4" height="28" fill="#555"/>`,
+  noise: () => rc("g-in", 0, 0, 360, 240) + gnd("g-conc") + rc("g-steel", 210, 100, 100, 92, 'rx="6"') + [0, 1, 2].map(k => `<path d="M${196 - k * 14} ${120 - k * 6} q-10 ${26 + k * 6} 0 ${52 + k * 12}" fill="none" stroke="#e5484d" stroke-width="3" opacity="${.9 - k * .25}"/>`).join("") + `<circle cx="260" cy="146" r="22" fill="none" stroke="#fff" stroke-width="4"/>`,
+  lab: () => rc("g-in", 0, 0, 360, 240) + gnd("g-conc") + [90, 140].map(y => rc("g-conc2", 160, y, 190, 6, 'rx="2"')).join("") + [["#3b82f6", 176, 90], ["#e5484d", 214, 90], ["#f5b50a", 252, 90], ["#12a37f", 290, 90], ["#a855f7", 190, 140], ["#e5484d", 240, 140]].map(b => rc("", b[1], b[2] - 38, 24, 38, `rx="5" fill="${b[0]}"`) + rc("", b[1] + 7, b[2] - 46, 10, 9, 'fill="#555"')).join(""),
+  office: () => rc("g-in", 0, 0, 360, 240) + gnd("g-conc") + rc("g-glass", 20, 30, 90, 70, 'rx="4"') + rc("g-conc2", 160, 140, 170, 8) + rc("g-conc2", 168, 148, 6, 46) + rc("g-conc2", 316, 148, 6, 46) + rc("", 220, 100, 50, 40, 'rx="3" fill="#1d2433"') + rc("g-conc2", 240, 140, 10, 6),
+};
+const THEME_FALLBACK = {outdoor: "site", indoor: "factory", factory: "factory"};
+const GROUND_SPRITES = ["🏗️", "🚜", "🚛", "🏭", "🛢️", "🧯", "🔌", "🪜", "🏢", "🧱", "🪵", "🛠️", "📦", "🧰", "🚧", "🧪", "⚗️", "🔧", "⚙️", "🚪", "🧴", "🪣", "🪖", "🦺", "😷"];
+function autoSprites(def, w) {
+  const focus = (def.focus || def.scene && def.scene.props || []).slice(0, 3);
+  let s = "";
+  focus.forEach((e, i) => { const x = 116 + i * 58; s += `<ellipse cx="${x}" cy="${GY + 33}" rx="18" ry="4" fill="#000" opacity=".16"/><text x="${x}" y="${GY + 31}" text-anchor="middle" font-size="34">${e}</text>`; });   // 앞쪽 바닥에 놓아 배경과 겹치지 않게
+  return s;
+}
+
 /* =============== 자동 의뢰: 데이터(game_auto.js)만으로 만드는 의뢰 ===============
    window.SAPGAME_AUTO = [ 의뢰 정의, … ], window.SAPGAME_PACKS = [{id, n, ic}, …]
    의뢰 정의: {id, pack, ic, title, sub, sit, name, kw[], arts[], scene:{bg, props[], hazard}, lessons[], acc:{사고id:{n,ic,art,tip}},
@@ -2412,11 +2441,8 @@ function autoMod(def) {
       });
     },
     draw(v) {
-      let s = (SC.bg === "indoor" || SC.bg === "factory") ? rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 196, 360, 44) : rc("g-sky", 0, 0, 360, 240) + rc("g-grnd", 0, 196, 360, 44);
-      const props = SC.props || [];
-      props.slice(0, 4).forEach((p, i) => { s += `<text x="${168 + i * 46}" y="104" font-size="30" text-anchor="middle" opacity=".92">${p}</text>`; });   // 위쪽 줄에 두어 작업자·위험물과 겹치지 않게
-      s += `<ellipse cx="290" cy="196" rx="34" ry="6" fill="#000" opacity=".12"/><text data-r="hz" x="290" y="192" text-anchor="middle" font-size="60">${SC.hazard || "⚠️"}</text>`;
-      s += wkr("w1", 70, 196, 78);
+      const th = THEMES[def.theme] || THEMES[THEME_FALLBACK[SC.bg] || "factory"];
+      let s = th() + autoSprites(def) + wkr("w1", 70, GY, 78);
       let y = 20;
       def.fields.forEach((f, i) => {
         const x = v["f" + i]; let txt = "";
@@ -2456,18 +2482,19 @@ function autoMod(def) {
       return c;
     },
     async play(svg, v, res) {
-      const w = R(svg, "w1"), hz = R(svg, "hz");
+      const w = R(svg, "w1");
       say("상황이 시작됩니다…");
-      await walk(w, 70, 190, 196, 900);
+      await walk(w, 70, 112, GY, 800);
       const bad = res.find(c => !c.ok && c.acc && ACC[c.acc]);
       if (bad) {
         sfx.bad();
-        await tw(500, t => hz.setAttribute("font-size", 60 + 36 * Math.sin(t * Math.PI)));
-        hurt(w); shake(); sfx.thud(); pop(svg, 200, 120, "쿵!");
-        await tw(450, t => setT(w, 190, 196, 80 * t));
+        const fx = ownEl(svg, `<text x="170" y="120" text-anchor="middle" font-size="40">${ACC[bad.acc].ic || "💥"}</text>`, "fx");
+        await tw(700, t => { fx.firstChild.setAttribute("font-size", 40 + 70 * Math.sin(t * Math.PI / 2)); fx.firstChild.setAttribute("x", 150 + 40 * t); });
+        hurt(w); shake(); sfx.thud(); pop(svg, 112, 100, "쿵!");
+        await tw(450, t => setT(w, 112, GY, 80 * t));
         say("💥 " + ACC[bad.acc].n + " — " + ACC[bad.acc].tip);
       } else if (!allOk(res)) generic(svg, res);
-      else { sfx.ok(); pop(svg, 200, 120, "✔ 안전!", "#12a37f"); say("🟢 " + (def.okMsg || "기준을 정확히 지켜 안전하게 마쳤습니다.")); }
+      else { sfx.ok(); pop(svg, 150, 110, "✔ 안전!", "#12a37f"); say("🟢 " + (def.okMsg || "기준을 정확히 지켜 안전하게 마쳤습니다.")); }
     },
   };
 }
