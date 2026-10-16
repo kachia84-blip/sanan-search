@@ -1032,8 +1032,6 @@ const M7 = {
     s += rc("g-steel", 280, 150, 60, 50, 'rx="6"') + `<text x="310" y="180" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">전동기</text>`;
     s += wkr("w2", 70, 200, 70, {vest: "#3b82f6", hat: "#fff"});
     s += wkr("w1", 262, 200, 70);
-    const seq = v.seq || [];
-    seq.forEach((id, i) => { const it = LOTO.find(x => x.id === id); s += `<text x="14" y="${22 + i * 14}" class="g-tag">${i + 1}. ${esc(it.t.slice(0, 16))}</text>`; });
     return s;
   },
   fields(v) {
@@ -1503,7 +1501,6 @@ const M15 = {
     s += `<g data-r="lockg" opacity="0"><rect x="66" y="128" width="16" height="13" rx="2" fill="#ffd21f"/></g><g data-r="tagg" opacity="0"><rect x="32" y="104" width="46" height="14" rx="2" fill="#fff" stroke="#e5484d"/><text x="55" y="114" text-anchor="middle" font-size="7.5" font-weight="900" fill="#e5484d">정비 중</text></g>`;
     s += wkr("w2", 100, 200, 66, {vest: "#3b82f6", hat: "#fff"});
     s += wkr("w1", 140, 200, 70);
-    (v.seq || []).forEach((id, i) => { const it = MACH.find(x => x.id === id); s += `<text x="14" y="${22 + i * 14}" class="g-tag">${i + 1}. ${esc(it.t.slice(0, 14))}</text>`; });
     return s;
   },
   fields() { return [{id: "seq", t: "seq", label: "컨베이어 기계를 정비·청소하기 전, 해야 할 순서를 맞게 이어 보세요", items: MACH, hints: ["근거: 제92조 (정비 등의 작업 시 운전정지)", "'정비 작업'은 맨 마지막이에요. 운전정지가 맨 처음", "정지 → 잠금(열쇠 별도 관리) → 표지판 → 압축된 것 방출 → 정비 (표지판과 방출은 순서를 바꿔도 돼요)"]}]; },
