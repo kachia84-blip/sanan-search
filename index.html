@@ -903,9 +903,20 @@ function delegOf(a, hang, kind) {
   const to = (DELEG_TO[a.lid] || {})[kind];
   if (!to) return null;
   const pick = key => (deleg[a.lid + " " + key] || []).filter(x => to.includes(x.lid));
-  const exact = hang ? pick(a.no + "|" + hang) : [];
-  const seen = new Set(exact);
-  const other = [];   // 같은 조문을 인용했지만 항이 다르거나 항 없이 인용한 조문
+  let exact = hang ? pick(a.no + "|" + hang) : [];
+  // 시행령 제18조처럼 "법 제75조제1항에 따른 … 노사협의체(이하 "노사협의체"라 한다)" 하고 용어만 정의하며 인용한 조문은
+  // 위임받아 정한 조문이 아니므로, 위임 조문이 따로 있으면 '같은 조문을 인용한 다른 조문' 쪽으로 내린다
+  const defOnly = x => {
+    const re = new RegExp("법 " + reEsc(a.no) + (hang ? "제" + hang + "항" : "(?!의\\d)") + "([^\\n]{0,100}?\\(이하 \"[^\"]+\"(?:이?라 한다)\\))?", "g");
+    let m, n = 0, d = 0;
+    while ((m = re.exec(x.text))) { n++; if (m[1]) d++; }
+    return n > 0 && n === d;
+  };
+  const real = exact.filter(x => !defOnly(x));
+  const demoted = real.length && real.length < exact.length ? exact.filter(x => !real.includes(x)) : [];
+  if (demoted.length) exact = real;
+  const seen = new Set(exact.concat(demoted));
+  const other = demoted.slice();   // 같은 조문을 인용했지만 항이 다르거나 항 없이 인용한 조문
   Object.keys(deleg).forEach(k => {
     if (k.startsWith(a.lid + " " + a.no + "|")) pick(k.slice(a.lid.length + 1)).forEach(x => { if (!seen.has(x)) { seen.add(x); other.push(x); } });
   });
