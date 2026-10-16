@@ -2385,6 +2385,117 @@ function onKey(e) {
   }
 }
 
+/* =============== 자동 의뢰: 데이터(game_auto.js)만으로 만드는 의뢰 ===============
+   window.SAPGAME_AUTO = [ 의뢰 정의, … ], window.SAPGAME_PACKS = [{id, n, ic}, …]
+   의뢰 정의: {id, pack, ic, title, sub, sit, name, kw[], arts[], scene:{bg, props[], hazard}, lessons[], acc:{사고id:{n,ic,art,tip}},
+     fields:[ {t:"num", label, unit, a, dir, acc, art, cl, law, q}
+            | {t:"pick", label, opts:[{id,ic,t}], ok:[id…], acc, hints}
+            | {t:"multi", label, opts:[{id,ic,t,ok,acc,art}], hints}
+            | {t:"seq", label, items:[{id,t}], swap:[i,j]?, acc, hints}
+            | {t:"kw", label, slots:[{lab, kw:[…], acc}], hints} ] }  */
+const cmpN = (x, a, d) => d === "min" ? x >= a : d === "max" ? x <= a : d === "gt" ? x > a : d === "lt" ? x < a : x === a;
+function autoMod(def) {
+  const fid = i => "x_" + def.id + "_" + i;
+  def.fields.forEach((f, i) => {
+    if (f.t === "num") F[fid(i)] = {id: fid(i), t: "n", art: f.art || (def.arts || [""])[0], cl: f.cl || "", q: f.q || f.label, a: f.a, u: f.unit || "", dir: f.dir || "eq", sum: f.law || def.name};
+  });
+  const SC = def.scene || {};
+  return {
+    fields() {
+      return def.fields.map((f, i) => {
+        const id = "f" + i;
+        if (f.t === "num") return {id, t: "num", label: f.label, unit: f.unit || "", ph: f.ph || "몇?", fact: fid(i)};
+        if (f.t === "pick") return {id, t: "pick", label: f.label, opts: f.opts, hints: f.hints};
+        if (f.t === "multi") return {id, t: "multi", label: f.label, opts: f.opts, need: f.opts.filter(o => o.ok).length, hints: f.hints};
+        if (f.t === "seq") return {id, t: "seq", label: f.label, items: f.items, hints: f.hints};
+        return {id, t: "kw", label: f.label, slots: f.slots.length, ph: f.ph || "직접 써 보세요", hints: f.hints};
+      });
+    },
+    draw(v) {
+      let s = (SC.bg === "indoor" || SC.bg === "factory") ? rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 196, 360, 44) : rc("g-sky", 0, 0, 360, 240) + rc("g-grnd", 0, 196, 360, 44);
+      const props = SC.props || [];
+      props.slice(0, 4).forEach((p, i) => { s += `<text x="${30 + i * 64}" y="${SC.bg === "indoor" ? 120 : 150}" font-size="34" opacity=".9">${p}</text>`; });
+      s += `<text data-r="hz" x="290" y="190" text-anchor="middle" font-size="64">${SC.hazard || "⚠️"}</text>`;
+      s += wkr("w1", 110, 196, 78);
+      let y = 20;
+      def.fields.forEach((f, i) => {
+        const x = v["f" + i]; let txt = "";
+        if (f.t === "num") txt = Number.isFinite(x) ? `${f.label.slice(0, 16)}: ${fmt(x)}${f.unit || ""}` : "";
+        else if (f.t === "multi") txt = (x || []).length ? `고른 것 ${(x || []).length}개` : "";
+        else if (f.t === "seq") txt = (x || []).length ? `순서 ${(x || []).length}/${f.items.length}` : "";
+        else if (f.t === "pick") { const o = f.opts.find(z => z.id === x); txt = o ? `${o.ic || ""} ${o.t}`.slice(0, 22) : ""; }
+        else txt = String(x || "").trim() ? "답 입력함" : "";
+        if (txt) { s += `<text x="12" y="${y}" class="g-tag">${esc(txt)}</text>`; y += 14; }
+      });
+      return s;
+    },
+    eval(v) {
+      const c = [];
+      def.fields.forEach((f, i) => {
+        const id = "f" + i, x = v[id];
+        if (f.t === "num") {
+          const ok = cmpN(x, f.a, f.dir || "eq"), up = (f.dir === "min" || f.dir === "gt") || (f.dir === "eq" && x < f.a);
+          c.push(ck(fid(i), f.label, ok, {dir: ok ? null : up ? "up" : "down", val: fmt(x) + (f.unit || ""), need: fmt(f.a) + (f.unit || "") + (DIRT[f.dir] ? " " + DIRT[f.dir] : ""), acc: ok ? null : f.acc}));
+        } else if (f.t === "pick") {
+          const ok = f.ok.includes(x);
+          c.push(ck(null, f.label.slice(0, 22) + "…", ok, {noSrs: true, dtxt: "✘ 맞는 선택이 아니에요", val: (f.opts.find(o => o.id === x) || {}).t, need: f.ok.map(k => (f.opts.find(o => o.id === k) || {}).t).join(" 또는 "), acc: ok ? null : f.acc}));
+        } else if (f.t === "multi") {
+          const sel = x || [];
+          f.opts.filter(o => o.ok).forEach(o => { const has = sel.includes(o.id); c.push(ck(null, o.t, has, {noSrs: true, dtxt: "✘ 빠졌어요", val: has ? "함" : "빠짐", need: "해야 해요" + (o.art ? " (" + o.art + ")" : ""), acc: has ? null : o.acc || f.acc})); });
+          f.opts.filter(o => !o.ok).forEach(o => { if (sel.includes(o.id)) c.push(ck(null, o.t, false, {noSrs: true, dtxt: "✘ 위험한 선택이에요", val: "선택함", need: "하면 안 돼요" + (o.art ? " (" + o.art + ")" : ""), acc: o.acc || f.acc})); });
+        } else if (f.t === "seq") {
+          const seq = x || [], sw = f.swap || [];
+          const okAt = (k, idc) => idc === f.items[k].id || (sw.length === 2 && sw.includes(k) && idc === f.items[sw[0] === k ? sw[1] : sw[0]].id);
+          seq.forEach((idc, k) => { const it = f.items.find(z => z.id === idc); c.push(ck(null, `${k + 1}번째: ${it.t}`, okAt(k, idc), {noSrs: true, dtxt: "✘ 이 자리가 아니에요", val: "", need: ""})); });
+          const ok = seq.every((idc, k) => okAt(k, idc));
+          c.push(ck(null, "순서", ok, {noSrs: true, acc: ok ? null : f.acc, dtxt: "✘ 순서가 달라요", val: ok ? "맞아요" : "달라요", need: f.items.map(z => z.t).join(" → ")}));
+        } else {
+          const t = x || "";
+          f.slots.forEach(sl => { const ok = hasKw(t, sl.kw); c.push(ck(null, sl.lab, ok, {noSrs: true, dtxt: "✘ 빠졌어요", val: ok ? "있음" : "빠짐", need: sl.need || sl.lab, acc: ok ? null : sl.acc || f.acc})); });
+        }
+      });
+      return c;
+    },
+    async play(svg, v, res) {
+      const w = R(svg, "w1"), hz = R(svg, "hz");
+      say("상황이 시작됩니다…");
+      await walk(w, 110, 200, 196, 900);
+      const bad = res.find(c => !c.ok && c.acc && ACC[c.acc]);
+      if (bad) {
+        sfx.bad();
+        await tw(500, t => hz.setAttribute("font-size", 64 + 36 * Math.sin(t * Math.PI)));
+        hurt(w); shake(); sfx.thud(); pop(svg, 200, 120, "쿵!");
+        await tw(450, t => setT(w, 200, 196, 80 * t));
+        say("💥 " + ACC[bad.acc].n + " — " + ACC[bad.acc].tip);
+      } else if (!allOk(res)) generic(svg, res);
+      else { sfx.ok(); pop(svg, 200, 120, "✔ 안전!", "#12a37f"); say("🟢 " + (def.okMsg || "기준을 정확히 지켜 안전하게 마쳤습니다.")); }
+    },
+  };
+}
+const AUTO_ST = {loaded: false, cb: []};
+function integrateAuto() {
+  if (AUTO_ST.done) return; AUTO_ST.done = true;
+  (window.SAPGAME_PACKS || []).forEach(p => { if (!PACKS.some(x => x.id === p.id)) PACKS.push(p); });
+  (window.SAPGAME_AUTO || []).forEach(def => {
+    if (MSBY[def.id]) return;
+    try {
+      Object.assign(ACC, def.acc || {});
+      const m = {id: def.id, pack: def.pack, ic: def.ic || "📌", title: def.title, sub: def.sub || "", vb: "0 0 360 240", mod: autoMod(def), arts: def.arts || [], brief: def.brief || def.sit,
+        sit: def.sit, name: def.name, kw: def.kw || [], lessons: def.lessons || []};
+      MS.push(m); MSBY[m.id] = m;
+    } catch (e) { console.error("auto mission", def && def.id, e); }
+  });
+}
+function loadAuto(cb) {
+  if (window.SAPGAME_AUTO !== undefined || AUTO_ST.tried) { integrateAuto(); cb(); return; }
+  AUTO_ST.tried = true;
+  const sc = document.createElement("script");
+  sc.src = (window.SAPGAME_AUTO_SRC || "game_auto.js") + "?v=" + (window.SAPGAME_VER || "1");
+  sc.onload = () => { integrateAuto(); cb(); };
+  sc.onerror = () => { cb(); };   // 없으면 기본 의뢰만
+  document.head.appendChild(sc);
+}
+
 /* =============== 붙이기 · 떼기 =============== */
 window.SAPGAME = {
   mount(el, h) {
@@ -2392,7 +2503,8 @@ window.SAPGAME = {
     if (!document.getElementById("gmCss")) { const st = document.createElement("style"); st.id = "gmCss"; st.textContent = CSS; document.head.appendChild(st); }
     root.addEventListener("click", onClick); root.addEventListener("input", onInput); root.addEventListener("keydown", onKey);
     S = loadS(); theme();
-    renderHome();
+    root.innerHTML = '<div class="gm"><div class="gm-note">불러오는 중…</div></div>';
+    loadAuto(() => { if (alive && root) renderHome(); });
   },
   unmount() {
     alive = false; stopQ(); closeArt();
