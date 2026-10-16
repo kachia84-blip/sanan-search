@@ -515,16 +515,10 @@ const M1 = {
     return s;
   },
   eval(v) {
-    const c = [], top = v.top, mids = Math.round(v.mids), toe = v.toe;
-    const okT = top >= 90;
-    c.push({f: "rail_top", label: "상부 난간대 높이", ok: okT, dir: okT ? null : "up", val: fmt(top) + "cm", need: "90cm 이상", acc: "a_rail_low"});
-    let okM, nd;
-    if (top <= 120) { okM = mids >= 1; nd = "상부 120cm 이하 → 중간 난간대 1단 이상(중간 지점)"; }
-    else { const gap = top / (mids + 1); okM = mids >= 2 && gap <= 60; nd = "상부 120cm 이상 → 2단 이상 균등, 상하 간격 60cm 이하" + (mids >= 2 ? ` (지금 간격 ${Math.round(gap)}cm)` : ""); }
-    c.push({f: top <= 120 ? "rail_hi" : "rail_mid", f2: top > 120 ? "rail_gap" : null, label: "중간 난간대", ok: okM, dir: okM ? null : "up", dtxt: "▲ 단이 더 필요해요", val: mids + "단", need: nd, acc: "a_rail_gap"});
-    const okE = toe >= 10;
-    c.push({f: "rail_toe", label: "발끝막이판 높이", ok: okE, dir: okE ? null : "up", val: fmt(toe) + "cm", need: "10cm 이상", acc: "a_rail_toe"});
-    return c;
+    const mids = Math.round(v.mids);
+    return [exact("rail_top", "상부 난간대 높이", v.top, 90, "cm", "min", "a_rail_low", "90cm 이상"),
+      exact("rail_hi", "중간 난간대", mids, 1, "단", "min", "a_rail_gap", "상부 120cm 이하 → 중간 난간대 1단 (120cm 이상이면 2단 이상·상하 간격 60cm 이하)", {dtxt: mids > 1 ? "✘ 이 높이에서는 1단이 기준이에요" : "▲ 단이 더 필요해요"}),
+      exact("rail_toe", "발끝막이판 높이", v.toe, 10, "cm", "min", "a_rail_toe", "10cm 이상")];
   },
   async play(svg, v, res) {
     const Y0 = this.y0, GY = this.gy, w = R(svg, "w1"), w2 = R(svg, "w2");
@@ -727,12 +721,9 @@ const M3 = {
     return s;
   },
   eval(v) {
-    const c = [];
-    const o1 = v.dist <= 10, o2 = v.sag >= 12, o3 = v.over >= 3;
-    c.push({f: "net_dist", label: "작업면~망 수직거리", ok: o1, dir: o1 ? null : "down", val: fmt(v.dist) + "m", need: "10m 이하", acc: "a_net_far"});
-    c.push({f: "net_sag", label: "망의 처짐", ok: o2, dir: o2 ? null : "up", val: fmt(v.sag) + "%", need: "짧은 변의 12% 이상", acc: "a_net_taut"});
-    c.push({f: "net_over", label: "벽면에서 내민 길이", ok: o3, dir: o3 ? null : "up", val: fmt(v.over) + "m", need: "3m 이상", acc: "a_net_short"});
-    return c;
+    return [exact("net_dist", "작업면~망 수직거리", v.dist, 10, "m", "max", "a_net_far", "10m 이하"),
+      exact("net_sag", "망의 처짐", v.sag, 12, "%", "min", "a_net_taut", "짧은 변의 12% 이상"),
+      exact("net_over", "벽면에서 내민 길이", v.over, 3, "m", "min", "a_net_short", "3m 이상")];
   },
   async play(svg, v, res) {
     const PY = this.py, GY = this.gy, WX = this.wx, w = R(svg, "w1"), net = R(svg, "net"), post = R(svg, "post");
@@ -811,11 +802,9 @@ const M4 = {
     return s;
   },
   eval(v) {
-    const c = [], o1 = v.tilt <= 75, o2 = v.over >= 60, o3 = v.width >= 30;
-    c.push({f: "lad_tilt", label: "사다리 기울기", ok: o1, dir: o1 ? null : "down", val: fmt(v.tilt) + "°", need: "75도 이하", acc: "a_lad_back"});
-    c.push({f: "lad_over", label: "걸친 지점 위로 올라온 길이", ok: o2, dir: o2 ? null : "up", val: fmt(v.over) + "cm", need: "60cm 이상", acc: "a_lad_short"});
-    c.push({f: "lad_w", label: "사다리 폭", ok: o3, dir: o3 ? null : "up", val: fmt(v.width) + "cm", need: "30cm 이상", acc: "a_lad_narrow"});
-    return c;
+    return [exact("lad_tilt", "사다리 기울기", v.tilt, 75, "°", "max", "a_lad_back", "75도 이하"),
+      exact("lad_over", "걸친 지점 위로 올라온 길이", v.over, 60, "cm", "min", "a_lad_short", "60cm 이상"),
+      exact("lad_w", "사다리 폭", v.width, 30, "cm", "min", "a_lad_narrow", "30cm 이상")];
   },
   async play(svg, v, res) {
     const GY = this.gy, g = this.geo(v), lad = R(svg, "lad"), w = R(svg, "w1"), bad = a => res.some(c => !c.ok && c.acc === a);
@@ -893,12 +882,10 @@ const M5 = {
     return s;
   },
   eval(v) {
-    const c = [], o1 = v.col <= 1.85, o2 = v.bt <= 2, o3 = v.width >= 40, o4 = v.gap <= 3;
-    c.push({f: "col_b", label: "비계기둥 간격 (띠장 방향)", ok: o1, dir: o1 ? null : "down", val: fmt(v.col) + "m", need: "1.85m 이하", acc: "a_scaf_span"});
-    c.push({f: "bt_gap", label: "띠장 간격", ok: o2, dir: o2 ? null : "down", val: fmt(v.bt) + "m", need: "2.0m 이하", acc: "a_scaf_bt"});
-    c.push({f: "plat_w", label: "작업발판 폭", ok: o3, dir: o3 ? null : "up", val: fmt(v.width) + "cm", need: "40cm 이상", acc: "a_plat_narrow"});
-    c.push({f: "plat_gap", label: "발판재료 사이 틈", ok: o4, dir: o4 ? null : "down", val: fmt(v.gap) + "cm", need: "3cm 이하", acc: "a_plat_gap"});
-    return c;
+    return [exact("col_b", "비계기둥 간격 (띠장 방향)", v.col, 1.85, "m", "max", "a_scaf_span", "1.85m 이하"),
+      exact("bt_gap", "띠장 간격", v.bt, 2, "m", "max", "a_scaf_bt", "2.0m 이하"),
+      exact("plat_w", "작업발판 폭", v.width, 40, "cm", "min", "a_plat_narrow", "40cm 이상"),
+      exact("plat_gap", "발판재료 사이 틈", v.gap, 3, "cm", "max", "a_plat_gap", "3cm 이하")];
   },
   async play(svg, v, res) {
     const GY = this.gy, PY = this.py, w = R(svg, "w1"), g = R(svg, "scaf"), w2 = R(svg, "w2"), bad = a => res.some(c => !c.ok && c.acc === a);
@@ -943,6 +930,11 @@ const M5 = {
 
 /* =============== 새 편의 그림 부품 =============== */
 const ck = (f, label, ok, o) => Object.assign({f, label, ok}, o || {});
+// 숫자 답은 법에 나온 숫자 그대로여야 정답 (20m 이상이라고 써도 3m 이상 기준이면 틀림). 위험한 쪽으로 틀리면 사고, 지나치게 큰/작은 쪽은 '정확히' 안내만.
+const exact = (f, label, x, law, u, dir, acc, need, o) => {
+  const ok = Math.abs(x - law) < 1e-9, low = x < law, unsafe = dir === "min" || dir === "gt" ? low : dir === "max" || dir === "lt" ? !low : true;
+  return ck(f, label, ok, Object.assign({dir: ok ? null : low ? "up" : "down", val: fmt(x) + u, need: need || fmt(law) + u, acc: !ok && unsafe ? acc : null, dtxt: !ok && !unsafe ? "✘ 법의 숫자와 달라요 (정확히 외워요)" : undefined}, o || {}));
+};
 async function zap(svg, x1, y1, x2, y2, ms) {
   const p = document.createElementNS(NS, "polyline");
   p.setAttribute("fill", "none"); p.setAttribute("stroke", "#ffd84a"); p.setAttribute("stroke-width", "2.6"); p.setAttribute("stroke-linejoin", "round");
@@ -977,14 +969,10 @@ const M6 = {
     return s;
   },
   eval(v) {
-    const c = [];
     const o1 = v.v === 150;
-    c.push(ck("elb_v", "누전차단기 설치 대상 대지전압", o1, {dir: o1 ? null : v.v > 150 ? "down" : "up", val: fmt(v.v) + "V 초과", need: "150V 초과", acc: v.v > 150 ? "a_elb_none" : null}));
-    const o2 = v.ma <= 30 && v.ma > 0;
-    c.push(ck("elb_ma", "정격감도전류", o2, {dir: o2 ? null : "down", val: fmt(v.ma) + "mA", need: "30mA 이하", acc: "a_elb_slow"}));
-    const o3 = v.t <= 0.03 && v.t > 0;
-    c.push(ck("elb_t", "작동시간", o3, {dir: o3 ? null : "down", val: fmt(v.t) + "초", need: "0.03초 이내", acc: "a_elb_slow"}));
-    return c;
+    return [ck("elb_v", "누전차단기 설치 대상 대지전압", o1, {dir: o1 ? null : v.v > 150 ? "down" : "up", val: fmt(v.v) + "V 초과", need: "150V 초과", acc: v.v > 150 ? "a_elb_none" : null}),
+      exact("elb_ma", "정격감도전류", v.ma, 30, "mA", "max", "a_elb_slow", "30mA 이하"),
+      exact("elb_t", "작동시간", v.t, 0.03, "초", "max", "a_elb_slow", "0.03초 이내")];
   },
   async play(svg, v, res) {
     const w = R(svg, "w1"), lamp = R(svg, "lamp");
@@ -1109,7 +1097,7 @@ const M8 = {
   },
   eval(v) {
     const law = [30, 60, 90], ids = ["d1", "d2", "d3"], fs = ["ap_03", "ap_2", "ap_15"], accs = ["a_arc_lv", "a_arc_hv", "a_arc_xhv"], lab = ["380V 저압선", "6.6kV 고압선", "22.9kV 특고압선"];
-    return ids.map((id, i) => { const ok = v[id] >= law[i]; return ck(fs[i], lab[i] + " 접근 한계거리", ok, {dir: ok ? null : "up", val: fmt(v[id]) + "cm", need: law[i] + "cm", acc: accs[i]}); });
+    return ids.map((id, i) => exact(fs[i], lab[i] + " 접근 한계거리", v[id], law[i], "cm", "min", accs[i], law[i] + "cm"));
   },
   async play(svg, v, res) {
     const w = R(svg, "w1"), K = this.K, WY = this.wy, GY = this.gy, ids = ["d1", "d2", "d3"], law = [30, 60, 90];
@@ -1336,7 +1324,7 @@ const M12 = {
     return s;
   },
   fields() { return SOILS.map(so => ({id: so.id, t: "num", label: so.n + " — 굴착면 기울기 (높이 1 : 수평거리 ?)", unit: "", ph: "1 : 몇?", fact: so.fact, dec: true})); },
-  eval(v) { return SOILS.map(so => { const ok = v[so.id] >= so.law; return ck(so.fact, so.n + " 굴착면 기울기", ok, {dir: ok ? null : "up", val: "1 : " + fmt(v[so.id]), need: "1 : " + fmt(so.law) + " 이상 (더 완만)", acc: so.acc}); }); },
+  eval(v) { return SOILS.map(so => exact(so.fact, so.n + " 굴착면 기울기", v[so.id], so.law, "", "min", so.acc, "1 : " + fmt(so.law) + " 이상 (더 완만)", {val: "1 : " + fmt(v[so.id])})); },
   async play(svg, v, res) {
     const H = this.H, T = this.top;
     say("네 종류의 지반을 굴착하고 근로자가 바닥에서 작업합니다…");
@@ -1451,9 +1439,8 @@ const M14 = {
   },
   eval(v) {
     const t = v.txt || "", a = hasKw(t, ["방화포", "비산방지", "덮개", "불티", "차단막", "방호"]), b = hasKw(t, ["소화기", "소화"]), c = hasKw(t, ["화재감시자", "감시자", "감시인", "감시"]);
-    const okr = v.r >= 11;
     return [
-      ck("fire_r", "가연물 확인 반경", okr, {dir: okr ? null : "up", val: fmt(v.r) + "m", need: "11m (작업반경)", acc: "a_fire_spark"}),
+      exact("fire_r", "가연물 확인 반경", v.r, 11, "m", "min", "a_fire_spark", "11m (작업반경)"),
       ck("t_blanket", "불티 비산 방지(방화포·덮개)", a, {dtxt: "✘ 빠졌어요", val: a ? "있음" : "빠짐", need: "용접방화포·비산방지덮개", acc: "a_fire_spark"}),
       ck("t_ext", "소화기구 비치", b, {dtxt: "✘ 빠졌어요", val: b ? "있음" : "빠짐", need: "소화기구 비치", acc: "a_fire_nofx"}),
       ck("t_watch", "화재감시자 배치", c, {dtxt: "✘ 빠졌어요", val: c ? "있음" : "빠짐", need: "화재감시자 지정·배치", acc: "a_fire_nowatch"}),
@@ -1654,7 +1641,7 @@ const M17 = {
     {id: "d1", t: "num", label: "입자 상태(흄·분진·미스트) · 포위식", unit: "m/s", ph: "몇 m/s 이상?", fact: "hood_dust_enc"},
     {id: "d2", t: "num", label: "입자 상태 · 외부식 상방흡인형", unit: "m/s", ph: "몇 m/s 이상?", fact: "hood_dust_up"},
   ]; },
-  eval(v) { return HOODS.map(h => { const ok = v[h.id] >= h.law; return ck(h.fact, h.lab + " 제어풍속", ok, {dir: ok ? null : "up", val: fmt(v[h.id]) + "m/s", need: fmt(h.law) + "m/s 이상", acc: h.acc}); }); },
+  eval(v) { return HOODS.map(h => exact(h.fact, h.lab + " 제어풍속", v[h.id], h.law, "m/s", "min", h.acc, fmt(h.law) + "m/s 이상")); },
   async play(svg, v, res) {
     const GY = this.gy;
     say("네 작업장에서 유해물질이 발생합니다. 후드가 얼마나 잘 빨아들이는지 봐요…");
@@ -2174,7 +2161,11 @@ async function launch() {
   $("#gmGo").disabled = true; $("#gmRes").innerHTML = ""; root.querySelectorAll("input,textarea,.gm-chip,.gm-hint").forEach(e => e.disabled = true);
   drawScene(res); $("#gmSkip").hidden = false;
   window.scrollTo({top: Math.max(0, svgEl.getBoundingClientRect().top + window.scrollY - 70), behavior: REDUCE ? "auto" : "smooth"});
-  try { await m.mod.play(svgEl, cm.v, res, say); } catch (e) { console.error(e); }
+  try {
+    const noAcc = res.some(c => !c.ok) && !res.some(c => !c.ok && c.acc && ACC[c.acc]);
+    if (noAcc) { say("⚠️ 법의 숫자(기준)와 달라요. 정확한 값을 기억해야 안전해요."); sfx.bad(); pop(svgEl, 180, 60, "✘ 기준 불일치"); await wait(1100); }
+    else await m.mod.play(svgEl, cm.v, res, say);
+  } catch (e) { console.error(e); }
   if (!alive || scr !== "mis" || !cm) { busy = false; return; }
   busy = false; skip = false; $("#gmSkip").hidden = true;
   showResult(res);
@@ -2202,7 +2193,7 @@ function showResult(res) {
   } else { S.cur = 0; sfx.bad(); }
   save();
   const full = !pass && cm.att >= 2;
-  h += `<div class="gm-res"><div class="gm-stamp${pass ? "" : " bad"}">${pass ? "무사고!" : "사고 발생"}</div>`;
+  h += `<div class="gm-res"><div class="gm-stamp${pass ? "" : " bad"}">${pass ? "무사고!" : res.some(c => !c.ok && c.acc && ACC[c.acc]) ? "사고 발생" : "숫자가 달라요"}</div>`;
   if (pass) h += `<div class="gm-stars">${"★".repeat(stars)}<span class="z">${"★".repeat(3 - stars)}</span></div><div style="font-size:.85em;color:var(--sub)">${cm.att === 1 ? "한 번에 성공" + (cm.hints ? " · 힌트 " + cm.hints + "회" : "") : cm.att + "번째 시도" + (cm.hints ? " · 힌트 " + cm.hints + "회" : "")}${S.cur > 1 ? " · 🛡️ 무사고 " + S.cur + "연속" : ""}</div>`;
   newAcc.forEach(a => { h += `<span class="gm-new">📕 도감 등록! ${ACC[a].ic} ${esc(ACC[a].n)}</span>`; });
   h += `<ul class="gm-ck">`;
@@ -2443,8 +2434,7 @@ function autoMod(def) {
       def.fields.forEach((f, i) => {
         const id = "f" + i, x = v[id];
         if (f.t === "num") {
-          const ok = cmpN(x, f.a, f.dir || "eq"), up = (f.dir === "min" || f.dir === "gt") || (f.dir === "eq" && x < f.a);
-          c.push(ck(fid(i), f.label, ok, {dir: ok ? null : up ? "up" : "down", val: fmt(x) + (f.unit || ""), need: fmt(f.a) + (f.unit || "") + (DIRT[f.dir] ? " " + DIRT[f.dir] : ""), acc: ok ? null : f.acc}));
+          c.push(exact(fid(i), f.label, x, f.a, f.unit || "", f.dir || "eq", f.acc, fmt(f.a) + (f.unit || "") + (DIRT[f.dir] ? " " + DIRT[f.dir] : "")));
         } else if (f.t === "pick") {
           const ok = f.ok.includes(x);
           c.push(ck(null, f.label.slice(0, 22) + "…", ok, {noSrs: true, dtxt: "✘ 맞는 선택이 아니에요", val: (f.opts.find(o => o.id === x) || {}).t, need: f.ok.map(k => (f.opts.find(o => o.id === k) || {}).t).join(" 또는 "), acc: ok ? null : f.acc}));
@@ -2520,6 +2510,6 @@ window.SAPGAME = {
     if (root) { root.removeEventListener("click", onClick); root.removeEventListener("input", onInput); root.removeEventListener("keydown", onKey); root.innerHTML = ""; }
     root = null; cm = null; svgEl = null; sayEl = null;
   },
-  _t: {F, MS, ACC, NF, TF, M1, M2, M3, M4, M5, get S() { return S; }},
+  _t: {F, MS, ACC, NF, TF, M1, M2, M3, M4, M5, CONF_OPTS, EXC_OPTS, MSDS_OPTS, LOTO, MACH, PPE_CASES, PPE_OPTS, GAS, NOISE, HOODS, SOILS, MS_BRIEF: () => MS.map(m => ({id: m.id, title: m.title, sub: m.sub, arts: m.arts, lessons: m.lessons})), get S() { return S; }},
 };
 })();
