@@ -1025,11 +1025,14 @@ const LOTO = [
 const M7 = {
   draw(v) {
     let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 200, 360, 40);
+    // 전로는 고정하고, 통전 강조만 기존 스위치 위치에 연동한다.
+    s += `<style>[data-r="panel"]:has([data-r="handle"][y="112"]) ~ .gm-loto-current { opacity:0; }</style><path d="M216 170 V214 H310 V194" fill="none" stroke="var(--gm-steel)" stroke-width="7"/><path d="M216 170 V214 H310 V194" fill="none" stroke="#1d2433" stroke-width="3"/>`;
     s += `<g data-r="panel">` + rc("g-conc2", 120, 40, 120, 150, 'rx="6"') + rc("", 130, 50, 100, 120, 'rx="3" fill="#1d2433"');
     s += `<text x="180" y="66" text-anchor="middle" font-size="9" font-weight="800" fill="#cde4ff">분전반</text>`;
     s += `<rect data-r="handle" x="172" y="84" width="16" height="42" rx="3" fill="#e5484d"/><text data-r="onoff" x="180" y="150" text-anchor="middle" font-size="10" font-weight="900" fill="#ffd84a">ON</text></g>`;
     s += `<g data-r="lockicon" opacity="0"><rect x="190" y="104" width="22" height="18" rx="3" fill="#ffd21f"/><path d="M195 104 v-6 a6 6 0 0 1 12 0 v6" stroke="#ffd21f" stroke-width="3" fill="none"/><rect x="194" y="126" width="16" height="10" fill="#fff" stroke="#e5484d"/></g>`;
     s += rc("g-steel", 280, 150, 60, 50, 'rx="6"') + `<text x="310" y="180" text-anchor="middle" font-size="9" font-weight="800" fill="#fff">전동기</text>`;
+    s += `<g class="gm-loto-current" fill="none" stroke="#ffd84a" stroke-width="2.5"><path d="M216 190 V214 H310 V200 M235 210 l5 4 -5 4 M274 210 l5 4 -5 4"/><circle cx="221" cy="80" r="4" fill="#ffd84a"/></g><text x="263" y="233" text-anchor="middle" font-size="9" fill="var(--gm-steel)">전원 케이블</text><path d="M288 155 v12 m7 -12 v12 m7 -12 v12 m7 -12 v12 m7 -12 v12 m7 -12 v12 M286 194 h48" stroke="#1d2433" stroke-width="2"/><path d="M92 119 L163 99 m-7 -3 l7 3 -4 6" fill="none" stroke="#e5484d" stroke-width="1.5" stroke-dasharray="4 3"/><text x="66" y="104" text-anchor="middle" font-size="10" fill="#e5484d">켜도 되나?</text>`;
     s += wkr("w2", 70, 200, 70, {vest: "#3b82f6", hat: "#fff"});
     s += wkr("w1", 262, 200, 70);
     return s;
@@ -1335,9 +1338,14 @@ const M12 = {
       s += `<polygon points="${x0 + 12 + run},${T + H} ${x0 + 80},${T + H} ${x0 + 80},${T + H + 40} ${x0},${T + H + 40} ${x0},${T}" fill="none"/></g>`;
       // 굴착면 (트렌치 단면): 땅속 그림 + 비어 있는 구멍
       s += `<polygon points="${x0},${T} ${x0 + 80},${T} ${x0 + 80},${T + H + 14} ${x0},${T + H + 14}" fill="${so.col}"/>`;
+      // 구멍보다 먼저 그려 토질 질감이 굴착 공간을 침범하지 않게 한다.
+      if (i === 0 || i === 3) for (let k = 0; k < 30; k++) s += `<ellipse cx="${x0 + 4 + k % 10 * 8}" cy="${T + 7 + Math.floor(k / 10) * 24 + k % 3 * 3}" rx="${i === 0 ? 1 : 2.5}" ry="${i === 0 ? 1 : 1.5}" fill="#1d2433" opacity=".35"/>`;
+      else s += `<path d="M${x0 + 2} ${T + 15} l20 8 14 -7 20 8 20 -6 M${x0 + 3} ${T + 43} l17 -9 24 12 18 -9 16 9 M${x0 + 22} ${T + 23} l-2 11 M${x0 + 56} ${T + 24} l6 13" fill="none" stroke="${i === 2 ? '#fff' : '#1d2433'}" stroke-opacity=".45" stroke-width="${i === 2 ? 2 : 1}"/>`;
       s += `<polygon data-r="hole${i}" points="${x0 + 80},${T} ${x0 + 80 - 4 - run * 0},${T} ${x0 + 14},${T} ${x0 + 14 + run},${T + H} ${x0 + 80},${T + H}" fill="var(--gm-void)" opacity="0"/>`;
       s += `<polygon points="${x0 + 14},${T} ${x0 + 14 + run},${T + H} ${x0 + 80},${T + H} ${x0 + 80},${T}" fill="var(--gm-void)"/>`;
       s += `<line x1="${x0 + 14}" y1="${T}" x2="${x0 + 14 + run}" y2="${T + H}" stroke="#000" stroke-opacity=".35" stroke-width="1.5"/>`;
+      s += `<path d="M${x0 + 7} ${T - 2} l-3 8 5 5 -4 8" fill="none" stroke="#1d2433" stroke-width="1.8"/>`;
+      if (r < so.law) s += `<path d="M${x0 + 6} ${T - 7} v-10 h25" fill="none" stroke="#e5484d" stroke-dasharray="3 2"/><text x="${x0 + 34}" y="${T - 14}" font-size="9" fill="#e5484d">균열</text><path d="M${x0 + 18 + run * .5} ${T + 28} l5 2 -2 5 -5 -2z" fill="${so.col}" stroke="#1d2433"/><path d="M${x0 + 23 + run * .5} ${T + 38} l4 5" stroke="#e5484d" stroke-dasharray="2 2"/>`;
       s += `<text x="${x0 + 40}" y="${T + H + 30}" text-anchor="middle" class="g-tag">${so.n}</text>`;
       s += `<text x="${x0 + 40}" y="${T + H + 43}" text-anchor="middle" class="g-tag">${Number.isFinite(v[so.id]) ? "1 : " + fmt(v[so.id]) : "1 : ?"}</text>`;
       s += wkr("w" + i, x0 + 62, T + H, 30);
@@ -1599,8 +1607,13 @@ const M16 = {
       s += panelBox(x, 68, 10, 220);
       s += `<text x="${cx}" y="36" text-anchor="middle" font-size="15" font-weight="900" fill="var(--ink)">${n.db}dB</text>`;
       s += `<text x="${cx}" y="52" text-anchor="middle" class="g-cap">하루 ${n.exp}</text><text x="${cx}" y="63" text-anchor="middle" class="g-cap">일하면…</text>`;
-      for (let k = 0; k < 3; k++) s += `<path d="M${cx - 12 - k * 6} ${96 - k * 5} q${12 + k * 6} ${-16 - k * 6} ${24 + k * 12} 0" fill="none" stroke="#e5484d" stroke-width="2" opacity="${.9 - k * .25}"/>`;
-      s += `<text x="${cx}" y="116" text-anchor="middle" font-size="20">🔊</text>`;
+      for (let k = 0; k < 1 + Math.ceil(i / 2); k++) s += `<path d="M${cx - 12 - k * 6} ${96 - k * 5} q${12 + k * 6} ${-16 - k * 6} ${24 + k * 12} 0" fill="none" stroke="#e5484d" stroke-width="${1 + i * .4}" opacity="${.55 + i * .1 - k * .12}"/>`;
+      s += `<g transform="translate(${cx} 108)" stroke="var(--gm-steel)" stroke-width="2"><path d="M-22 13 H22 M-18 13 v-8 M18 13 v-8" fill="none"/>`;
+      if (i === 0) s += `<rect x="-20" y="-8" width="31" height="18" rx="4" fill="var(--gm-conc2)"/><circle cx="-10" cy="1" r="6" fill="var(--gm-void)"/><path d="M13 -4 h8 v9 h-8 M-1 -5 v12 M4 -5 v12" fill="none"/>`;
+      else if (i === 2) s += `<rect x="-20" y="2" width="40" height="7" fill="var(--gm-conc2)"/><circle cx="-6" cy="-3" r="10" fill="var(--gm-conc2)"/><circle cx="-6" cy="-3" r="3" fill="var(--gm-void)"/><path d="M5 -2 l12 -4 M7 1 l13 3" stroke="#ffd84a"/>`;
+      else s += `<path d="M-18 10 v-25 h36 v25 M-18 -12 h36 M0 -12 v9" fill="none" stroke-width="4"/><rect x="-9" y="-4" width="18" height="6" fill="var(--gm-conc2)"/><path d="M-12 7 h24" stroke="#ffd84a" stroke-width="4"/>`;
+      s += `</g>`;
+      if (i > 2) s += `<path d="M${cx + 20} 132 l-5 7 h5 l-5 8" fill="none" stroke="#e5484d" stroke-width="${i - 1}"/>`;
       s += wkr("w" + i, cx, 192, 62);
       s += `<text data-r="ear${i}" x="${cx}" y="150" text-anchor="middle" font-size="20" opacity="0">🎧</text>`;
       s += `<text x="${cx}" y="212" text-anchor="middle" class="g-tag" style="stroke:none">${Number.isFinite(val) ? "기준 " + fmt(val) + n.u : "기준 ?"}</text>`;
@@ -1652,6 +1665,9 @@ const M17 = {
       s += `<text x="${cx}" y="24" text-anchor="middle" class="g-tag" style="stroke:none">${h.lab}</text>`;
       // 발생원
       s += h.gas ? `<path d="M${cx - 22} ${GY - 22} h14 l-2 22 h-10z" fill="#9fd0ee" stroke="#4a8db8"/>` : `<polygon points="${cx - 26},${GY} ${cx - 15},${GY - 16} ${cx - 4},${GY}" fill="#b89b6b"/>`;
+      s += `<text x="${cx}" y="48" text-anchor="middle" font-size="9" fill="var(--gm-steel)">${h.gas ? '용제 증기' : '발생 분진'}</text><path d="M${cx - 23} ${GY - 25} q-9 -12 1 -17 q-6 -14 7 -15 q13 -3 12 10 q10 10 -3 17z" fill="${h.gas ? '#8bbf5a' : '#9a8f7a'}" fill-opacity=".3" stroke="var(--gm-steel)" stroke-opacity=".5"/>`;
+      if (!h.gas) for (let k = 0; k < 9; k++) s += `<circle cx="${cx - 26 + k % 3 * 8}" cy="${GY - 29 - Math.floor(k / 3) * 10}" r="${1 + k % 2}" fill="var(--gm-steel)"/>`;
+      if (val < h.law) s += `<path d="M${cx - 10} ${GY - 30} Q${cx + 3} ${GY - 54} ${cx + 21} ${GY - 39} m-7 -1 l7 1 -2 -7" fill="none" stroke="#e5484d" stroke-width="2" stroke-dasharray="4 2"/><text x="${cx + 19}" y="${GY - 60}" text-anchor="middle" font-size="9" fill="#e5484d">누출</text>`;
       // 후드
       if (h.kind === "enc") s += `<path d="M${cx - 32} ${GY} v-52 h38 v6" fill="none" stroke="var(--gm-steel)" stroke-width="4"/>`;
       if (h.kind === "side") s += `<polygon points="${cx - 42},${GY - 46} ${cx - 34},${GY - 40} ${cx - 34},${GY - 8} ${cx - 42},${GY - 2}" fill="var(--gm-steel)"/>`;
@@ -1701,6 +1717,8 @@ const M18 = {
   draw(v) {
     const X0 = this.X0, MX = this.MX, mark = d => X0 + d / 30 * MX, T = (x, y, t, an) => `<text x="${x}" y="${y}" ${an ? `text-anchor="${an}"` : ""} class="g-tag">${t}</text>`;
     let s = rc("g-in", 0, 0, 360, 250);
+    // 일정 좌표를 유지하고 우측 여백에 노출 공정을 작은 단면으로 넣는다.
+    s += `<g stroke="var(--gm-steel)" stroke-width="1.5"><path d="M332 52 H356 V177 H332Z" fill="var(--gm-conc2)"/><path d="M336 78 v-12 h16 v12z M340 66 v-6 h8 v6 M339 81 q-4 3 0 6 m8 -6 q-4 3 0 6" fill="none"/><path d="M336 128 v-16 h16 v16 M336 116 h16 M344 116 v7 M334 130 h20 M338 109 q6 -7 12 0" fill="none"/><path d="M336 165 l8 -16 8 16z" fill="#ffd84a" stroke="#1d2433"/><path d="M344 154 v6 m0 2 v1" stroke="#1d2433"/></g><text x="344" y="57" text-anchor="middle" font-size="9" fill="var(--gm-steel)">노출</text><text x="344" y="100" text-anchor="middle" font-size="9" fill="var(--gm-steel)">증기</text><text x="344" y="143" text-anchor="middle" font-size="9" fill="var(--gm-steel)">소음</text>`;
     s += `<text x="12" y="18" class="g-cap">작업환경측정 일정 (가로축 = 달력, 1칸 = 1개월)</text>`;
     for (let m = 0; m <= 12; m++) s += `<line x1="${X0 + m * MX}" y1="${m % 6 === 0 ? 26 : 30}" x2="${X0 + m * MX}" y2="34" stroke="var(--sub)" stroke-width="${m % 6 === 0 ? 1.6 : 1}"/><text x="${X0 + m * MX}" y="46" text-anchor="middle" class="g-cap">${m}</text>`;
     s += `<line x1="${X0}" y1="34" x2="${X0 + 12 * MX}" y2="34" stroke="var(--sub)"/>`;
@@ -1768,11 +1786,18 @@ const M19 = {
     const sel = v.sel || [], has = id => sel.includes(id);
     let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 192, 360, 48);
     s += rc("g-conc2", 24, 70, 200, 8, 'rx="2"') + rc("g-conc2", 24, 124, 200, 8, 'rx="2"');
+    s += `<path d="M28 78 v46 M216 78 v46 M28 132 v60 M216 132 v60" stroke="var(--gm-steel)" stroke-width="4"/><rect x="32" y="138" width="184" height="46" rx="3" fill="#1d2433" stroke="#ffd84a"/><path d="M40 157 l8 -14 8 14z" fill="#ffd84a"/><path d="M48 147 v5 m0 2 v1" stroke="#1d2433" stroke-width="1.5"/><text x="64" y="154" font-size="10" fill="#ffd84a">임의 혼합 금지</text><text x="42" y="175" font-size="9" fill="#fff">${has('label') ? '물질별 경고표시 확인' : '? = 경고표시 없음'}</text>`;
     const cols = ["#3b82f6", "#e5484d", "#f5b50a", "#12a37f", "#a855f7", "#e5484d"];
     [0, 1, 2, 3, 4, 5].forEach(i => { const y = i < 3 ? 70 : 124, x = 36 + (i % 3) * 60; s += `<rect x="${x}" y="${y - 38}" width="26" height="38" rx="5" fill="${cols[i]}"/><rect x="${x + 8}" y="${y - 46}" width="10" height="9" fill="#555"/>` + (has("label") ? `<rect x="${x + 3}" y="${y - 28}" width="20" height="14" fill="#fff"/><path d="M${x + 13} ${y - 26} l-5 9 h10z" fill="#e5484d"/>` : `<text x="${x + 13}" y="${y - 14}" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">?</text>`); });
     if (has("board")) s += rc("", 240, 56, 56, 74, 'rx="4" fill="#fff" stroke="#6b7684"') + `<text x="268" y="78" text-anchor="middle" font-size="9" font-weight="900" fill="#1d2433">MSDS</text><path d="M248 88 h40 M248 98 h40 M248 108 h30" stroke="#9aa3b5" stroke-width="2"/>`;
-    if (has("proc")) s += rc("", 304, 56, 46, 40, 'rx="3" fill="#ffe9a8" stroke="#c98d00"') + `<text x="327" y="80" text-anchor="middle" font-size="8" font-weight="900" fill="#5b3d00">관리요령</text>`;
-    if (has("ppe")) s += rc("", 304, 102, 46, 30, 'rx="3" fill="#dff6ec" stroke="#12a37f"') + `<text x="327" y="121" text-anchor="middle" font-size="8" font-weight="900" fill="#0a5b44">보호구·응급</text>`;
+    if (has("label")) [0, 1, 2, 3, 4, 5].forEach(i => {
+      const x = 49 + i % 3 * 60, y = (i < 3 ? 70 : 124) - 21;
+      s += `<g transform="translate(${x} ${y})"><path d="M0 -9 l9 9 -9 9 -9 -9z" fill="#fff" stroke="#e5484d" stroke-width="1.5"/>`;
+      s += i % 2 ? `<path d="M-4 5 Q-7 1 -2 -3 L0 -6 L2 0 L4 -2 Q8 5 0 6Z" fill="#1d2433"/>` : `<circle cy="-2" r="4" fill="#1d2433"/><path d="M-4 4 l8 3 m-8 0 l8 -3" stroke="#1d2433" stroke-width="1.5"/><path d="M-2 -2 h1 m2 0 h1" stroke="#fff"/>`;
+      s += `</g>`;
+    });
+    if (has("proc")) s += rc("", 304, 56, 46, 40, 'rx="3" fill="#ffe9a8" stroke="#c98d00"') + `<text x="327" y="80" text-anchor="middle" font-size="9" font-weight="900" fill="#5b3d00">관리요령</text>`;
+    if (has("ppe")) s += rc("", 304, 102, 46, 30, 'rx="3" fill="#dff6ec" stroke="#12a37f"') + `<text x="327" y="114" text-anchor="middle" font-size="9" font-weight="900" fill="#0a5b44">보호구</text><text x="327" y="126" text-anchor="middle" font-size="9" font-weight="900" fill="#0a5b44">응급조치</text>`;
     s += wkr("w1", 270, 192, 70);
     sel.forEach((id, i) => { const o = MSDS_OPTS.find(x => x.id === id); s += `<text x="${12 + i * 26}" y="22" font-size="16">${o.ic}</text>`; });
     return s;
@@ -1821,6 +1846,14 @@ const M20 = {
       s += panelBox(x, 68, 10, 220);
       s += `<text x="${cx}" y="44" text-anchor="middle" font-size="26">${c.ic}</text>`;
       s += `<text x="${cx}" y="62" text-anchor="middle" class="g-cap">${["탱크 내부", "유기용제", "분진", "소음", "부식성"][i]}</text>`;
+      s += `<g stroke="var(--gm-steel)" stroke-width="1.5">`;
+      if (i === 0) s += `<path d="M${cx - 25} 179 V82 q25 -17 50 0 v97 M${cx - 25} 179 q25 14 50 0" fill="var(--gm-conc2)"/><path d="M${cx - 10} 73 v-5 h20 v5 M${cx + 18} 87 v89 m-6 -78 h6 m-6 12 h6 m-6 12 h6" fill="none"/><path d="M${cx - 21} 163 q18 -12 40 0" fill="none" stroke="#8bbf5a" stroke-width="8" stroke-opacity=".35"/>`;
+      if (i === 1 || i === 4) s += `<path d="M${cx - 23} 95 v-17 h17 v17z M${cx - 20} 78 v-5 h10 v5 M${cx - 26} 97 h51" fill="var(--gm-conc2)"/><path d="M${cx - 2} 90 q8 -12 17 -4" fill="none" stroke="${i === 1 ? '#8bbf5a' : '#e5484d'}" stroke-width="4" stroke-opacity=".55"/>`;
+      if (i === 2) s += `<path d="M${cx - 24} 97 l12 -19 12 19z" fill="var(--gm-conc2)"/><path d="M${cx - 8} 92 q-10 -12 3 -16 q6 -10 15 -2 q13 0 12 12 q0 11 -19 9z" fill="var(--gm-steel)" fill-opacity=".2"/>`;
+      if (i === 3) s += `<path d="M${cx - 23} 97 V74 h28 v23 M${cx - 23} 79 h28 M${cx - 9} 79 v10 M${cx - 17} 94 h16 M${cx + 11} 79 q8 7 0 14 m5 -18 q13 11 0 22" fill="none"/><path d="M${cx - 14} 89 h10" stroke="#ffd84a" stroke-width="4"/>`;
+      s += `</g>`;
+      if (i === 1 || i === 2) for (let k = 0; k < 8; k++) s += `<circle cx="${cx - 22 + k % 2 * 43}" cy="${118 + Math.floor(k / 2) * 16}" r="${i === 1 ? 4 : 1.8}" fill="var(--gm-steel)" opacity=".35"/>`;
+      if (i === 4) s += `<path d="M${cx + 12} 124 l3 6 -6 0z M${cx - 21} 140 l3 6 -6 0z M${cx + 20} 158 l3 6 -6 0z" fill="#e5484d"/>`;
       s += wkr("w" + i, cx, 190, 70);
       s += `<text data-r="ic${i}" x="${cx}" y="${190 - 74}" text-anchor="middle" font-size="22">${o ? o.ic : ""}</text>`;
       s += `<text x="${cx}" y="212" text-anchor="middle" class="g-tag" style="stroke:none">${o ? o.s : "?"}</text>`;
