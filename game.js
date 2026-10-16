@@ -445,7 +445,7 @@ const CSS = `
 function wkr(name, x, y, h, o) {
   o = o || {};
   const vest = o.vest || "#ff8a1f", hat = o.hat || "#ffd21f", k = (h / 99).toFixed(4);
-  return `<g data-wk="${name}" data-r="${name}" data-h="${h}" data-k="${k}" transform="translate(${x} ${y}) scale(${k})">` +
+  return `<g data-wk="${name}" data-r="${name}" data-h="${h}" data-k="${k}" data-x="${x}" data-y="${y}" transform="translate(${x} ${y}) scale(${k})">` +
     `<rect x="-6.5" y="-46" width="5.8" height="43" rx="2.4" fill="#34425e"/><rect x="0.7" y="-46" width="5.8" height="43" rx="2.4" fill="#34425e"/>` +
     `<rect x="-8" y="-4" width="8" height="4" rx="1.5" fill="#1d2433"/><rect x="0" y="-4" width="8" height="4" rx="1.5" fill="#1d2433"/>` +
     `<path d="M-10 -73 L-17 -50" stroke="${vest}" stroke-width="6" stroke-linecap="round"/><path d="M10 -73 L17 -50" stroke="${vest}" stroke-width="6" stroke-linecap="round"/>` +
@@ -2441,6 +2441,10 @@ function autoMod(def) {
       });
     },
     draw(v) {
+      if (def.svg) {
+        const ind = def.svgbg === "indoor";
+        return (ind ? rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, GY, 360, 44) : rc("g-sky", 0, 0, 360, 240) + rc("g-grnd", 0, GY, 360, 44)) + svgTpl(def, v);
+      }
       const th = THEMES[def.theme] || THEMES[THEME_FALLBACK[SC.bg] || "factory"];
       let s = th() + autoSprites(def) + wkr("w1", 70, GY, 78);
       let y = 20;
@@ -2484,19 +2488,34 @@ function autoMod(def) {
     async play(svg, v, res) {
       const w = R(svg, "w1");
       say("상황이 시작됩니다…");
-      await walk(w, 70, 112, GY, 800);
+      const X0 = +w.dataset.x, Y0 = +w.dataset.y, own = !!def.svg;
+      if (!own) await walk(w, 70, 112, GY, 800); else await wait(700);
+      const bx = own ? X0 : 112, by = own ? Y0 : GY;
       const bad = res.find(c => !c.ok && c.acc && ACC[c.acc]);
       if (bad) {
         sfx.bad();
-        const fx = ownEl(svg, `<text x="170" y="120" text-anchor="middle" font-size="40">${ACC[bad.acc].ic || "💥"}</text>`, "fx");
-        await tw(700, t => { fx.firstChild.setAttribute("font-size", 40 + 70 * Math.sin(t * Math.PI / 2)); fx.firstChild.setAttribute("x", 150 + 40 * t); });
-        hurt(w); shake(); sfx.thud(); pop(svg, 112, 100, "쿵!");
-        await tw(450, t => setT(w, 112, GY, 80 * t));
+        const fx = ownEl(svg, `<text x="${bx + 30}" y="${by - 50}" text-anchor="middle" font-size="40">${ACC[bad.acc].ic || "💥"}</text>`, "fx");
+        await tw(700, t => { fx.firstChild.setAttribute("font-size", 40 + 60 * Math.sin(t * Math.PI / 2)); fx.firstChild.setAttribute("x", bx + 30 + 24 * t); });
+        hurt(w); shake(); sfx.thud(); pop(svg, bx, by - 80, "쿵!");
+        await tw(450, t => setT(w, bx, by, 80 * t));
         say("💥 " + ACC[bad.acc].n + " — " + ACC[bad.acc].tip);
       } else if (!allOk(res)) generic(svg, res);
-      else { sfx.ok(); pop(svg, 150, 110, "✔ 안전!", "#12a37f"); say("🟢 " + (def.okMsg || "기준을 정확히 지켜 안전하게 마쳤습니다.")); }
+      else { sfx.ok(); pop(svg, own ? X0 + 30 : 150, own ? Y0 - 80 : 110, "✔ 안전!", "#12a37f"); say("🟢 " + (def.okMsg || "기준을 정확히 지켜 안전하게 마쳤습니다.")); }
     },
   };
+}
+/* 의뢰별 그림 틀(def.svg): [[W x y 높이 색]] = 작업자, {{식}} = 계산(f0~f4=입력값), {f0} = 입력값 글자 */
+const SVG_OK = /^[0-9f+\-*/(). ,a-z]+$/;
+function svgTpl(def, v) {
+  const dv = def.defaults || {}, vals = {};
+  (def.fields || []).forEach((f, i) => { const x = v["f" + i]; vals["f" + i] = f.t === "num" ? (Number.isFinite(x) ? x : (dv["f" + i] !== undefined ? dv["f" + i] : 0)) : 0; });
+  const shown = i => { const f = def.fields[i], x = v["f" + i]; return f && f.t === "num" && Number.isFinite(x) ? fmt(x) : "?"; };
+  let n = 0, out = String(def.svg || "");
+  out = out.replace(/\[\[W\s+([\d.\-]+)\s+([\d.\-]+)\s+([\d.\-]+)(?:\s+(\w+))?\]\]/g, (m, x, y, h, c) => wkr("w" + (++n), +x, +y, +h, c === "blue" ? {vest: "#3b82f6", hat: "#fff"} : c === "green" ? {vest: "#12a37f", hat: "#fff"} : {}));
+  out = out.replace(/\{\{([^{}]+)\}\}/g, (m, ex) => { try { if (!SVG_OK.test(ex)) return "0"; const r = new Function("f0", "f1", "f2", "f3", "f4", "min", "max", "return (" + ex + ")")(vals.f0, vals.f1, vals.f2, vals.f3, vals.f4, Math.min, Math.max); return Number.isFinite(r) ? (+r).toFixed(1) : "0"; } catch (e) { return "0"; } });
+  out = out.replace(/\{f(\d)\}/g, (m, i) => shown(+i));
+  if (!/data-wk=/.test(out)) out += wkr("w1", 60, GY, 78);
+  return out;
 }
 const AUTO_ST = {loaded: false, cb: []};
 function integrateAuto() {
