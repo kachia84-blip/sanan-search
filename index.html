@@ -904,7 +904,7 @@ function delegOf(a, hang, kind) {
   if (!to) return null;
   const pick = key => (deleg[a.lid + " " + key] || []).filter(x => to.includes(x.lid));
   let exact = hang ? pick(a.no + "|" + hang) : [];
-  // 시행령 제18조처럼 "법 제75조제1항에 따른 … 노사협의체(이하 "노사협의체"라 한다)" 하고 용어만 정의하며 인용한 조문은
+  // 시행령 제18조처럼 "법 제75조제1항에 따른 … 노사협의체(이하 "노사협의체"라 한다)" 하고 용어만 정의하며 인용한 조문, 권한의 위임·업무의 위탁 같은 공통 조문은
   // 위임받아 정한 조문이 아니므로, 위임 조문이 따로 있으면 '같은 조문을 인용한 다른 조문' 쪽으로 내린다
   const defOnly = x => {
     const re = new RegExp("법 " + reEsc(a.no) + (hang ? "제" + hang + "항" : "(?!의\\d)") + "([^\\n]{0,100}?\\(이하 \"[^\"]+\"(?:이?라 한다)\\))?", "g");
@@ -912,7 +912,8 @@ function delegOf(a, hang, kind) {
     while ((m = re.exec(x.text))) { n++; if (m[1]) d++; }
     return n > 0 && n === d;
   };
-  const real = exact.filter(x => !defOnly(x));
+  const boiler = x => /^(권한의 위임|업무의 위탁|권한의 위임ㆍ위탁|민감정보 및 고유식별정보의 처리|규제의 재검토)/.test(x.title || "");   // 거의 모든 조문을 인용하는 공통 조문
+  const real = exact.filter(x => !defOnly(x) && !boiler(x));
   const demoted = real.length && real.length < exact.length ? exact.filter(x => !real.includes(x)) : [];
   if (demoted.length) exact = real;
   const seen = new Set(exact.concat(demoted));
