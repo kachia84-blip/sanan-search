@@ -324,10 +324,17 @@ const CSS = `
 .gm-alert .sir{animation:gmsir 1s infinite}
 @keyframes gmsir{50%{transform:scale(1.25) rotate(-8deg)}}
 .gm-guide{margin-top:12px;background:var(--panel);border-radius:16px;padding:12px 14px;font-size:.9em;line-height:1.6;box-shadow:var(--shadow,none)}
-.gm-guide b:first-child{display:block;margin-bottom:2px}
+.gm-guide>b:first-child{display:block;margin-bottom:2px}
 .gm-guide div b{color:var(--accent)}
 .gm-rnd{background:linear-gradient(135deg,#1c3b73,#2a9d8f);color:#fff}.gm-rnd .gm-mn{background:rgba(255,255,255,.2)}.gm-rnd small{color:rgba(255,255,255,.8)}
 .gm-rnd2 .gm-mn{background:#fff3cf}
+.gm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.gm-tile{position:relative}
+.gm-tb{width:100%;text-align:left;border:0;background:var(--panel);color:var(--ink);border-radius:16px;padding:11px 12px;display:flex;flex-direction:column;gap:1px;min-height:74px;box-shadow:var(--shadow,0 1px 2px rgba(0,0,0,.05));transition:transform .15s}
+.gm-tb:active{transform:scale(.97)}
+.gm-tb .ic{font-size:1.4em;line-height:1.2}.gm-tb b{letter-spacing:-.03em;font-size:.95em}.gm-tb small{color:var(--sub);font-size:.78em}
+.gm-tile.open .gm-tb{outline:2px solid var(--accent)}
+.gm-tl{position:absolute;top:7px;right:7px;border:0;background:var(--fill,#f2f4f6);color:var(--sub);border-radius:9px;width:30px;height:30px;font-weight:800}
 .gm-fold{display:block;width:100%;border:0;background:none;color:var(--sub);font-weight:700;padding:2px 6px 8px;text-align:left;font-size:.86em}
 .gm-rtag{display:inline-block;background:#fff3cf;color:#5b3d00;border-radius:99px;padding:1px 10px;font-size:.82em;font-weight:800;margin-right:6px}
 .gm-modal{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
@@ -2040,13 +2047,18 @@ function renderHome() {
   if (due.length) h += `<button type="button" class="gm-alert" data-a="redo"><span class="sir">🚨</span><span>속보: 재발 사고 ${due.length}건!<small>잊어버릴 때쯤 같은 사고가 또 터졌어요. 지금 출동</small></span></button>`;
   if (!cleared) h += `<div class="gm-guide"><b>이렇게 해요</b><div>① 의뢰를 고르면 현장 그림이 나와요</div><div>② <b>기준 숫자를 보기 없이 직접 입력</b>하면 그림이 바로 바뀌어요</div><div>③ <b>착공!</b>을 누르면 결과가 눈앞에서 벌어져요. 틀리면 사고가 나고, 사고는 <b>도감</b>에 모여요</div><div>④ 틀린 숫자는 며칠 뒤 <b>재발 사고</b>로 다시 터져요. 그때 또 맞히면 완전히 내 것!</div></div>`;
   h += `<div class="gm-sec">🎲 랜덤 현장</div><button type="button" class="gm-mc gm-rnd" data-a="rand" data-pack="all"><span class="gm-mn">🎲</span><span class="gm-mt"><b>아무 현장이나 순찰</b><small>모든 편에서 랜덤으로 상황이 터져요 · 약한 곳이 더 자주 나와요</small></span><span class="gm-ms" style="color:#fff">▶</span></button>`;
+  // 편은 2열 타일로 촘촘하게: 타일을 누르면 그 편의 랜덤 상황, ≡ 를 누르면 의뢰 목록(한 번에 한 편만 펼침)
+  h += `<div class="gm-sec">편 선택 · 누르면 랜덤 상황이 터져요</div><div class="gm-grid">`;
   PACKS.forEach(pk => {
-    const list = MS.map((m, i) => [m, i]).filter(x => x[0].pack === pk.id), n = list.filter(x => S.stars[x[0].id]).length;
-    h += `<div class="gm-sec">${pk.ic} ${pk.n} · ${n}/${list.length}</div>`;
-    h += `<button type="button" class="gm-mc gm-rnd2" data-a="rand" data-pack="${pk.id}"><span class="gm-mn">🎲</span><span class="gm-mt"><b>${pk.n} 랜덤 상황</b><small>${list.length}가지 상황 중 하나가 갑자기 발생해요</small></span><span class="gm-ms" style="color:var(--accent)">▶</span></button>`;
-    h += `<button type="button" class="gm-fold" data-a="fold" data-pack="${pk.id}">${openPacks[pk.id] ? "▾ 의뢰 목록 접기" : "▸ 골라서 하기 (의뢰 " + list.length + "개)"}</button>`;
-    if (openPacks[pk.id]) list.forEach(([m, i]) => { h += `<button type="button" class="gm-mc" data-a="mis" data-id="${m.id}"><span class="gm-mn">${m.ic}</span><span class="gm-mt"><b>${i + 1}. ${m.title}</b><small>${m.sub}</small></span>${starStr(S.stars[m.id] || 0)}</button>`; });
+    const list = MS.filter(m => m.pack === pk.id), n = list.filter(m => S.stars[m.id]).length;
+    h += `<div class="gm-tile${openPacks[pk.id] ? " open" : ""}"><button type="button" class="gm-tb" data-a="rand" data-pack="${pk.id}"><span class="ic">${pk.ic}</span><b>${pk.n}</b><small>🎲 · ★ ${n}/${list.length}</small></button><button type="button" class="gm-tl" data-a="fold" data-pack="${pk.id}" aria-label="${pk.n} 의뢰 목록">${openPacks[pk.id] ? "▴" : "≡"}</button></div>`;
   });
+  h += `</div>`;
+  const op = PACKS.find(p => openPacks[p.id]);
+  if (op) {
+    h += `<div class="gm-sec">${op.ic} ${op.n} 의뢰 목록</div>`;
+    MS.map((m, i) => [m, i]).filter(x => x[0].pack === op.id).forEach(([m, i]) => { h += `<button type="button" class="gm-mc" data-a="mis" data-id="${m.id}"><span class="gm-mn">${m.ic}</span><span class="gm-mt"><b>${i + 1}. ${m.title}</b><small>${m.sub}</small></span>${starStr(S.stars[m.id] || 0)}</button>`; });
+  }
   const bossOK = cleared >= 3;
   h += `<div class="gm-sec">보스</div><button type="button" class="gm-mc boss" data-a="boss" ${bossOK ? "" : "disabled"}><span class="gm-mn">🧑‍✈️</span><span class="gm-mt"><b>감독관 불시점검</b><small>${bossOK ? "시간 안에 직접 답을 떠올려 쓰세요 · 목숨 3개" + (S.insp ? " · 통과 " + S.insp + "회" : "") : "의뢰 3개 이상 클리어하면 열려요"}</small></span><span class="gm-ms" style="color:#fff">${bossOK ? "▶" : "🔒"}</span></button>`;
   h += `<div class="gm-sec">기록</div><button type="button" class="gm-mc" data-a="dex"><span class="gm-mn">📕</span><span class="gm-mt"><b>사고 도감</b><small>일부러(?) 사고를 내서 모아 보세요 · ${dexN}/${accN()}</small></span></button>`;
@@ -2333,7 +2345,7 @@ function onClick(e) {
     case "rand": renderMission(pickRandom(t.dataset.pack).id, t.dataset.pack); break;
     case "topicgo": topicCheck(false); break;
     case "topicshow": topicCheck(true); break;
-    case "fold": openPacks[t.dataset.pack] = !openPacks[t.dataset.pack]; renderHome(); break;
+    case "fold": { const on = !openPacks[t.dataset.pack]; Object.keys(openPacks).forEach(k => { openPacks[k] = false; }); openPacks[t.dataset.pack] = on; renderHome(); break; }
     case "go": launch(); break;
     case "retry": retry(); break;
     case "skip": skip = true; break;
