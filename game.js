@@ -493,6 +493,10 @@ const M1 = {
     s += rc("g-conc", 0, Y0, 360, 20) + rc("g-wall", 0, Y0 + 20, 360, GY - Y0 - 20);
     [34, 146, 258].forEach(x => { s += rc("g-glass", x, Y0 + 40, 64, 44, 'rx="3"') + rc("g-conc", x - 3, Y0 + 84, 70, 4); });
     s += rc("g-grnd", 0, GY, 360, 18);
+    /* 단부 빗금과 낙하 경로는 기존 난간·작업자 뒤에 둔다. */
+    s += `<path d="M30 126 H304" stroke="#ffd84a" stroke-width="8"/>`;
+    for (let x = 32; x < 300; x += 16) s += `<path d="M${x} 130 l8 -8" stroke="#1d2433" stroke-width="5"/>`;
+    s += `<path d="M192 144 H240 V258 H192 Z" fill="#e5484d" fill-opacity=".08" stroke="#e5484d" stroke-dasharray="5 4"/><path d="M216 150 v48 m-6 -8 l6 8 6 -8" fill="none" stroke="#e5484d" stroke-width="2"/><text x="184" y="218" text-anchor="end" font-size="10" fill="#e5484d">낙하 위험</text>`;
     s += `<g><rect class="g-steel" x="250" y="${Y0 - 6}" width="46" height="3.5" rx="1.7"/><rect class="g-steel" x="250" y="${Y0 - 2.5}" width="46" height="3.5" rx="1.7"/></g>`;
     s += `<text x="352" y="${Y0 + 124}" text-anchor="end" class="g-cap">추락 높이 약 5m ↕</text>`;
     s += wkr("w2", 214, 276, 44, {vest: "#3b82f6", hat: "#fff"});
@@ -581,6 +585,7 @@ const M2 = {
     let s = rc("g-sky", 0, 0, 360, 260) + rc("g-in", 0, 0, 360, Y);
     s += rc("g-conc", 0, Y, 126, 16) + rc("g-conc", 234, Y, 126, 16);
     s += rc("g-void", 126, Y, 108, 118);
+    s += `<defs><linearGradient id="gm-open-depth" x2="0" y2="1"><stop stop-color="#1d2433" stop-opacity=".25"/><stop offset="1" stop-color="#1d2433"/></linearGradient></defs><rect x="126" y="${Y}" width="108" height="116" fill="url(#gm-open-depth)"/><path d="M126 ${Y} l18 22 v94 M234 ${Y} l-18 22 v94 M144 132 H216" fill="none" stroke="var(--gm-conc2)" stroke-width="2"/><path d="M180 136 v34 m-6 -8 l6 8 6 -8" fill="none" stroke="#ffd84a" stroke-width="2.5"/>`;
     s += rc("g-conc", 0, 226, 360, 14) + rc("g-wall", 0, 240, 360, 20);
     s += rc("g-conc2", 120, Y + 16, 6, 110) + rc("g-conc2", 234, Y + 16, 6, 110);
     s += `<text x="180" y="190" text-anchor="middle" class="g-cap">개구부 (아래층까지 약 4m)</text>`;
@@ -710,7 +715,9 @@ const M3 = {
     if (Number.isFinite(v.dist)) {
       const ny = this.netY(v), oh = Number.isFinite(v.over) ? Math.max(0, Math.min(v.over, 6)) : 2, x1 = WX + oh * 20;
       const sg = Number.isFinite(v.sag) ? Math.max(0, Math.min(v.sag, 40)) : 8;
-      s += `<path data-r="net" d="${this.netD(x1, ny, ny + 2 * sg)}" fill="none" stroke="var(--gm-net)" stroke-width="3.4" stroke-dasharray="4 2.2" stroke-linecap="round"/>`;
+      /* use가 원래 망의 변형을 따라가도록 격자만 덧댄다. */
+      s += `<defs><pattern id="gm-net-mesh" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0 L8 8 M8 0 L0 8" stroke="var(--gm-net)" stroke-width="1"/></pattern></defs><use href="#gm-net-edge" fill="none" stroke="url(#gm-net-mesh)" stroke-width="12"/><rect x="${WX - 8}" y="${ny - 6}" width="12" height="12" rx="2" fill="var(--gm-steel)"/><circle cx="${WX - 4}" cy="${ny}" r="2" fill="#ffd84a"/>`;
+      s += `<path id="gm-net-edge" data-r="net" d="${this.netD(x1, ny, ny + 2 * sg)}" fill="none" stroke="var(--gm-net)" stroke-width="3.4" stroke-dasharray="4 2.2" stroke-linecap="round"/>`;
       s += rc("g-steel", x1 - 1.5, ny - 10, 3, 14, 'data-r="post"') + rc("g-steel", WX - 3, ny - 2, 6, 5);
       s += `<line x1="${WX + 80}" y1="${PY + 2}" x2="${WX + 80}" y2="${ny}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3" opacity=".55"/>`;
       s += `<text x="${WX + 86}" y="${(PY + ny) / 2 + 3}" class="g-tag">수직거리 ${fmt(v.dist)}m</text>`;
@@ -790,6 +797,7 @@ const M4 = {
     s += rc("g-wall", WX, RY, 110, GY - RY) + rc("g-conc", WX - 4, RY - 6, 114, 8) + rc("g-conc2", WX + 8, RY - 22, 100, 16);
     for (let i = 0; i < 2; i++) s += rc("g-glass", WX + 22 + i * 44, 110 + 0, 30, 26, 'rx="2"') + rc("g-glass", WX + 22 + i * 44, 160, 30, 26, 'rx="2"');
     s += `<g data-r="lad">` + this.ladder(g) + `</g>`;
+    s += `<circle cx="${WX}" cy="${RY}" r="13" fill="none" stroke="#e5484d" stroke-width="2" stroke-dasharray="3 3"/><circle cx="${g.xf}" cy="${GY - 4}" r="12" fill="none" stroke="#e5484d" stroke-width="2" stroke-dasharray="3 3"/><path d="M${g.xf - 4} ${GY + 8} h-26 m7 -5 l-7 5 7 5" fill="none" stroke="#e5484d" stroke-width="2"/><path d="M${WX - 20} ${RY + 8} Q${g.xf - 10} 110 ${g.xf - 20} 145 l-3 -10 m3 10 9 -5" fill="none" stroke="#e5484d" stroke-width="1.5" stroke-dasharray="4 4"/>`;
     if (Number.isFinite(v.tilt)) s += `<path d="M${g.xf + 26} ${GY} A26 26 0 0 0 ${g.xf + 26 * Math.cos(g.a)} ${GY - 26 * Math.sin(g.a)}" fill="none" stroke="var(--ink)" stroke-width="1" opacity=".6"/><text x="${g.xf + 32}" y="${GY - 6}" class="g-tag">${fmt(v.tilt)}°</text>`;
     if (Number.isFinite(v.over)) s += `<text x="${this.wx + 4}" y="${RY - 28}" class="g-tag">위로 ${fmt(v.over)}cm</text>`;
     s += `<g><rect x="8" y="8" width="104" height="82" rx="10" fill="var(--panel)" opacity=".92"/><text x="16" y="23" class="g-cap">사다리 앞모습</text>`;
@@ -872,6 +880,9 @@ const M5 = {
     const GY = this.gy, PY = this.py;
     let s = rc("g-sky", 0, 0, 360, 260) + rc("g-grnd", 0, GY, 360, 16);
     s += `<g data-r="scaf">` + this.scaf(v, 0, 0) + `</g>`;
+    const span = (Number.isFinite(v.col) ? Math.max(.6, Math.min(v.col, 2.8)) : 1.5) * 40;
+    [180 - span, 180, 180 + span].forEach(x => { s += `<rect x="${x - 5}" y="${PY + 2}" width="10" height="7" rx="2" fill="var(--gm-steel)" stroke="#ffd84a"/><circle cx="${x}" cy="${PY + 5.5}" r="1.5" fill="#1d2433"/>`; });
+    s += `<path d="M215 ${PY + 10} V208 m-6 -8 l6 8 6 -8" fill="none" stroke="#e5484d" stroke-width="2" stroke-dasharray="5 4"/><path d="M209 ${PY} h12" stroke="#e5484d" stroke-width="5"/><text x="225" y="190" font-size="10" fill="#e5484d">공구 낙하</text>`;
     const pw = Number.isFinite(v.width) ? Math.max(10, Math.min(v.width, 80)) : 40, gp = Number.isFinite(v.gap) ? Math.max(0, Math.min(v.gap, 12)) : 3;
     s += `<g><rect x="8" y="8" width="112" height="64" rx="10" fill="var(--panel)" opacity=".92"/><text x="16" y="22" class="g-cap">발판 위에서 본 모습</text>`;
     const sc = .95, tw_ = pw * sc, pl = (tw_ - gp * sc) / 2;
@@ -958,6 +969,7 @@ const M6 = {
     const ma = Number.isFinite(v.ma) ? fmt(v.ma) + "mA" : "?", t = Number.isFinite(v.t) ? fmt(v.t) + "초" : "?";
     let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 192, 360, 48);
     s += rc("g-steel", 18, 184, 232, 9, 'rx="2"') + `<ellipse cx="150" cy="192" rx="62" ry="5" fill="#5b8fd9" opacity=".55"/>`;
+    s += `<path d="M126 190 q12 -3 24 0 m8 3 q17 -3 31 -1 M98 194 l12 -1" fill="none" stroke="#fff" stroke-width="1.5" opacity=".8"/><ellipse cx="174" cy="192" rx="26" ry="3" fill="none" stroke="#5b8fd9"/><path d="M150 143 L132 155 L139 160 L123 175 L126 183 L110 190" fill="none" stroke="#e5484d" stroke-width="2.5" stroke-dasharray="5 3"/><path d="M195 151 l-9 14 h7 l-5 12 17 -18 h-9 l5 -8z" fill="#ffd84a" stroke="#1d2433"/><text x="154" y="217" font-size="10" fill="#e5484d">물 + 전기</text>`;
     s += `<text x="16" y="24" class="g-tag">220V 전동드릴 · 젖은 철판 위</text>`;
     s += `<g data-r="box">` + rc("g-conc2", 262, 92, 88, 100, 'rx="6"') + rc("", 270, 100, 72, 56, 'rx="3" fill="#1d2433"');
     s += `<text x="306" y="116" text-anchor="middle" font-size="8.5" font-weight="800" fill="#cde4ff">누전차단기</text><text x="306" y="133" text-anchor="middle" font-size="11" font-weight="900" fill="#ffd84a">${ma}</text><text x="306" y="148" text-anchor="middle" font-size="11" font-weight="900" fill="#ffd84a">${t}</text>`;
@@ -1086,6 +1098,7 @@ const M8 = {
     const GY = this.gy, WY = this.wy, K = this.K, ids = ["d1", "d2", "d3"], volts = ["380V", "6.6kV", "22.9kV"];
     let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, GY, 360, 24);
     this.px.forEach((x, i) => {
+      s += `<rect x="${x - 52}" y="${WY - 11}" width="104" height="${18 + i * 9}" rx="8" fill="#e5484d" opacity=".12"/><path d="M${x + 28} ${WY + 5} l-8 11 h7 l-5 12 16 -17 h-8 l5 -6z" fill="#ffd84a" stroke="#1d2433"/>`;
       s += rc("g-conc2", x - 3, WY, 6, GY - WY) + rc("g-steel", x - 40, WY - 4, 80, 4, 'rx="2"');
       s += `<line x1="${x - 52}" y1="${WY - 6}" x2="${x + 52}" y2="${WY - 6}" stroke="#e5484d" stroke-width="2.6"/>`;
       s += `<text x="${x}" y="${WY - 16}" text-anchor="middle" class="g-tag">${volts[i]}</text>`;
@@ -1093,6 +1106,7 @@ const M8 = {
       if (Number.isFinite(d)) { const y = WY - 6 + d * K; s += `<line x1="${x - 36}" y1="${y}" x2="${x + 36}" y2="${y}" stroke="var(--ink)" stroke-dasharray="4 3" stroke-width="1.2"/><text x="${x}" y="${y + 11}" text-anchor="middle" class="g-tag">${fmt(d)}cm</text>`; }
     });
     s += wkr("w1", 36, GY, 44);
+    s += `<path d="M20 216 v10 h32 v-10 M16 230 H56" fill="none" stroke="var(--gm-steel)" stroke-width="3"/><path d="M46 172 v-42 m-5 7 l5 -7 5 7" fill="none" stroke="#e5484d" stroke-width="2" stroke-dasharray="4 3"/><text x="76" y="210" font-size="10" fill="#e5484d">접근·방전</text>`;
     return s;
   },
   eval(v) {
@@ -1139,6 +1153,7 @@ const GAS = [
 const M9 = {
   draw(v) {
     let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, 62, 360, 188) + rc("g-void", 28, 62, 92, 170) + rc("g-conc2", 20, 56, 108, 8, 'rx="2"');
+    s += `<rect x="28" y="66" width="92" height="166" fill="#1d2433" opacity=".75"/><path d="M30 132 Q53 115 76 133 T118 130 V230 H30Z" fill="#ffd84a" opacity=".12"/><path d="M30 196 Q54 176 78 196 T118 192" fill="none" stroke="#ffd84a" stroke-width="9" opacity=".18"/><text x="74" y="154" text-anchor="middle" font-size="10" fill="#ffd84a">유해가스</text><text x="74" y="171" text-anchor="middle" font-size="9" fill="#fff">위험 개념도</text><path d="M34 68 v157 M114 68 v157" stroke="var(--gm-conc2)" stroke-width="3"/>`;
     s += `<text x="74" y="246" text-anchor="middle" class="g-cap">맨홀 (깊이 약 3m)</text>`;
     s += `<g data-r="meter">` + rc("g-conc2", 150, 70, 196, 170, 'rx="10"') + rc("", 158, 78, 180, 154, 'rx="6" fill="#1d2433"');
     s += `<text x="248" y="94" text-anchor="middle" font-size="9" font-weight="800" fill="#cde4ff">가스 측정기 경보 설정</text>`;
@@ -1210,6 +1225,7 @@ const CONF_OPTS = [
 ];
 function manholeScene(extra) {
   let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, 70, 360, 180) + rc("g-void", 110, 70, 140, 170) + rc("g-conc2", 100, 64, 160, 8, 'rx="2"');
+  s += `<defs><linearGradient id="gm-shaft-depth" x2="0" y2="1"><stop stop-color="#1d2433" stop-opacity=".45"/><stop offset="1" stop-color="#1d2433"/></linearGradient></defs><rect x="110" y="72" width="140" height="168" fill="url(#gm-shaft-depth)"/><path d="M114 74 l10 12 v141 M246 74 l-10 12 v141" fill="none" stroke="var(--gm-conc2)" stroke-width="3"/><path d="M126 148 Q151 130 180 148 T234 146 V226 H126Z" fill="#ffd84a" opacity=".10"/><path d="M126 204 Q155 184 180 204 T234 201" fill="none" stroke="#ffd84a" stroke-width="12" opacity=".13"/><text x="180" y="106" text-anchor="middle" font-size="11" fill="#ffd84a">산소결핍 위험</text><text x="180" y="122" text-anchor="middle" font-size="9" fill="#fff">가스 개념도</text>`;
   s += `<text x="180" y="236" text-anchor="middle" class="g-cap">맨홀 (깊이 약 3m)</text>`;
   return s + (extra || "");
 }
@@ -1218,6 +1234,10 @@ const M10 = {
   draw(v) {
     let s = manholeScene();
     const sel = v.sel || [];
+    /* 선택한 준비물을 입구와 연결해 현장 장비로 표현한다. */
+    if (sel.includes("vent")) s += `<circle cx="294" cy="86" r="15" fill="var(--gm-steel)" stroke="#ffd84a" stroke-width="2"/><path d="M294 75 v22 m-11 -11 h22 M280 89 H224 V155" fill="none" stroke="var(--gm-rail)" stroke-width="8"/><path d="M224 160 v13 m-4 -5 l4 5 4 -5" fill="none" stroke="#ffd84a" stroke-width="2"/>`;
+    if (sel.includes("ladder")) s += `<path d="M200 78 L224 34 L248 78 M224 34 V88" fill="none" stroke="var(--gm-steel)" stroke-width="3"/><circle cx="224" cy="45" r="4" fill="#ffd84a"/>`;
+    if (sel.includes("sign")) s += `<path d="M272 135 h68 m-60 0 v24 m52 -24 v24" stroke="var(--gm-steel)" stroke-width="3"/><rect x="274" y="113" width="64" height="20" rx="3" fill="#1d2433" stroke="#e5484d"/><text x="306" y="127" text-anchor="middle" font-size="10" fill="#fff">출입금지</text>`;
     sel.forEach((id, i) => { const o = CONF_OPTS.find(x => x.id === id); s += `<text x="${16 + (i % 6) * 54}" y="${26 + Math.floor(i / 6) * 24}" font-size="20">${o.ic}</text>`; });
     s += wkr("w1", 70, 70, 60);
     return s;
@@ -1255,6 +1275,8 @@ const M11 = {
   draw(v) {
     let s = manholeScene();
     s += `<g data-r="victim">${wkr("w2", 180, 224, 56, {vest: "#3b82f6", hat: "#fff"})}</g>`;
+    /* 구조 애니메이션의 시작점을 보존하고 옆에 쓰러짐 확대도를 둔다. */
+    s += `<path d="M195 193 H258" fill="none" stroke="#e5484d" stroke-dasharray="3 3"/><rect x="262" y="166" width="88" height="58" rx="6" fill="#1d2433" stroke="#e5484d"/><circle cx="276" cy="187" r="6" fill="#ffd84a"/><path d="M274 185 l4 4 m0 -4 l-4 4" stroke="#1d2433" stroke-width="1.2"/><path d="M286 190 l20 3 12 -5 15 7 M289 192 l7 9 12 1" fill="none" stroke="#5b8fd9" stroke-width="5" stroke-linecap="round"/><text x="306" y="217" text-anchor="middle" font-size="10" fill="#fff">쓰러짐·의식없음</text>`;
     s += wkr("w1", 70, 70, 60, {vest: "#12a37f"});
     s += `<text x="16" y="24" class="g-tag">🆘 맨홀 안 작업자가 쓰러져 있어요</text>`;
     return s;
@@ -1365,6 +1387,9 @@ const M13 = {
     const sel = v.sel || [], has = id => sel.includes(id);
     let s = rc("g-sky", 0, 0, 360, 250) + rc("g-grnd", 0, 92, 360, 158) + rc("g-void", 120, 92, 120, 120);
     s += rc("", 120, 212, 120, 8, 'fill="var(--gm-conc2)"');
+    s += `<path d="M42 92 L4 48 Q2 70 4 106Z" fill="#e5484d" fill-opacity=".18" stroke="#e5484d" stroke-dasharray="4 3"/><path d="M32 104 H8 m6 -5 l-6 5 6 5" fill="none" stroke="#e5484d" stroke-width="2"/><text x="10" y="122" font-size="10" fill="#e5484d">후진 위험</text>`;
+    if (!has("shore")) s += `<path d="M110 98 l-8 12 9 9 -10 14 M250 98 l8 12 -9 9 10 14" fill="none" stroke="#e5484d" stroke-width="2"/>`;
+    if (!has("utility")) s += `<circle cx="120" cy="170" r="16" fill="#e5484d" fill-opacity=".1" stroke="#e5484d" stroke-dasharray="4 3"/><path d="M100 168 H80" stroke="#e5484d"/><text x="74" y="162" text-anchor="end" font-size="10" fill="#e5484d">파손 위험</text>`;
     if (has("shore")) s += rc("", 114, 92, 8, 128, 'fill="#c8975a"') + rc("", 238, 92, 8, 128, 'fill="#c8975a"') + rc("", 120, 130, 120, 5, 'fill="#c8975a"');
     if (has("net")) s += rc("", 100, 70, 4, 22, 'fill="var(--gm-rail)"') + rc("", 256, 70, 4, 22, 'fill="var(--gm-rail)"') + `<path d="M100 74 L260 74 M100 84 L260 84" stroke="var(--gm-rail)" stroke-width="2.5"/>`;
     if (has("drain")) s += `<path d="M20 100 L60 100 L100 92" stroke="#2b6cb0" stroke-width="5" fill="none"/><rect x="264" y="88" width="50" height="5" fill="#2b6cb0" opacity=".6"/>`;
@@ -1424,6 +1449,7 @@ const M14 = {
     const GY = 200, r = Number.isFinite(v.r) ? Math.max(0, Math.min(v.r, 20)) : 0, S = this.S, cx = 120;
     let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, GY, 360, 40);
     s += `<circle cx="${cx}" cy="${GY - 24}" r="${r * S}" fill="#2b6cb0" opacity=".12" stroke="#2b6cb0" stroke-dasharray="5 4" stroke-width="1.6"/>`;
+    s += `<ellipse cx="${cx}" cy="${GY + 4}" rx="${r * S}" ry="${r * S * .22}" fill="#e5484d" fill-opacity=".06" stroke="#e5484d" stroke-width="1.5" stroke-dasharray="5 4"/><path d="M142 163 Q163 135 184 173 M144 165 Q200 120 224 169" fill="none" stroke="#e5484d" stroke-width="1.5" stroke-dasharray="3 4"/><path d="M143 151 v8 m-8 -3 6 4 m6 -1 7 -5" stroke="#ffd84a" stroke-width="2"/><path d="M246 152 H270 V200 H246 M242 152 H274 M242 200 H274" fill="none" stroke="var(--gm-steel)" stroke-width="4"/><text x="224" y="152" text-anchor="middle" font-size="10" fill="#e5484d">불티</text><text x="224" y="219" text-anchor="middle" font-size="10" fill="#e5484d">시너</text>`;
     s += `<text x="${cx}" y="${GY - 24 - r * S - 4}" text-anchor="middle" class="g-tag">${Number.isFinite(v.r) ? "점검 반경 " + fmt(v.r) + "m" : "점검 반경 ?"}</text>`;
     s += `<g data-r="paper"><rect x="${cx + 8 * S}" y="${GY - 26}" width="26" height="26" fill="#c8975a"/><rect x="${cx + 8 * S + 3}" y="${GY - 34}" width="20" height="8" fill="#dcb98a"/><text x="${cx + 8 * S + 13}" y="${GY - 8}" text-anchor="middle" font-size="9" font-weight="800" fill="#5a3b12">종이</text></g>`;
     s += `<g><rect x="${cx + 15 * S}" y="${GY - 30}" width="16" height="30" rx="3" fill="#c0392b"/><text x="${cx + 15 * S + 8}" y="${GY - 12}" text-anchor="middle" font-size="7" font-weight="800" fill="#fff">인화</text></g>`;
@@ -1484,6 +1510,9 @@ const M15 = {
   draw(v) {
     let s = rc("g-in", 0, 0, 360, 240) + rc("g-conc", 0, 200, 360, 40);
     s += `<g data-r="mach">` + rc("g-steel", 150, 100, 130, 100, 'rx="6"') + `<g data-r="gear"><circle cx="215" cy="150" r="30" fill="#c9ced6" stroke="#6b7684" stroke-width="3"/><path d="M215 120 v60 M185 150 h60 M194 129 l42 42 M236 129 l-42 42" stroke="#6b7684" stroke-width="4"/></g></g>`;
+    s += `<rect x="158" y="82" width="116" height="24" rx="12" fill="#1d2433" stroke="var(--gm-steel)" stroke-width="3"/><path d="M170 85 H262 M170 103 H262" stroke="#ffd84a" stroke-width="2"/>`;
+    [170, 194, 218, 242, 262].forEach(x => { s += `<circle cx="${x}" cy="94" r="7" fill="var(--gm-conc2)" stroke="var(--gm-steel)" stroke-width="2"/>`; });
+    s += `<rect x="210" y="65" width="28" height="16" fill="#c8975a"/><path d="M224 65 v16" stroke="#1d2433"/><path d="M162 130 H191 m-7 -5 l7 5 -7 5" fill="none" stroke="#e5484d" stroke-width="2"/><circle cx="188" cy="139" r="10" fill="none" stroke="#e5484d" stroke-width="2" stroke-dasharray="3 2"/><path d="M154 110 h26" stroke="#ffd84a" stroke-width="6"/><path d="M155 113 l5 -6 m3 6 5 -6 m3 6 5 -6" stroke="#1d2433" stroke-width="3"/><text x="288" y="134" font-size="10" fill="#e5484d">말림 위험</text><path d="M286 139 H250" stroke="#e5484d" stroke-dasharray="3 3"/>`;
     s += rc("g-conc2", 40, 120, 40, 64, 'rx="4"') + `<circle data-r="sw" cx="60" cy="140" r="9" fill="#12a37f"/><text x="60" y="166" text-anchor="middle" font-size="8" font-weight="800" fill="#fff">기동</text>`;
     s += `<g data-r="lockg" opacity="0"><rect x="66" y="128" width="16" height="13" rx="2" fill="#ffd21f"/></g><g data-r="tagg" opacity="0"><rect x="32" y="104" width="46" height="14" rx="2" fill="#fff" stroke="#e5484d"/><text x="55" y="114" text-anchor="middle" font-size="7.5" font-weight="900" fill="#e5484d">정비 중</text></g>`;
     s += wkr("w2", 100, 200, 66, {vest: "#3b82f6", hat: "#fff"});
