@@ -330,6 +330,12 @@ const CSS = `
 .gm-rnd2 .gm-mn{background:#fff3cf}
 .gm-fold{display:block;width:100%;border:0;background:none;color:var(--sub);font-weight:700;padding:2px 6px 8px;text-align:left;font-size:.86em}
 .gm-rtag{display:inline-block;background:#fff3cf;color:#5b3d00;border-radius:99px;padding:1px 10px;font-size:.82em;font-weight:800;margin-right:6px}
+.gm-modal{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center}
+.gm-sheet{background:var(--panel);color:var(--ink);width:100%;max-width:720px;max-height:84vh;display:flex;flex-direction:column;border-radius:20px 20px 0 0;padding:14px 18px calc(16px + env(safe-area-inset-bottom,0px));animation:gmup .25s;font-size:15px;line-height:1.65;word-break:keep-all;overflow-wrap:break-word}
+.gm-shh{display:flex;align-items:center;gap:10px;margin-bottom:6px}.gm-shh b{flex:1;letter-spacing:-.02em}
+.gm-shb{overflow:auto;flex:1;min-height:0;border-top:1px solid var(--line);padding-top:6px}
+.gm-sheet .gm-btns button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:13px;padding:11px 8px;font-weight:700;font:inherit}
+.gm-sheet .gm-ib{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;width:36px;height:36px}
 .gm-sec{margin:20px 2px 8px;font-size:.84em;color:var(--sub);font-weight:700;letter-spacing:.02em}
 .gm-mc{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:var(--panel);color:var(--ink);border-radius:16px;padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow,0 1px 2px rgba(0,0,0,.05));transition:transform .15s}
 .gm-mc:active{transform:scale(.98)}
@@ -2090,6 +2096,23 @@ function renderMission(id, rand) {
   drawScene(); renderForm(); say(rand ? "그림을 보고, 어떤 안전조치가 필요한 상황인지 먼저 떠올려 보세요." : "값을 입력하면 현장이 바로 바뀌어요.");
   window.scrollTo(0, 0);
 }
+/* 조문 보기: 공부 탭의 읽던 자리를 건드리지 않고, 게임 위에 창으로 띄운다 */
+let artEl = null;
+function closeArt() { if (artEl) { artEl.remove(); artEl = null; } }
+function showArt(art) {
+  const D = window.LAWDATA; if (!D) return;
+  const m = /^(법|시행규칙|시행령) (제\d+조(?:의\d+)?)/.exec(art || ""), lid = m ? {"법": "law", "시행규칙": "rule", "시행령": "decree"}[m[1]] : "safety", no = m ? m[2] : String(art).replace(/ .*$/, "");
+  const law = D.laws[lid], a = law && law.articles.find(x => x.no === no);
+  if (!a) { host && host.toast("조문을 찾지 못했어요"); return; }
+  closeArt();
+  const body = a.lines.map(l => `<p style="margin:.35em 0;padding-left:${Math.min(3, +l[0] || 0) * 12}px">${esc(l[1])}</p>`).join("");
+  artEl = document.createElement("div");
+  artEl.className = "gm-modal";
+  artEl.innerHTML = `<div class="gm-sheet" role="dialog" aria-label="조문"><div class="gm-shh"><b>${esc(law.short || law.name)} ${esc(a.no)}${a.title ? " · " + esc(a.title) : ""}</b><button type="button" class="gm-ib" data-a="artx" aria-label="닫기">✕</button></div>` +
+    `<div class="gm-shb">${body}</div><div class="gm-btns"><button type="button" data-a="artx">닫고 계속하기</button><button type="button" data-a="readgo" data-art="${esc(art)}">공부 탭에서 열기 <small style="color:var(--sub)">(읽던 자리가 바뀌어요)</small></button></div></div>`;
+  artEl.addEventListener("click", e => { if (e.target === artEl) closeArt(); else { const b = e.target.closest("[data-a]"); if (b) onClick({target: b}); } });
+  document.body.appendChild(artEl);
+}
 function topicCheck(reveal) {
   if (!cm || cm.stage !== "id") return;
   const m = cm.m, inp = $("#gmTopic"), txt = reveal ? "" : (inp ? inp.value : "");
@@ -2320,7 +2343,9 @@ function onClick(e) {
     case "qok": { const i = $("#qIn"); answerQ(i ? i.value : ""); } break;
     case "qskip": answerQ(null, false); break;
     case "qnext": nextQ(); break;
-    case "read": { const m = /^(법|시행규칙|시행령) (제\d+조(?:의\d+)?)/.exec(t.dataset.art || ""); host && (m ? host.read(m[2], {"법": "law", "시행규칙": "rule", "시행령": "decree"}[m[1]]) : host.read(String(t.dataset.art).replace(/ .*$/, ""))); break; }
+    case "read": showArt(t.dataset.art); break;
+    case "readgo": { const art = t.dataset.art; closeArt(); const m = /^(법|시행규칙|시행령) (제\d+조(?:의\d+)?)/.exec(art || ""); host && (m ? host.read(m[2], {"법": "law", "시행규칙": "rule", "시행령": "decree"}[m[1]]) : host.read(String(art).replace(/ .*$/, ""))); break; }
+    case "artx": closeArt(); break;
     case "pick": {
       readVals(); cm.v[t.dataset.f] = t.dataset.v;
       renderForm(); drawScene(); break;
@@ -2370,7 +2395,7 @@ window.SAPGAME = {
     renderHome();
   },
   unmount() {
-    alive = false; stopQ();
+    alive = false; stopQ(); closeArt();
     if (root) { root.removeEventListener("click", onClick); root.removeEventListener("input", onInput); root.removeEventListener("keydown", onKey); root.innerHTML = ""; }
     root = null; cm = null; svgEl = null; sayEl = null;
   },
