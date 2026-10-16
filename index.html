@@ -899,13 +899,47 @@ for (const lid of ["decree", "rule", "safety"]) L[lid].arts.forEach(a => {
 // 법의 '대통령령'은 시행령, '고용노동부령'은 시행규칙·안전보건규칙 / 시행령의 '고용노동부령'은 시행규칙·안전보건규칙
 const DELEG_TO = {law: {"대통령령": ["decree"], "고용노동부령": ["rule", "safety"]}, decree: {"고용노동부령": ["rule", "safety"]},
   sapa: {"대통령령": ["sapad"]}};
+// 위임 조문 직접 지정 (인용 색인만으로는 용어 정의·공통 조문이 섞이거나 구성·운영 같은 위임 조문이 빠지는 곳). 원문을 읽고 확인한 것만 둔다.
+// 키: "법령 조문|항|위임대상" → [[법령, 조문], …]
+const DELEG_FIX = {
+  "law 제15조|1|고용노동부령": [["rule", "제9조"]],
+  "law 제17조|3|대통령령": [["decree", "제16조"]], "law 제17조|4|대통령령": [["decree", "제16조"]], "law 제17조|5|대통령령": [["decree", "제19조"]],
+  "law 제21조|1|대통령령": [["decree", "제27조"]], "law 제21조|4|대통령령": [["decree", "제28조"]],
+  "law 제32조|1|고용노동부령": [["rule", "제30조"]], "law 제32조|2|고용노동부령": [["rule", "제29조"]],
+  "law 제41조|1|고용노동부령": [["rule", "제41조"]],
+  "law 제42조|1|대통령령": [["decree", "제42조"]],
+  "law 제44조|1|대통령령": [["decree", "제43조"], ["decree", "제44조"], ["decree", "제45조"]],
+  "law 제49조|1|대통령령": [["decree", "제49조"], ["decree", "제50조"]],
+  "law 제64조|1|대통령령": [["decree", "제53조의2"]],
+  "law 제75조|1|대통령령": [["decree", "제63조"], ["decree", "제64조"], ["decree", "제65조"]],
+  "law 제75조|3|대통령령": [["decree", "제65조"]], "law 제75조|4|대통령령": [["decree", "제65조"]],
+  "law 제89조|1|고용노동부령": [["rule", "제119조"]],
+  "law 제98조|1|고용노동부령": [["rule", "제130조"], ["rule", "제131조"]], "law 제98조|5|고용노동부령": [["rule", "제132조"]]
+};
 function delegOf(a, hang, kind) {
   const to = (DELEG_TO[a.lid] || {})[kind];
   if (!to) return null;
   const pick = key => (deleg[a.lid + " " + key] || []).filter(x => to.includes(x.lid));
-  const exact = hang ? pick(a.no + "|" + hang) : [];
-  const seen = new Set(exact);
-  const other = [];   // 같은 조문을 인용했지만 항이 다르거나 항 없이 인용한 조문
+  let exact = hang ? pick(a.no + "|" + hang) : [];
+  // 시행령 제18조처럼 "법 제75조제1항에 따른 … 노사협의체(이하 "노사협의체"라 한다)" 하고 용어만 정의하며 인용한 조문, 권한의 위임·업무의 위탁 같은 공통 조문은
+  // 위임받아 정한 조문이 아니므로, 위임 조문이 따로 있으면 '같은 조문을 인용한 다른 조문' 쪽으로 내린다
+  const defOnly = x => {
+    const re = new RegExp("법 " + reEsc(a.no) + (hang ? "제" + hang + "항" : "(?!의\\d)") + "([^\\n]{0,100}?\\(이하 \"[^\"]+\"(?:이?라 한다)\\))?", "g");
+    let m, n = 0, d = 0;
+    while ((m = re.exec(x.text))) { n++; if (m[1]) d++; }
+    return n > 0 && n === d;
+  };
+  const boiler = x => /^(권한의 위임|업무의 위탁|권한의 위임ㆍ위탁|민감정보 및 고유식별정보의 처리|규제의 재검토)/.test(x.title || "");   // 거의 모든 조문을 인용하는 공통 조문
+  const fx = DELEG_FIX[a.lid + " " + a.no + "|" + hang + "|" + kind];
+  let real = exact.filter(x => !defOnly(x) && !boiler(x)), demoted;
+  if (fx) {   // 직접 지정한 조문이 있으면 그것만 위임 조문으로, 색인에 걸린 나머지는 '같은 조문을 인용한 다른 조문'으로
+    const fixed = fx.map(([l, n]) => L[l].arts.find(x => x.no === n)).filter(Boolean);
+    if (fixed.length) { demoted = pick(a.no + "|" + hang).filter(x => !fixed.includes(x)); real = fixed; }
+  }
+  demoted = demoted || (real.length && real.length < exact.length ? exact.filter(x => !real.includes(x)) : []);
+  if (demoted.length || fx) exact = real;
+  const seen = new Set(exact.concat(demoted));
+  const other = demoted.slice();   // 같은 조문을 인용했지만 항이 다르거나 항 없이 인용한 조문
   Object.keys(deleg).forEach(k => {
     if (k.startsWith(a.lid + " " + a.no + "|")) pick(k.slice(a.lid.length + 1)).forEach(x => { if (!seen.has(x)) { seen.add(x); other.push(x); } });
   });
