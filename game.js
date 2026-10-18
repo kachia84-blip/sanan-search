@@ -2102,12 +2102,15 @@ function addXP(n) { const a = lvInfo(S.xp).i; S.xp += n; const b = lvInfo(S.xp).
 let scr = "home", cm = null; // 현재 화면, 현재 의뢰 상태
 const openPacks = {};   // 홈에서 펼친 편
 function missionFacts(m) { try { return fieldsOf(m, {}).map(f => f.fact).filter(Boolean); } catch (e) { return []; } }
-function pickRandom(pack) {   // 아직 못 깬 의뢰·약한 낱말이 걸린 의뢰가 더 자주 나온다 (방금 한 것은 제외)
+function pickRandom(pack) {   // 균등 랜덤(셔플 가방): 현재 의뢰 목록 전체를 한 번씩 다 돌린 뒤 다시 섞는다. 의뢰를 새로 추가해도 목록에서 자동으로 뽑힌다.
   const list = MS.filter(m => pack === "all" || m.pack === pack);
-  const w = list.map(m => 1 + (S.stars[m.id] ? 3 - S.stars[m.id] : 3) + missionFacts(m).filter(id => factDue(id)).length * 2 - (m.id === S.lastRand ? 99 : 0));
-  const sum = w.reduce((a, b) => a + Math.max(.05, b), 0); let r = Math.random() * sum;
-  for (let i = 0; i < list.length; i++) { r -= Math.max(.05, w[i]); if (r <= 0) return list[i]; }
-  return list[0];
+  S.bag = S.bag || {};
+  let seen = (S.bag[pack] || []).filter(id => list.some(m => m.id === id));   // 없어진 의뢰는 가방에서 빼기
+  let left = list.filter(m => !seen.includes(m.id));                            // 새로 생긴 의뢰는 아직 안 나온 쪽에 자동 포함
+  if (!left.length) { seen = []; left = list.filter(m => m.id !== S.lastRand); if (!left.length) left = list; }   // 한 바퀴 끝: 새로 섞기(방금 한 것은 맨 앞에서 제외)
+  const m = left[Math.floor(Math.random() * left.length)];
+  seen.push(m.id); S.bag[pack] = seen; save();
+  return m;
 }
 const starStr = n => `<span class="gm-ms${n ? "" : " z"}">${"★".repeat(n)}${"☆".repeat(3 - n)}</span>`;
 function topBar() {
