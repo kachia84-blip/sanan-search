@@ -114,10 +114,14 @@ async function loadGenres(){
   if(!genreCache[type]){
     const d=await tmdb(`/genre/${type}/list`);genreCache[type]=d.genres;
   }
-  $('#genres').innerHTML=genreCache[type].map(g=>`<button data-g="${g.id}" class="${sel.has(g.id)?'on':''}">${g.name}</button>`).join('');
+  const KO={'Action & Adventure':'액션·모험','Kids':'키즈','News':'뉴스','Reality':'리얼리티','Sci-Fi & Fantasy':'SF·판타지','Soap':'연속극','Talk':'토크','War & Politics':'전쟁·정치'};
+  const paint=()=>$('#genres').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.g===''?sel.size===0:sel.has(+x.dataset.g)));
+  $('#genres').innerHTML='<button data-g="">전체</button>'+genreCache[type].map(g=>`<button data-g="${g.id}">${KO[g.name]||g.name}</button>`).join('');
   $('#genres').querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    const id=+b.dataset.g, was=sel.has(id);sel.clear();if(!was)sel.add(id);
-    $('#genres').querySelectorAll('button').forEach(x=>x.classList.toggle('on',sel.has(+x.dataset.g)));search(true)});
+    const was=b.dataset.g===''?sel.size===0:sel.has(+b.dataset.g);
+    sel.clear();if(b.dataset.g!==''&&!was)sel.add(+b.dataset.g);
+    paint();search(true)});
+  paint();
 }
 
 function params(){
