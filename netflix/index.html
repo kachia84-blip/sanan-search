@@ -116,7 +116,8 @@ async function loadGenres(){
   }
   $('#genres').innerHTML=genreCache[type].map(g=>`<button data-g="${g.id}" class="${sel.has(g.id)?'on':''}">${g.name}</button>`).join('');
   $('#genres').querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    const id=+b.dataset.g;sel.has(id)?sel.delete(id):sel.add(id);b.classList.toggle('on');search(true)});
+    const id=+b.dataset.g, was=sel.has(id);sel.clear();if(!was)sel.add(id);
+    $('#genres').querySelectorAll('button').forEach(x=>x.classList.toggle('on',sel.has(+x.dataset.g)));search(true)});
 }
 
 function params(){
