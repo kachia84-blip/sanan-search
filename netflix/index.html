@@ -73,7 +73,6 @@ label{font-size:13px;color:var(--sub)}
       <option value="JP">일본</option>
       <option value="GB">영국</option>
     </select>
-    <select id="cert"><option value="">관람등급 전체</option><option value="19">19금 (청불)</option><option value="lte15">15세 이하</option></select>
     <select id="hide"><option value="0">전부 보기</option><option value="1">본 것 숨기기</option></select>
   </div>
   <div class="row"><div class="chips" id="genres" style="width:100%"></div></div>
@@ -126,8 +125,6 @@ function params(){
     'vote_count.gte':$('#sort').value==='vote_average.desc'?200:0,
     'vote_average.gte':$('#rate').value,with_origin_country:$('#origin').value,
     with_genres:[...sel].join(',')};
-  const c=$('#cert').value;
-  if(type==='movie'&&c){p.certification_country='KR';if(c==='19')p.certification='19';else p['certification.lte']='15'}
   const s=$('#sort').value;
   if(s==='date.desc')p.sort_by=type==='movie'?'primary_release_date.desc':'first_air_date.desc';
   else p.sort_by=s;
@@ -216,7 +213,7 @@ function close(){$('#modal').classList.remove('show')}
 $('#modal').onclick=e=>{if(e.target.id==='modal')close()};
 
 function setTab(t){
-  type=t;sel.clear();$('#cert').hidden=t!=='movie';
+  type=t;sel.clear();
   $('#tMovie').classList.toggle('on',t==='movie');$('#tTv').classList.toggle('on',t==='tv');$('#tMine').classList.toggle('on',t==='mine');
   if(t==='mine'){$('#genres').innerHTML='';renderMine()}
   else loadGenres().then(()=>search(true));
@@ -229,7 +226,7 @@ function init(){
 $('#tMovie').onclick=()=>setTab('movie');
 $('#tTv').onclick=()=>setTab('tv');
 $('#tMine').onclick=()=>setTab('mine');
-['sort','rate','origin','cert','hide'].forEach(i=>$('#'+i).onchange=()=>type==='mine'?renderMine():(i==='hide'?render():search(true)));
+['sort','rate','origin','hide'].forEach(i=>$('#'+i).onchange=()=>type==='mine'?renderMine():(i==='hide'?render():search(true)));
 $('#q').oninput=()=>{clearTimeout(timer);timer=setTimeout(()=>type!=='mine'&&search(true),500)};
 $('#keyBtn').onclick=showSetup;
 init();
