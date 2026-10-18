@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><meta name="theme-color" content="#141414">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <title>넷플릭스 검색기</title>
 <style>
 :root{--bg:#141414;--card:#1f1f1f;--text:#f2f2f2;--sub:#9a9a9a;--red:#e50914;--line:#333}
@@ -233,6 +234,7 @@ $('#tMine').onclick=()=>setTab('mine');
 ['sort','rate','origin','hide'].forEach(i=>$('#'+i).onchange=()=>type==='mine'?renderMine():(i==='hide'?render():search(true)));
 $('#q').oninput=()=>{clearTimeout(timer);timer=setTimeout(()=>type!=='mine'&&search(true),500)};
 $('#keyBtn').onclick=showSetup;
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 init();
 </script>
 </body>
