@@ -16,11 +16,28 @@ function loadS() {
   try { s = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   if (!s || typeof s !== "object") s = {};
   s.stars = s.stars || {}; s.facts = s.facts || {}; s.dex = s.dex || {};
+  s.days = s.days || {}; s.goal = s.goal || 5;
   s.xp = s.xp || 0; s.cur = s.cur || 0; s.best = s.best || 0; s.insp = s.insp || 0; s.snd = !!s.snd;
   return s;
 }
 let S = loadS();
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+/* 오늘 기록: 날짜별(이 기기 시간 기준)로 착공 횟수·무사고 횟수·새로 깬 의뢰 수를 센다. 30일치만 보관 */
+const dayKey = d => { d = d || new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+function bumpDay(pass, isNew) {
+  const k = dayKey(), d = S.days[k] = S.days[k] || {n: 0, ok: 0, nw: 0};
+  d.n++; if (pass) d.ok++; if (isNew) d.nw++;
+  const ks = Object.keys(S.days).sort(); while (ks.length > 30) delete S.days[ks.shift()];
+}
+function todayHtml() {
+  const t = S.days[dayKey()] || {n: 0, ok: 0, nw: 0}, g = S.goal, pct = Math.min(100, Math.round(t.n / g * 100)), bars = [];
+  for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); bars.push({d, n: (S.days[dayKey(d)] || {}).n || 0}); }
+  const mx = Math.max(g, ...bars.map(b => b.n), 1), wd = "일월화수목금토";
+  return `<div class="gm-today"><div class="gm-th"><b>📅 오늘</b><span class="gm-tg">목표 <button type="button" data-a="goal" data-d="-1" aria-label="목표 줄이기">−</button><b>${g}</b>판<button type="button" data-a="goal" data-d="1" aria-label="목표 늘리기">＋</button></span></div>` +
+    `<div class="gm-tn"><b>${t.n}</b>판 했어요 <small>· 무사고 ${t.ok}판${t.nw ? " · 새 의뢰 " + t.nw + "개 클리어" : ""}</small></div>` +
+    `<div class="gm-tbar${t.n >= g ? " done" : ""}"><i style="width:${pct}%"></i></div><div class="gm-tmsg">${t.n >= g ? "🎉 오늘 목표를 채웠어요!" : t.n ? "목표까지 " + (g - t.n) + "판 남았어요" : "오늘 첫 판을 시작해 보세요"}</div>` +
+    `<div class="gm-t7" aria-label="최근 7일 판 수">${bars.map((b, i) => `<span class="${i === 6 ? "now" : ""}"><i style="height:${b.n ? Math.max(8, Math.round(b.n / mx * 100)) : 4}%"></i><em>${b.n || ""}</em><small>${wd[b.d.getDay()]}</small></span>`).join("")}</div></div>`;
+}
 
 /* =============== 법령 지식 카드 (한 장 = 외워야 할 숫자·말 하나) =============== */
 // [id, 조, 항·호, 질문, 정답, 단위, 방향, 요지]   방향: min 이상 · max 이하 · gt 초과 · eq 딱 그 값
@@ -319,6 +336,21 @@ const CSS = `
 .gm-xp i{display:block;height:100%;background:#ffd24a;border-radius:99px;transition:width .6s}
 .gm-stats{display:flex;gap:8px;flex-wrap:wrap;font-size:.84em}
 .gm-stats span{background:rgba(255,255,255,.16);border-radius:99px;padding:3px 11px;white-space:nowrap}
+.gm-today{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.gm-th{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.gm-tg{display:flex;align-items:center;gap:6px;font-size:.82em;color:var(--sub)}
+.gm-tg button{width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1em;line-height:1;padding:0}
+.gm-tg b{color:var(--ink);min-width:1.2em;text-align:center}
+.gm-tn{margin-top:6px;font-size:.95em}.gm-tn b{font-size:1.6em;letter-spacing:-.03em;margin-right:2px}.gm-tn small{color:var(--sub);font-size:.82em}
+.gm-tbar{height:9px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px}.gm-tbar i{display:block;height:100%;background:#2b6cb0;border-radius:99px;transition:width .4s}
+.gm-tbar.done i{background:var(--gm-good)}
+.gm-tmsg{font-size:.8em;color:var(--sub);margin-top:5px}
+.gm-t7{display:flex;gap:6px;align-items:flex-end;height:74px;margin-top:10px}
+.gm-t7 span{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:2px}
+.gm-t7 i{display:block;width:100%;max-width:22px;background:var(--line);border-radius:5px 5px 2px 2px;min-height:3px}
+.gm-t7 .now i{background:#2b6cb0}
+.gm-t7 em{font-style:normal;font-size:.7em;color:var(--sub);height:1em;line-height:1}
+.gm-t7 small{font-size:.7em;color:var(--sub)}
 .gm-alert{width:100%;margin-top:12px;border:0;border-radius:16px;padding:13px 16px;background:#fff3cf;color:#5b3d00;text-align:left;font-weight:700;box-shadow:0 2px 0 #f0cf74;display:flex;gap:10px;align-items:center}
 .gm-alert small{display:block;font-weight:500;opacity:.85}
 .gm-alert .sir{animation:gmsir 1s infinite}
@@ -2090,6 +2122,7 @@ function renderHome() {
   h += `<div class="gm-hero"><h2>무사고 현장</h2><p>숫자를 직접 떠올려 현장을 지키는 안전 게임</p>` +
     `<div class="gm-lv"><b>LV.${lv.i + 1}</b>${lv.title}</div><div class="gm-xp"><i style="width:${lv.max ? 100 : Math.round(lv.cur / lv.need * 100)}%"></i></div>` +
     `<div class="gm-stats"><span>🛡️ 무사고 ${S.cur}연속 (최고 ${S.best})</span><span>📕 사고도감 ${dexN}/${accN()}</span><span>✅ 의뢰 ${cleared}/${MS.length}</span></div></div>`;
+  h += todayHtml();
   if (due.length) h += `<button type="button" class="gm-alert" data-a="redo"><span class="sir">🚨</span><span>속보: 재발 사고 ${due.length}건!<small>잊어버릴 때쯤 같은 사고가 또 터졌어요. 지금 출동</small></span></button>`;
   if (!cleared) h += `<div class="gm-guide"><b>이렇게 해요</b><div>① 의뢰를 고르면 현장 그림이 나와요</div><div>② <b>기준 숫자를 보기 없이 직접 입력</b>하면 그림이 바로 바뀌어요</div><div>③ <b>착공!</b>을 누르면 결과가 눈앞에서 벌어져요. 틀리면 사고가 나고, 사고는 <b>도감</b>에 모여요</div><div>④ 틀린 숫자는 며칠 뒤 <b>재발 사고</b>로 다시 터져요. 그때 또 맞히면 완전히 내 것!</div></div>`;
   h += `<div class="gm-sec">🎲 랜덤 현장</div><button type="button" class="gm-mc gm-rnd" data-a="rand" data-pack="all"><span class="gm-mn">🎲</span><span class="gm-mt"><b>아무 현장이나 순찰</b><small>모든 편에서 랜덤으로 상황이 터져요 · 약한 곳이 더 자주 나와요</small></span><span class="gm-ms" style="color:#fff">▶</span></button>`;
@@ -2244,15 +2277,16 @@ function showResult(res) {
     ids.forEach(id => { if (seenF[id] === undefined) seenF[id] = true; if (!c.ok) seenF[id] = false; });
   });
   Object.keys(seenF).forEach(id => rec(id, seenF[id] && !cm.wrongF[id], !!cm.hinted[id]));
-  let stars = 0, h = "";
+  let stars = 0, h = "", newClear = false;
   if (pass) {
     stars = cm.att === 1 && cm.hints === 0 ? 3 : cm.att <= 2 && cm.hints <= 2 ? 2 : 1;
-    const had = S.stars[m.id] || 0;
+    const had = S.stars[m.id] || 0; newClear = !had;
     if (stars > had) S.stars[m.id] = stars;
     S.cur = cm.att === 1 ? S.cur + 1 : 0; S.best = Math.max(S.best, S.cur);
     addXP(had ? 5 : 20 + stars * 10);
     sfx.star();
   } else { S.cur = 0; sfx.bad(); }
+  bumpDay(pass, newClear);
   save();
   const full = !pass && cm.att >= 2;
   h += `<div class="gm-res"><div class="gm-stamp${pass ? "" : " bad"}">${pass ? "무사고!" : res.some(c => !c.ok && c.acc && ACC[c.acc]) ? "사고 발생" : "숫자가 달라요"}</div>`;
@@ -2391,6 +2425,7 @@ function onClick(e) {
     case "close": stopQ(); host && host.close(); break;
     case "snd": S.snd = !S.snd; save(); t.textContent = S.snd ? "🔊" : "🔇"; if (S.snd) sfx.ok(); break;
     case "home": stopQ(); renderHome(); break;
+    case "goal": S.goal = Math.max(1, Math.min(99, S.goal + (+t.dataset.d || 0))); save(); renderHome(); break;
     case "mis": renderMission(t.dataset.id); break;
     case "rand": renderMission(pickRandom(t.dataset.pack).id, t.dataset.pack); break;
     case "topicgo": topicCheck(false); break;
