@@ -2114,7 +2114,7 @@ function pickRandom(pack) {   // 균등 랜덤(셔플 가방): 현재 의뢰 목
 }
 const starStr = n => `<span class="gm-ms${n ? "" : " z"}">${"★".repeat(n)}${"☆".repeat(3 - n)}</span>`;
 function topBar() {
-  return `<div class="gm-top"><div class="gm-mode"><button type="button" data-a="toread">📖 공부</button><button type="button" class="on">🎮 게임</button></div>` +
+  return `<div class="gm-top"><span style="flex:1"></span>` +
     `<button type="button" class="gm-ib" data-a="snd" aria-label="효과음" title="효과음">${S.snd ? "🔊" : "🔇"}</button><button type="button" class="gm-ib" data-a="close" aria-label="공부 닫기">✕</button></div>`;
 }
 function renderHome() {
